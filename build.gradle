@@ -1,0 +1,18 @@
+
+ext.libraries = [
+        compileShared: [],
+        testShared: ['junit:junit:4.11'],
+        runtimeShared: []
+]
+
+subprojects {
+    group 'smartsociety'
+    version '1.0-SNAPSHOT'
+
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+    }
+}
