@@ -1,9 +1,5 @@
-Compile with:
+**Compilation**
 
-'(windows)'
+*windows*: ``` gradlew.bat build ```
    
-   gradlew.bat build
-   
-'(unix)'
-
-   ./gradlew build
+*unix*: ```./gradlew build```
