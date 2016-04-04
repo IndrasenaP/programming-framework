@@ -1,7 +1,12 @@
 
 ext.libraries = [
-        compileShared: [],
-        testShared: ['junit:junit:4.11'],
+        compileShared: [
+                'com.google.guava:guava:19.0'
+        ],
+        testShared: [
+                'junit:junit:4.11',
+                'org.assertj:assertj-core:3.3.0'
+        ],
         runtimeShared: []
 ]
 
@@ -11,6 +16,7 @@ subprojects {
 
     apply plugin: 'java'
     sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     repositories {
         mavenCentral()

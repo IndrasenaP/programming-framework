@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf.orchestration;
 
+import com.google.common.base.Objects;
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.Plan;
 
@@ -22,5 +23,22 @@ public class CollectiveWithPlan {
 
     public Plan getPlan() {
         return plan;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CollectiveWithPlan that = (CollectiveWithPlan) o;
+
+        return Objects.equal(this.collective, that.collective) &&
+            Objects.equal(this.plan, that.plan);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(collective, plan);
     }
 }
