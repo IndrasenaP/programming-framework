@@ -1,4 +1,6 @@
 rootProject.name = 'programming-framework'
+include 'model'
+findProject(':model')?.name = 'programming-framework-model'
 include 'runtime'
 findProject(':runtime')?.name = 'programming-framework-runtime'
 include 'orchestration'
