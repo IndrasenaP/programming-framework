@@ -2,19 +2,17 @@ package eu.smartsocietyproject.pf.orchestration;
 
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
-import eu.smartsocietyproject.pf.Plan;
 import eu.smartsocietyproject.pf.TaskRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ImplicitAgreementForAllOM implements OrchestratorManager {
+public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
     @Override
     public List<CollectiveWithPlan> compose(
         Collective provisioned, TaskRequest t) throws CompositionException {
 //        throw new UnsupportedOperationException("TODO"); // -=TODO=-
         OMInstance omi=new OMInstance();
-        List<CollectiveWithPlan> collectiveWithPlanList =omi.getPlans(provisioned,t);
+        List<CollectiveWithPlan> collectiveWithPlanList = omi.getPlans(provisioned,t);
         return  collectiveWithPlanList;
     }
 
