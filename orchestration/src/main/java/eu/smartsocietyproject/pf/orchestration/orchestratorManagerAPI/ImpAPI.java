@@ -1,4 +1,4 @@
-package eu.smartsocietyproject.pf.orchestration.api;
+package eu.smartsocietyproject.pf.orchestration.orchestratorManagerAPI;
 
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.Plan;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * Created by zhenyuwen on 05/04/2016.
  */
-public class ImpAPI implements API {
+public class ImpAPI implements orchestratorAPI {
 
    public HashMap<Collective, Plan> OMCompose(Collective provisioned, TaskRequest t){
        HashMap <Collective,Plan> result=new HashMap<Collective,Plan>();
