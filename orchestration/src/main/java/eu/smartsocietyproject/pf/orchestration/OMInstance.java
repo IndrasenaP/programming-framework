@@ -3,8 +3,8 @@ package eu.smartsocietyproject.pf.orchestration;
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.Plan;
 import eu.smartsocietyproject.pf.TaskRequest;
-import eu.smartsocietyproject.pf.orchestration.api.API;
-import eu.smartsocietyproject.pf.orchestration.api.ImpAPI;
+import eu.smartsocietyproject.pf.orchestration.orchestratorManagerAPI.orchestratorAPI;
+import eu.smartsocietyproject.pf.orchestration.orchestratorManagerAPI.ImpAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class OMInstance {
 
-    private API api;
+    private orchestratorAPI api;
     public OMInstance(){
 
         this.api= new ImpAPI();
