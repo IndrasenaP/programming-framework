@@ -10,6 +10,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class Collective {
@@ -19,11 +20,22 @@ public abstract class Collective {
     private Set<Peer> members = ImmutableSet.of();
     private Map<String, Attribute> attributes = ImmutableMap.of();
 
-
     public Collective(SmartSocietyApplicationContext context, String id, String kind) {
         this.context = context;
         this.id = id;
         this.kind = kind;
+    }
+
+    protected Collective(Collective from, Optional<String> kind) {
+        context = from.getContext();
+        id = from.getId();
+        this.kind = kind.orElse(from.getKind());
+        setMembers(from.getMembers());
+        setAttributes(from.getAttributes());
+    }
+
+    public String getId() {
+        return id;
     }
 
     protected SmartSocietyApplicationContext getContext() {
@@ -83,5 +95,30 @@ public abstract class Collective {
     @Override
     public int hashCode() {
         return Objects.hashCode(context, id, kind, members, attributes);
+    }
+
+    public static class CollectiveCreationException extends Exception {
+        public CollectiveCreationException() {
+        }
+
+        public CollectiveCreationException(String message) {
+            super(message);
+        }
+
+        public CollectiveCreationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public CollectiveCreationException(Throwable cause) {
+            super(cause);
+        }
+
+        public CollectiveCreationException(
+            String message,
+            Throwable cause,
+            boolean enableSuppression,
+            boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
     }
 }

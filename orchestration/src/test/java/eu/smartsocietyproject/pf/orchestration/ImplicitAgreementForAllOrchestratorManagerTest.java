@@ -3,15 +3,14 @@ package eu.smartsocietyproject.pf.orchestration;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
-import org.assertj.core.util.Compatibility;
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.List;
 
 public class ImplicitAgreementForAllOrchestratorManagerTest {
-    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext();
+    CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().build();
+    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry);
 
     @Test
     public void testCompose() throws Exception {

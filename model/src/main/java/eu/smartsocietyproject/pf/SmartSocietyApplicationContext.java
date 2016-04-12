@@ -7,6 +7,19 @@ import java.util.UUID;
 
 public class SmartSocietyApplicationContext {
     UUID id = java.util.UUID.randomUUID();
+    CollectiveKindRegistry kindRegistry;
+
+    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry) {
+        this.kindRegistry = kindRegistry;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public CollectiveKindRegistry getKindRegistry() {
+        return kindRegistry;
+    }
 
     @Override
     public String toString() {
@@ -29,4 +42,6 @@ public class SmartSocietyApplicationContext {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+
 }
