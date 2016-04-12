@@ -16,7 +16,7 @@ public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
 //        OMInstance omi=new OMInstance();
 //        List<CollectiveWithPlan> collectiveWithPlanList = omi.getPlans(provisioned,t);
         List<CollectiveWithPlan> collectiveWithPlanList = new ArrayList<CollectiveWithPlan>();
-        collectiveWithPlanList.add(CollectiveWithPlan.of(new Collective(), new Plan()));
+//        collectiveWithPlanList.add(CollectiveWithPlan.of(new Collective(), new Plan()));
         return  collectiveWithPlanList;
     }
 
