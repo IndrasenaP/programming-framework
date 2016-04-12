@@ -28,11 +28,11 @@ public class OMInstance {
 //            CollectiveWithPlan cwp=null;
 //            collectiveWithPlanList.add(cwp.of(c,componets.get(c)));
 //        }
-        collectiveWithPlanList.add( CollectiveWithPlan.of(new Collective(), new Plan()));
+        //collectiveWithPlanList.add( CollectiveWithPlan.of(new Collective(), new Plan()));
         return collectiveWithPlanList;
     }
 
     public CollectiveWithPlan doNegotiate(CollectiveWithPlan cwp){
-        return  CollectiveWithPlan.of(new Collective(), new Plan());
+        return null;// CollectiveWithPlan.of(new Collective(), new Plan());
     }
 }
