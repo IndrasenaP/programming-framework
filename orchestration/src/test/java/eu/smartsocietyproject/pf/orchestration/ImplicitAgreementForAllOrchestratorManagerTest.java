@@ -50,7 +50,8 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         return new Condition<CollectiveWithPlan>() {
             @Override
             public boolean matches(CollectiveWithPlan value) {
-                return expected.equals(value);
+
+                return expected.equals(value.getCollective());
             }
         };
     }
