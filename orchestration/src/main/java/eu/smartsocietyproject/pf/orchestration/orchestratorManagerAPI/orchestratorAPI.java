@@ -9,6 +9,7 @@ import java.util.HashMap;
 /**
  * Created by zhenyuwen on 05/04/2016.
  */
+/*this interface descirbes the functionality of orchestrator manager */
 public interface orchestratorAPI {
     HashMap<Collective, Plan> OMCompose(Collective provisioned, TaskRequest t);
 }

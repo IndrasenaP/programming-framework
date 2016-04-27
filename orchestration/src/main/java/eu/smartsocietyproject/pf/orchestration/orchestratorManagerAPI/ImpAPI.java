@@ -13,6 +13,7 @@ public class ImpAPI implements orchestratorAPI {
 
    public HashMap<Collective, Plan> OMCompose(Collective provisioned, TaskRequest t){
        HashMap <Collective,Plan> result=new HashMap<Collective,Plan>();
+
        Collective c=null;//new Collective();
        Plan p=new Plan();
        result.put(provisioned,p);
