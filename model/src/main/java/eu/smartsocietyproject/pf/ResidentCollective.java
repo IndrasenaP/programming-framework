@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableSet;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
@@ -31,6 +32,11 @@ public final class ResidentCollective extends Collective {
                     "Failed creation of an Application Based Collective from a Resident Collective: %s",
                     toString()), e);
         }
+    }
+
+    @Override
+    public ImmutableSet<Peer> getMembers() {
+        return super.getMembers();
     }
 
     public static ResidentCollective createFromQuery(
