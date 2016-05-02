@@ -3,6 +3,7 @@ package eu.smartsocietyproject.pf;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public final class CollectiveKindRegistry {
     private final Map<String, CollectiveKind> kinds;
@@ -11,12 +12,11 @@ public final class CollectiveKindRegistry {
         this.kinds = kinds;
     }
 
-    public CollectiveKind get(String kind) {
+    public Optional<CollectiveKind> get(String kind) {
         CollectiveKind ret = kinds.get(kind);
-        if ( kind == null ) {
-            throw new NoSuchElementException(kind);
-        }
-        return ret;
+        return ret != null
+            ?Optional.of(ret)
+               :Optional.empty();
     }
 
     public static Builder builder() {

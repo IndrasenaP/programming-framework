@@ -1,16 +1,18 @@
 package eu.smartsocietyproject.pf;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
+import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
 
 public class SmartSocietyApplicationContext {
-    UUID id = java.util.UUID.randomUUID();
-    CollectiveKindRegistry kindRegistry;
+    private final UUID id = java.util.UUID.randomUUID();
+    private final CollectiveKindRegistry kindRegistry;
+    private final PeerManager peerManager;
 
-    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry) {
+    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, PeerManager peerManager) {
         this.kindRegistry = kindRegistry;
+        this.peerManager = peerManager;
     }
 
     public UUID getId() {
@@ -21,27 +23,15 @@ public class SmartSocietyApplicationContext {
         return kindRegistry;
     }
 
+    public PeerManager getPeerManager() {
+        return peerManager;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("id", id)
                           .toString();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SmartSocietyApplicationContext that = (SmartSocietyApplicationContext) o;
-
-        return Objects.equal(this.id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
 
 }

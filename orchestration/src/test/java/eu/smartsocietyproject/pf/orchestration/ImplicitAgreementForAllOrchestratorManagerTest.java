@@ -1,6 +1,7 @@
 package eu.smartsocietyproject.pf.orchestration;
 
 import com.google.common.collect.ImmutableList;
+import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -9,14 +10,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 public class ImplicitAgreementForAllOrchestratorManagerTest {
-    CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().build();
-    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry);
+    String basicKindId = "basic";
+    CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
+    CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
+    PeerManager peerManager = new PeerManager(){};
+    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
 
     @Test
     public void testCompose() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
 
-        Collective provisionedCollective = new ResidentCollective(context, "id", "basic");
+        Collective provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
         List<CollectiveWithPlan> result = target.compose(provisionedCollective, new TaskRequest());
         assertThat(result).hasSize(1);
         assertThat(result).are(withCollective(provisionedCollective));
@@ -27,8 +31,8 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     public void testNegotiate() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
         List<CollectiveWithPlan> compositionResult = ImmutableList.of(
-            CollectiveWithPlan.of(new ResidentCollective(context, "id", "basic"), new Plan()),
-            CollectiveWithPlan.of(new ResidentCollective(context, "id2", "basic"), new Plan())
+            CollectiveWithPlan.of(ApplicationBasedCollective.empty(context, "id", basicKindId), new Plan()),
+            CollectiveWithPlan.of(ApplicationBasedCollective.empty(context, "id2", basicKindId), new Plan())
         );
         CollectiveWithPlan result = target.negotiate(compositionResult);
         assertThat(result).isEqualTo(compositionResult.get(0));

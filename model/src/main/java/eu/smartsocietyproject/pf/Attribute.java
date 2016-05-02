@@ -1,13 +1,11 @@
 package eu.smartsocietyproject.pf;
 
 public abstract class Attribute {
-    private final Collective parent;
+    public Attribute() {
 
-    public Attribute(Collective parent) {
-        this.parent = parent;
     }
 
-    public abstract Attribute clone(Collective newParent);
+    public abstract Attribute clone();
 
     @Override
     public abstract boolean equals(Object o);
