@@ -29,14 +29,14 @@ public class HttpClient {
     public HttpClient(Collective provisioned, TaskRequest t){
         this.provisioned=provisioned;
         this.t=t;
-        ResourceOfOM resource= new ResourceOfOM(provisioned);
+     //   ResourceOfOM resource= new ResourceOfOM(provisioned);
     }
 
-    private void  postRequest(ResourceOfOM resource){
+    private void  postRequest(){
         String target=path+"/rideRequests";
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(target);
-        Collection<Peer> peers= resource.getMembers();
+        Collection<Peer> peers= provisioned.getMembers();
         httpPost.addHeader("User-Agent", USER_AGENT);
     }
 }
