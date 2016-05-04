@@ -2,6 +2,8 @@ package eu.smartsocietyproject.pf.orchestration;
 
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerQuery;
+import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -13,7 +15,22 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     String basicKindId = "basic";
     CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
     CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
-    PeerManager peerManager = new PeerManager(){};
+    PeerManager peerManager = new PeerManager() {
+        @Override
+        public void persistCollective(Collective collective) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ResidentCollectiveIntermediary readCollectiveById(String id) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    };
     SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
 
     @Test
