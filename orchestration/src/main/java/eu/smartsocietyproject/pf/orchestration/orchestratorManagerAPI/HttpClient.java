@@ -33,17 +33,17 @@ import static jdk.nashorn.internal.runtime.regexp.joni.Config.log;
  */
 public class HttpClient {
 
-    private ResidentCollective provisioned;
-    private TaskRequest t;
+//    private ResidentCollective provisioned;
+//    private TaskRequest t;
     private  String path="http://localhost:3000";
     private static final String USER_AGENT = "Mozilla/5.0";
-    public HttpClient(ResidentCollective provisioned, TaskRequest t){
-        this.provisioned=provisioned;
-        this.t=t;
-     //   ResourceOfOM resource= new ResourceOfOM(provisioned);
-    }
+//    public HttpClient(ResidentCollective provisioned, TaskRequest t){
+//        this.provisioned=provisioned;
+//        this.t=t;
+//     //   ResourceOfOM resource= new ResourceOfOM(provisioned);
+//    }
 
-    private StringBuffer sendGet(String dest,String username, String password) throws IOException{
+    protected StringBuffer sendGet(String dest,String username, String password,JSONObject data) throws IOException{
         String target=path+dest;
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(target);
@@ -70,11 +70,10 @@ public class HttpClient {
         return response;
     }
     
-    private StringBuffer  sendPost(String dest, JSONObject data,String username, String password) throws IOException {
+    protected StringBuffer  sendPost(String dest, JSONObject data,String username, String password) throws IOException {
         String target=path+dest;
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(target);
-        Collection<Peer> peers= provisioned.getMembers();
         httpPost.addHeader("APP_KEY","DEV-WEB-CLIENT");
         httpPost.addHeader("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
         String basic="Basic " + username + ":" + password;
@@ -102,21 +101,21 @@ public class HttpClient {
     }
 
 
-    protected  void Authentification(String username, String password){
-        try {
-            JSONObject auth=new JSONObject();
-
-            auth.put("APP_KEY","DEV-WEB-CLIENT");
-            auth.put("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
-            String basic="Basic " + username + ":" + password;
-            auth.put("Authorization",basic);
-
-        } catch (JSONException e){
-            System.out.println("unexpected JSON exception");
-        }
-    }
+//    protected  void Authentification(String username, String password){
+//        try {
+//            JSONObject auth=new JSONObject();
+//
+//            auth.put("APP_KEY","DEV-WEB-CLIENT");
+//            auth.put("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
+//            String basic="Basic " + username + ":" + password;
+//            auth.put("Authorization",basic);
+//
+//        } catch (JSONException e){
+//            System.out.println("unexpected JSON exception");
+//        }
+//    }
 // when we get the implementation of task  class, this method has to be rewirten.
-    protected void TaskRequest(String username, String password, String mode, int capcity, String dep, String dest){
+    protected StringBuffer TaskRequest(String username, String password, String mode, int capcity, String dep, String dest) throws IOException{
         String path="/rideRequests";
         try {
             JSONObject data =new JSONObject();
@@ -144,11 +143,11 @@ public class HttpClient {
             data.put("route","A route for agent"+username);
             data.put("comments","Agent"+username+"has generated this request");
             data.put("managedBy","");
-
+            return sendPost(path, data, username, password);
         }catch (JSONException e){
             System.out.println("unexpected JSON exception");
         }
+        return null;
     }
-
 
 }
