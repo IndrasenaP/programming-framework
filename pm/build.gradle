@@ -4,4 +4,6 @@ dependencies {
 	compile 'org.json:json:20090211'
 	compile libraries.compileShared
     testCompile libraries.testShared
+	testCompile 'com.github.tomakehurst:wiremock:1.57'
+	testCompile 'commons-io:commons-io:2.5'
 }

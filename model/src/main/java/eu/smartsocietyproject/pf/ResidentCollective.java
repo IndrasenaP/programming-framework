@@ -67,7 +67,7 @@ public final class ResidentCollective extends Collective {
                 id,
                 null, //todo-sv figure this out 
                 collective.getMembers(),
-                new HashMap<>());
+                new HashMap<>()); //todo-sv should at some point also be provided by PM
     }
 
 }
