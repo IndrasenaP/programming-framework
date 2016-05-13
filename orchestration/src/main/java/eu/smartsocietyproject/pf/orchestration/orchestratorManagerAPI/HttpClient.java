@@ -11,6 +11,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -69,36 +70,92 @@ public class HttpClient {
         httpClient.close();
         return response;
     }
+    // this method is used to get the spesific task
+    protected StringBuffer sendGet(String taskPath,String username, String password) throws IOException{
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(taskPath);
+        httpGet.addHeader("APP_KEY","DEV-WEB-CLIENT");
+        httpGet.addHeader("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
+        String basic="Basic " + username + ":" + password;
+        httpGet.addHeader("Authorization",basic);
+        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+        System.out.println("GET Response Status:: "
+                + httpResponse.getStatusLine().getStatusCode());
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                httpResponse.getEntity().getContent()));
+
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = reader.readLine()) != null) {
+            response.append(inputLine);
+        }
+        reader.close();
+
+        httpClient.close();
+        return response;
+    }
     
     protected StringBuffer  sendPost(String dest, JSONObject data,String username, String password) throws IOException {
         String target=path+dest;
+        System.out.println("url:"+target);
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(target);
         httpPost.addHeader("APP_KEY","DEV-WEB-CLIENT");
         httpPost.addHeader("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
         String basic="Basic " + username + ":" + password;
         httpPost.addHeader("Authorization",basic);
+        StringEntity se = new StringEntity(data.toString());
+        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+        httpPost.setEntity(se);
+        CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+        System.out.println("POST Response Status:: "
+                + httpResponse.getStatusLine().getStatusCode());
 
-            StringEntity se = new StringEntity(data.toString());
-            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-            httpPost.setEntity(se);
-            CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-            System.out.println("POST Response Status:: "
-                    + httpResponse.getStatusLine().getStatusCode());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
+                httpResponse.getEntity().getContent()));
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    httpResponse.getEntity().getContent()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
 
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = reader.readLine()) != null) {
-                response.append(inputLine);
-            }
-            reader.close();
-            httpClient.close();
+        while ((inputLine = reader.readLine()) != null) {
+            response.append(inputLine);
+        }
+        reader.close();
+        httpClient.close();
         return response;
     }
+
+//    protected StringBuffer sendPut(String dest, JSONObject data,String username, String password)throws IOException{
+//        String target=dest;
+//        CloseableHttpClient httpClient = HttpClients.createDefault();
+//        HttpPut httpPut=new HttpPut(target);
+//        httpPut.addHeader("APP_KEY","DEV-WEB-CLIENT");
+//        httpPut.addHeader("APP_SECRET","6a019b20-d44c-11e3-9c1a-0800200c9a66");
+//        String basic="Basic " + username + ":" + password;
+//        httpPut.addHeader("Authorization",basic);
+//        StringEntity se = new StringEntity(data.toString());
+//        se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+//        httpPut.setEntity(se);
+//        CloseableHttpResponse httpResponse = httpClient.execute(httpPut);
+//        System.out.println("PUT Response Status:: "
+//                + httpResponse.getStatusLine().getStatusCode());
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(
+//                httpResponse.getEntity().getContent()));
+//
+//        String inputLine;
+//        StringBuffer response = new StringBuffer();
+//
+//        while ((inputLine = reader.readLine()) != null) {
+//            response.append(inputLine);
+//        }
+//        reader.close();
+//        httpClient.close();
+//        return response;
+//    }
+
+
 
 
 //    protected  void Authentification(String username, String password){
