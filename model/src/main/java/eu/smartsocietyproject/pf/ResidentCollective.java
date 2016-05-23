@@ -5,14 +5,14 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ResidentCollective extends Collective {
+public final class ResidentCollective extends CollectiveBase {
 
     private ResidentCollective(
             SmartSocietyApplicationContext context,

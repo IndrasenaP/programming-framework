@@ -3,12 +3,16 @@ package eu.smartsocietyproject.peermanager;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class Peer {
+public abstract class Peer {
     private final String id;
 
     public Peer(String id) {
         this.id = id;
     }
+	
+	protected String getId() {
+		return this.id;
+	}
 
     @Override
     public boolean equals(Object o) {

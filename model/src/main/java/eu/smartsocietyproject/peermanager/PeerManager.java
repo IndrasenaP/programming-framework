@@ -1,10 +1,11 @@
 package eu.smartsocietyproject.peermanager;
 
-import eu.smartsocietyproject.pf.Collective;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.pf.CollectiveBase;
 
 public interface PeerManager {
 
-    void persistCollective(Collective collective);
+    void persistCollective(CollectiveBase collective);
 
     ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query);
 

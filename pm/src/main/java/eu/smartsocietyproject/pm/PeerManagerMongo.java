@@ -7,6 +7,7 @@ package eu.smartsocietyproject.pm;
 
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
@@ -16,11 +17,14 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
+import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
-import eu.smartsocietyproject.pf.Collective;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.pf.CollectiveBase;
 import java.io.IOException;
+import org.bson.Document;
+import org.json.JSONObject;
 
 /**
  * 
@@ -31,7 +35,9 @@ public class PeerManagerMongo implements PeerManager {
 	private MongoDatabase db;
 	private MongodProcess mongoProcess;
 	private MongodExecutable mongodExecutable;
+	private MongoCollection<Document> collectivesCollection;
 	
+	//todo: provide a constructor for passing in mongo
 	public PeerManagerMongo(int mongoPort) throws IOException {
 		try {
 		MongodStarter starter = MongodStarter.getDefaultInstance();
@@ -45,10 +51,20 @@ public class PeerManagerMongo implements PeerManager {
 		
 		MongoClient mongoClient = new MongoClient("localhost", mongoPort);
 		db = mongoClient.getDatabase("smartSocietyLocalMongoDB");
+		loadCollection();
 		} catch (IOException ex) {
 			close();
 			throw ex;
 		}
+	}
+	
+	public PeerManagerMongo(MongoDatabase db) {
+		this.db = db;
+		loadCollection();
+	}
+	
+	private void loadCollection() {
+		collectivesCollection = db.getCollection("collective");
 	}
 	
 	public void close() {
@@ -58,8 +74,12 @@ public class PeerManagerMongo implements PeerManager {
 	}
 
 	@Override
-	public void persistCollective(Collective collective) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void persistCollective(CollectiveBase collective) {
+		Document doc = new Document("id", collective.getId());
+		doc.put("peers", ConvertHelper
+				.convertPeers(collective.getMembers()).toArray());
+		doc.putAll(ConvertHelper.convertAttributes(collective.getAttributes()));
+		collectivesCollection.insertOne(doc);
 	}
 
 	@Override

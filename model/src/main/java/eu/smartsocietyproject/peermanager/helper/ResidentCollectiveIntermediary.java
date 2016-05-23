@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.peermanager;
+package eu.smartsocietyproject.peermanager.helper;
 
+import eu.smartsocietyproject.peermanager.Peer;
 import java.util.ArrayList;
 import java.util.Collection;
 

@@ -3,8 +3,9 @@ package eu.smartsocietyproject.pm;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
-import eu.smartsocietyproject.pf.Collective;
+import eu.smartsocietyproject.peermanager.helper.PersistablePeer;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.pf.CollectiveBase;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.HTTP;
@@ -37,7 +38,7 @@ public class PeerManagerProxy implements PeerManager {
 	}
 
 	@Override
-	public void persistCollective(Collective collective) {
+	public void persistCollective(CollectiveBase collective) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
@@ -57,7 +58,7 @@ public class PeerManagerProxy implements PeerManager {
 			JSONArray users = new JSONObject(response.getBody())
 					.getJSONArray("collectedUsers");
 			for (int i = 0; i < users.length(); i++) {
-				collective.addMember(new Peer(users.getString(i)));
+				collective.addMember(new PersistablePeer(users.getString(i)));
 			}
 		} catch (JSONException ex) {
 			//todo-sv: handle

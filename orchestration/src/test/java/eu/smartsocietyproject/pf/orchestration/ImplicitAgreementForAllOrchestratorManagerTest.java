@@ -3,7 +3,7 @@ package eu.smartsocietyproject.pf.orchestration;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
     PeerManager peerManager = new PeerManager() {
         @Override
-        public void persistCollective(Collective collective) {
+        public void persistCollective(CollectiveBase collective) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
@@ -37,7 +37,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     public void testCompose() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
 
-        Collective provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
+        CollectiveBase provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
         List<CollectiveWithPlan> result = target.compose(provisionedCollective, new TaskRequest());
         assertThat(result).hasSize(1);
         assertThat(result).are(withCollective(provisionedCollective));
@@ -67,7 +67,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         target.withdraw(new CollectiveBasedTask());
     }
 
-    Condition<CollectiveWithPlan> withCollective(final Collective expected) {
+    Condition<CollectiveWithPlan> withCollective(final CollectiveBase expected) {
         return new Condition<CollectiveWithPlan>() {
             @Override
             public boolean matches(CollectiveWithPlan value) {

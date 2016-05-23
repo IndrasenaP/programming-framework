@@ -33,7 +33,7 @@ import java.util.Optional;
  * <p>
  * While attributes must be consistent with the collective kind user attributes can be completely free
  */
-public final class ApplicationBasedCollective extends Collective {
+public final class ApplicationBasedCollective extends CollectiveBase {
     private final ImmutableMap<String, Attribute> userAttributes;
 
     private ApplicationBasedCollective(

@@ -8,7 +8,7 @@ package eu.smartsocietyproject.pm;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.peermanager.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;

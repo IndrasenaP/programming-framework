@@ -1,7 +1,7 @@
 package eu.smartsocietyproject.pf.orchestration.orchestratorManagerAPI;
 
 import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.pf.Collective;
+import eu.smartsocietyproject.pf.CollectiveBase;
 import eu.smartsocietyproject.pf.ResidentCollective;
 import eu.smartsocietyproject.pf.TaskRequest;
 
