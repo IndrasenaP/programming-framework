@@ -27,69 +27,69 @@ import org.bson.Document;
 import org.json.JSONObject;
 
 /**
- * 
+ *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class PeerManagerMongo implements PeerManager {
-	
-	private MongoDatabase db;
-	private MongodProcess mongoProcess;
-	private MongodExecutable mongodExecutable;
-	private MongoCollection<Document> collectivesCollection;
-	
-	//todo: provide a constructor for passing in mongo
-	public PeerManagerMongo(int mongoPort) throws IOException {
-		try {
-		MongodStarter starter = MongodStarter.getDefaultInstance();
-		IMongodConfig mongodConfig = new MongodConfigBuilder()
-				.version(Version.Main.PRODUCTION)
-				.net(new Net(mongoPort, Network.localhostIsIPv6()))
-				.build();
-		
-		mongodExecutable = starter.prepare(mongodConfig);
-		mongoProcess = mongodExecutable.start();
-		
-		MongoClient mongoClient = new MongoClient("localhost", mongoPort);
-		db = mongoClient.getDatabase("smartSocietyLocalMongoDB");
-		loadCollection();
-		} catch (IOException ex) {
-			close();
-			throw ex;
-		}
-	}
-	
-	public PeerManagerMongo(MongoDatabase db) {
-		this.db = db;
-		loadCollection();
-	}
-	
-	private void loadCollection() {
-		collectivesCollection = db.getCollection("collective");
-	}
-	
-	public void close() {
-		if(mongodExecutable != null) {
-			mongodExecutable.stop();
-		}
-	}
 
-	@Override
-	public void persistCollective(CollectiveBase collective) {
-		Document doc = new Document("id", collective.getId());
-		doc.put("peers", ConvertHelper
-				.convertPeers(collective.getMembers()).toArray());
-		doc.putAll(ConvertHelper.convertAttributes(collective.getAttributes()));
-		collectivesCollection.insertOne(doc);
-	}
+    private MongoDatabase db;
+    private MongodProcess mongoProcess;
+    private MongodExecutable mongodExecutable;
+    private MongoCollection<Document> collectivesCollection;
 
-	@Override
-	public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    //todo: provide a constructor for passing in mongo
+    public PeerManagerMongo(int mongoPort) throws IOException {
+        try {
+            MongodStarter starter = MongodStarter.getDefaultInstance();
+            IMongodConfig mongodConfig = new MongodConfigBuilder()
+                    .version(Version.Main.PRODUCTION)
+                    .net(new Net(mongoPort, Network.localhostIsIPv6()))
+                    .build();
 
-	@Override
-	public ResidentCollectiveIntermediary readCollectiveById(String id) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-	
+            mongodExecutable = starter.prepare(mongodConfig);
+            mongoProcess = mongodExecutable.start();
+
+            MongoClient mongoClient = new MongoClient("localhost", mongoPort);
+            db = mongoClient.getDatabase("smartSocietyLocalMongoDB");
+            loadCollection();
+        } catch (IOException ex) {
+            close();
+            throw ex;
+        }
+    }
+
+    public PeerManagerMongo(MongoDatabase db) {
+        this.db = db;
+        loadCollection();
+    }
+
+    private void loadCollection() {
+        collectivesCollection = db.getCollection("collective");
+    }
+
+    public void close() {
+        if (mongodExecutable != null) {
+            mongodExecutable.stop();
+        }
+    }
+
+    @Override
+    public void persistCollective(CollectiveBase collective) {
+        Document doc = new Document("id", collective.getId());
+        doc.put("peers", ConvertHelper
+                .convertPeers(collective.getMembers()).toArray());
+        doc.putAll(ConvertHelper.convertAttributes(collective.getAttributes()));
+        collectivesCollection.insertOne(doc);
+    }
+
+    @Override
+    public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ResidentCollectiveIntermediary readCollectiveById(String id) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

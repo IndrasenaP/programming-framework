@@ -20,55 +20,55 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 public class PeerManagerProxy implements PeerManager {
 
-	private UriComponents collectiveById;
+    private UriComponents collectiveById;
 
-	public PeerManagerProxy() {
-		this("http", "elog.disi.unitn.it", 8081);
-	}
+    public PeerManagerProxy() {
+        this("http", "elog.disi.unitn.it", 8081);
+    }
 
-	public PeerManagerProxy(String protocol,
-			String host,
-			int port) {
-		collectiveById = UriComponentsBuilder.newInstance()
-				.scheme(protocol)
-				.host(host)
-				.port(port)
-				.path(PeerManagerPaths.collectiveGet)
-				.build();
-	}
+    public PeerManagerProxy(String protocol,
+            String host,
+            int port) {
+        collectiveById = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(PeerManagerPaths.collectiveGet)
+                .build();
+    }
 
-	@Override
-	public void persistCollective(CollectiveBase collective) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public void persistCollective(CollectiveBase collective) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public ResidentCollectiveIntermediary readCollectiveById(String id) {
-		RequestEntity<Void> request = RequestEntity
-				.get(this.collectiveById.expand(id).encode().toUri())
-				.build();
+    @Override
+    public ResidentCollectiveIntermediary readCollectiveById(String id) {
+        RequestEntity<Void> request = RequestEntity
+                .get(this.collectiveById.expand(id).encode().toUri())
+                .build();
 
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<String> response = restTemplate
-				.exchange(request, String.class);
-		ResidentCollectiveIntermediary collective
-				= new ResidentCollectiveIntermediary();
-		collective.setId(id);
-		try {
-			JSONArray users = new JSONObject(response.getBody())
-					.getJSONArray("collectedUsers");
-			for (int i = 0; i < users.length(); i++) {
-				collective.addMember(new PersistablePeer(users.getString(i)));
-			}
-		} catch (JSONException ex) {
-			//todo-sv: handle
-		}
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate
+                .exchange(request, String.class);
+        ResidentCollectiveIntermediary collective
+                = new ResidentCollectiveIntermediary();
+        collective.setId(id);
+        try {
+            JSONArray users = new JSONObject(response.getBody())
+                    .getJSONArray("collectedUsers");
+            for (int i = 0; i < users.length(); i++) {
+                collective.addMember(new PersistablePeer(users.getString(i)));
+            }
+        } catch (JSONException ex) {
+            //todo-sv: handle
+        }
 
-		return collective;
-	}
+        return collective;
+    }
 
-	@Override
-	public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

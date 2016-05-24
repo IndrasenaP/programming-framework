@@ -19,25 +19,26 @@ import java.util.Set;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public abstract class ConvertHelper {
-	public static List<String> convertPeers(Set<Peer> peers) {
-		List<String> arrayList = new ArrayList<>();
 
-		for (Peer peer : peers) {
-			if (peer instanceof PersistablePeer) {
-				arrayList.add(((PersistablePeer) peer).getId());
-			}
-		}
+    public static List<String> convertPeers(Set<Peer> peers) {
+        List<String> arrayList = new ArrayList<>();
 
-		return arrayList;
-	}
-	
-	public static Map<String, String> convertAttributes(Map<String, Attribute> attributes) {
-		Map<String, String> convertedAtts = new HashMap<>();
-		
-		for(Map.Entry<String, Attribute> entry: attributes.entrySet()){
-			convertedAtts.put(entry.getKey(), entry.getValue().toString());
-		}
-		
-		return convertedAtts;
-	}
+        for (Peer peer : peers) {
+            if (peer instanceof PersistablePeer) {
+                arrayList.add(((PersistablePeer) peer).getId());
+            }
+        }
+
+        return arrayList;
+    }
+
+    public static Map<String, String> convertAttributes(Map<String, Attribute> attributes) {
+        Map<String, String> convertedAtts = new HashMap<>();
+
+        for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
+            convertedAtts.put(entry.getKey(), entry.getValue().toString());
+        }
+
+        return convertedAtts;
+    }
 }

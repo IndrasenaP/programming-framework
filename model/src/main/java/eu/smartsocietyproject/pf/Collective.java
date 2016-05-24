@@ -10,21 +10,21 @@ import java.util.Optional;
 
 /**
  * This interface represents an atomic collective.
- * 
+ *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public interface Collective {
 
-	Optional<Attribute> getAttribute(String name);
+    Optional<Attribute> getAttribute(String name);
 
-	ImmutableMap<String, Attribute> getAttributes();
+    ImmutableMap<String, Attribute> getAttributes();
 
-	String getId();
+    String getId();
 
-	String getKind();
+    String getKind();
 
-	CollectiveKind getKindInstance();
+    CollectiveKind getKindInstance();
 
-	ApplicationBasedCollective toApplicationBasedCollective();
-	
+    ApplicationBasedCollective toApplicationBasedCollective();
+
 }

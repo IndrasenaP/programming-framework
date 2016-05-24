@@ -17,7 +17,8 @@ import java.util.Optional;
  * <p>
  * The class is immutable, new instances can be created by:
  * <ul>
- * <li>using the {@link ResidentCollective#toApplicationBasedCollective()} method</li>
+ * <li>using the {@link ResidentCollective#toApplicationBasedCollective()}
+ * method</li>
  * <li>using the set operations:
  * <ul>
  * <li>{@link ApplicationBasedCollective#intersection},</li>
@@ -31,34 +32,36 @@ import java.util.Optional;
  * </ul>
  * </ul>
  * <p>
- * While attributes must be consistent with the collective kind user attributes can be completely free
+ * While attributes must be consistent with the collective kind user attributes
+ * can be completely free
  */
 public final class ApplicationBasedCollective extends CollectiveBase {
+
     private final ImmutableMap<String, Attribute> userAttributes;
 
     private ApplicationBasedCollective(
-        SmartSocietyApplicationContext context,
-        String id,
-        CollectiveKind kind,
-        Collection<Peer> members,
-        Map<String, ? extends Attribute> attributes,
-        Map<String, ? extends Attribute> userAttribute) {
+            SmartSocietyApplicationContext context,
+            String id,
+            CollectiveKind kind,
+            Collection<Peer> members,
+            Map<String, ? extends Attribute> attributes,
+            Map<String, ? extends Attribute> userAttribute) {
         super(context, id, kind, members, attributes);
         this.userAttributes = ImmutableMap.copyOf(userAttribute);
     }
-
 
     /**
      * this method retrieves a given user attribute by name
      *
      * @param name name of the attribute
-     * @return an optional containing the attribute, if it does not exists an Optional.empty() is returned
+     * @return an optional containing the attribute, if it does not exists an
+     * Optional.empty() is returned
      */
     public Optional<Attribute> getUserAttribute(String name) {
         Attribute attribute = userAttributes.get(name);
         return attribute != null
-               ? Optional.of(attribute)
-               : Optional.empty();
+                ? Optional.of(attribute)
+                : Optional.empty();
     }
 
     /**
@@ -71,11 +74,12 @@ public final class ApplicationBasedCollective extends CollectiveBase {
     }
 
     /**
-     * this methods returns a new collective that differs from the current one only for the value of a user attribute
+     * this methods returns a new collective that differs from the current one
+     * only for the value of a user attribute
      * <p>
      * if the key is not present a new user attribute will be added
      *
-     * @param key   attribute key (name)
+     * @param key attribute key (name)
      * @param value attribute value
      * @return a new collective
      */
@@ -84,48 +88,53 @@ public final class ApplicationBasedCollective extends CollectiveBase {
     }
 
     /**
-     * this methods returns a new collective that differs from the current one only because the attributes are merged
-     * with the provided ones
+     * this methods returns a new collective that differs from the current one
+     * only because the attributes are merged with the provided ones
      * <p>
-     * if a key is not present a new user attribute will be added, otherwise the value will be replaced
+     * if a key is not present a new user attribute will be added, otherwise the
+     * value will be replaced
      *
-     * @param userAttributes attributes to be merged with the current instance's ones
+     * @param userAttributes attributes to be merged with the current instance's
+     * ones
      * @return a new collective
      */
     public ApplicationBasedCollective withUserAttributes(Map<String, ? extends Attribute> userAttributes) {
         return new ApplicationBasedCollective(
-            this.getContext(),
-            this.getId(),
-            this.getKindInstance(),
-            this.getMembers(),
-            this.getAttributes(),
-            ImmutableMap.<String, Attribute>builder().putAll(this.getUserAttributes()).putAll(userAttributes).build()
+                this.getContext(),
+                this.getId(),
+                this.getKindInstance(),
+                this.getMembers(),
+                this.getAttributes(),
+                ImmutableMap.<String, Attribute>builder().putAll(this.getUserAttributes()).putAll(userAttributes).build()
         );
     }
 
     /**
-     * this methods returns a new collective that differs from the current one because of the replaced user attributes
+     * this methods returns a new collective that differs from the current one
+     * because of the replaced user attributes
      * <p>
-     * In the collective none of the current user attributes will be kept, only the provided one will be present
+     * In the collective none of the current user attributes will be kept, only
+     * the provided one will be present
      *
      * @param userAttributes attribute key (name)
      * @return a new collective
      */
     public ApplicationBasedCollective withOnlyUserAttributes(Map<String, ? extends Attribute> userAttributes) {
         return new ApplicationBasedCollective(
-            this.getContext(),
-            this.getId(),
-            this.getKindInstance(),
-            this.getMembers(),
-            this.getAttributes(),
-            userAttributes
+                this.getContext(),
+                this.getId(),
+                this.getKindInstance(),
+                this.getMembers(),
+                this.getAttributes(),
+                userAttributes
         );
     }
 
     /**
      * this methods creates an empty collective, mainly for tests
      * <p>
-     * In the collective none of the current user attributes will be kept, only the provided one will be present
+     * In the collective none of the current user attributes will be kept, only
+     * the provided one will be present
      *
      * @param context the context to which the collective is associated
      * @param id the id of the collective
@@ -133,58 +142,61 @@ public final class ApplicationBasedCollective extends CollectiveBase {
      * @return a new collective
      */
     public static ApplicationBasedCollective empty(SmartSocietyApplicationContext context, String id, String kind)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
 
         return new ApplicationBasedCollective(
-            context,
-            id,
-            getKindFromString(context, kind),
-            ImmutableList.of(),
-            ImmutableMap.of(),
-            ImmutableMap.of());
+                context,
+                id,
+                getKindFromString(context, kind),
+                ImmutableList.of(),
+                ImmutableMap.of(),
+                ImmutableMap.of());
     }
 
     static ApplicationBasedCollective of(
-        SmartSocietyApplicationContext context,
-        String id,
-        CollectiveKind collectiveKind,
-        Collection<Peer> members) {
+            SmartSocietyApplicationContext context,
+            String id,
+            CollectiveKind collectiveKind,
+            Collection<Peer> members) {
         Map<String, Attribute> newAttributes = collectiveKind.getDefaultValues();
 
         return new ApplicationBasedCollective(
-            context,
-            id,
-            collectiveKind,
-            members,
-            newAttributes,
-            ImmutableMap.of());
+                context,
+                id,
+                collectiveKind,
+                members,
+                newAttributes,
+                ImmutableMap.of());
     }
 
     private static CollectiveKind getKindFromString(SmartSocietyApplicationContext context, String kind)
-        throws CollectiveCreationException {
-        Optional<CollectiveKind> collectiveKind =
-            context
+            throws CollectiveCreationException {
+        Optional<CollectiveKind> collectiveKind
+                = context
                 .getKindRegistry()
                 .get(kind);
 
-        if (!collectiveKind.isPresent())
+        if (!collectiveKind.isPresent()) {
             throw new CollectiveCreationException(String.format("Unknown collective kind: %s", kind));
+        }
 
         return collectiveKind.get();
     }
 
     /**
-     * this method creates a copy of the collective, changing the collective kind
+     * this method creates a copy of the collective, changing the collective
+     * kind
      * <p>
      * <p>
-     * the copy created will contain all the user attributes of the original collective, and all
-     * the attributes that have the same key of the new kind will be copied only if the they are consistent
-     * with the new collective kind
+     * the copy created will contain all the user attributes of the original
+     * collective, and all the attributes that have the same key of the new kind
+     * will be copied only if the they are consistent with the new collective
+     * kind
      *
      * @param toKind
      * @return a collective of the new kind
-     * @throws CollectiveCreationException when the new
-     *                                     kind id is not known to the current collective's context
+     * @throws CollectiveCreationException when the new kind id is not known to
+     * the current collective's context
      */
     public ApplicationBasedCollective copy(String toKind) throws CollectiveCreationException {
         CollectiveKind collectiveKind = getKindFromString(getContext(), toKind);
@@ -202,16 +214,17 @@ public final class ApplicationBasedCollective extends CollectiveBase {
         }
 
         return new ApplicationBasedCollective(
-            getContext(),
-            getId(),
-            collectiveKind,
-            getMembers(),
-            newAttributes,
-            getUserAttributes());
+                getContext(),
+                getId(),
+                collectiveKind,
+                getMembers(),
+                newAttributes,
+                getUserAttributes());
     }
 
     /**
-     * Since the class is immutable this method does not make any more sense is it's not supported
+     * Since the class is immutable this method does not make any more sense is
+     * it's not supported
      *
      * @param newAttributes
      * @throws UnsupportedOperationException always
@@ -226,101 +239,103 @@ public final class ApplicationBasedCollective extends CollectiveBase {
     }
 
     ApplicationBasedCollective withAttributes(Map<String, ? extends Attribute> attributes)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
         checkAttributes(attributes);
         return new ApplicationBasedCollective(
-            this.getContext(),
-            this.getId(),
-            this.getKindInstance(),
-            this.getMembers(),
-            ImmutableMap.<String, Attribute>builder().putAll(this.getAttributes()).putAll(attributes).build(),
-            this.getUserAttributes()
+                this.getContext(),
+                this.getId(),
+                this.getKindInstance(),
+                this.getMembers(),
+                ImmutableMap.<String, Attribute>builder().putAll(this.getAttributes()).putAll(attributes).build(),
+                this.getUserAttributes()
         );
     }
 
-
     /**
-     * this method returns a new collective which members will be the set intersection of the current one
-     * (<i>this</i>) with the
-     * provided one (<i>other</i>)
+     * this method returns a new collective which members will be the set
+     * intersection of the current one (<i>this</i>) with the provided one
+     * (<i>other</i>)
      * <p>
      * <p>
-     * The attributes and user attributes will be merged giving precedence to the current collective
+     * The attributes and user attributes will be merged giving precedence to
+     * the current collective
      *
      * @param other
      * @return
-     * @throws CollectiveCreationException when the collective kinds of the two collective differ
+     * @throws CollectiveCreationException when the collective kinds of the two
+     * collective differ
      */
     public ApplicationBasedCollective intersection(ApplicationBasedCollective other)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
         checkCompatibleKind(other);
 
         return other.withMembers(Sets.intersection(getMembers(), other.getMembers())).
-            withAttributes(this.getAttributes()).
-                        withUserAttributes(this.getUserAttributes());
+                withAttributes(this.getAttributes()).
+                withUserAttributes(this.getUserAttributes());
     }
 
-
     /**
-     * this method returns a new collective which members will be the set difference of the current one (<i>this</i>)
-     * with the
-     * provided one (<i>other</i>)
+     * this method returns a new collective which members will be the set
+     * difference of the current one (<i>this</i>) with the provided one
+     * (<i>other</i>)
      * <p>
      * <p>
-     * The attributes and user attributes will be merged giving precedence to the current collective
+     * The attributes and user attributes will be merged giving precedence to
+     * the current collective
      *
      * @param other
      * @return
-     * @throws CollectiveCreationException when the collective kinds of the two collective differ
+     * @throws CollectiveCreationException when the collective kinds of the two
+     * collective differ
      */
     public ApplicationBasedCollective difference(ApplicationBasedCollective other)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
         checkCompatibleKind(other);
 
         return other.withMembers(Sets.difference(this.getMembers(), other.getMembers())).
-            withAttributes(this.getAttributes()).
-                        withUserAttributes(this.getUserAttributes());
+                withAttributes(this.getAttributes()).
+                withUserAttributes(this.getUserAttributes());
     }
 
     /**
-     * this method returns a new collective which members will be the set union of the current one (<i>this</i>) with
-     * the
-     * provided one (<i>other</i>)
+     * this method returns a new collective which members will be the set union
+     * of the current one (<i>this</i>) with the provided one (<i>other</i>)
      * <p>
      * <p>
-     * The attributes and user attributes will be merged giving precedence to the current collective
+     * The attributes and user attributes will be merged giving precedence to
+     * the current collective
      *
      * @param other
      * @return
-     * @throws CollectiveCreationException when the collective kinds of the two collective differ
+     * @throws CollectiveCreationException when the collective kinds of the two
+     * collective differ
      */
     public ApplicationBasedCollective union(ApplicationBasedCollective other)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
         checkCompatibleKind(other);
 
         return other.withMembers(Sets.union(this.getMembers(), other.getMembers())).
-            withAttributes(this.getAttributes()).
-                        withUserAttributes(this.getUserAttributes());
+                withAttributes(this.getAttributes()).
+                withUserAttributes(this.getUserAttributes());
     }
 
     private ApplicationBasedCollective withMembers(Collection<Peer> members) {
         return new ApplicationBasedCollective(
-            this.getContext(),
-            this.getId(),
-            this.getKindInstance(),
-            members,
-            this.getAttributes(),
-            this.getUserAttributes()
+                this.getContext(),
+                this.getId(),
+                this.getKindInstance(),
+                members,
+                this.getAttributes(),
+                this.getUserAttributes()
         );
     }
 
     private void checkCompatibleKind(ApplicationBasedCollective other)
-        throws CollectiveCreationException {
+            throws CollectiveCreationException {
         if (!other.getKindInstance().equals(other.getKindInstance())) {
             throw new CollectiveCreationException("Set operations can be made only on the same kind");
         }
     }
-
 
     @Override
     public ApplicationBasedCollective toApplicationBasedCollective() {
@@ -329,12 +344,13 @@ public final class ApplicationBasedCollective extends CollectiveBase {
 
     @Override
     public boolean equals(Object o) {
-        if (!super.equals(o)) return false;
+        if (!super.equals(o)) {
+            return false;
+        }
 
         ApplicationBasedCollective that = (ApplicationBasedCollective) o;
 
-        return
-            Objects.equal(this.userAttributes, that.userAttributes);
+        return Objects.equal(this.userAttributes, that.userAttributes);
     }
 
     @Override
@@ -342,17 +358,16 @@ public final class ApplicationBasedCollective extends CollectiveBase {
         return Objects.hashCode(userAttributes, super.hashCode());
     }
 
-
     @Override
     public String toString() {
         return MoreObjects
-            .toStringHelper(this)
-            .add("context", getContext().getId())
-            .add("id", getId())
-            .add("userAttributes", userAttributes)
-            .add("kind", getKind())
-            .add("members", "Unaccessible")
-            .add("attributes", getAttributes())
-            .toString();
+                .toStringHelper(this)
+                .add("context", getContext().getId())
+                .add("id", getId())
+                .add("userAttributes", userAttributes)
+                .add("kind", getKind())
+                .add("members", "Unaccessible")
+                .add("attributes", getAttributes())
+                .toString();
     }
 }

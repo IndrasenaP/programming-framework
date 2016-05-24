@@ -25,54 +25,54 @@ import org.springframework.http.MediaType;
  */
 public class PeerManagerProxyTest {
 
-	private static WireMockServer pm;
-	private PeerManagerProxy proxy;
+    private static WireMockServer pm;
+    private PeerManagerProxy proxy;
 
-	private static String readJsonFileHelper(String fileName) throws IOException {
-		return IOUtils.toString(Thread
-				.currentThread()
-				.getContextClassLoader()
-				.getResourceAsStream(fileName), "UTF-8");
-	}
+    private static String readJsonFileHelper(String fileName) throws IOException {
+        return IOUtils.toString(Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(fileName), "UTF-8");
+    }
 
-	@BeforeClass
-	public static void setUpClass() throws IOException {
-		pm = new WireMockServer(8080);
-		pm.start();
-		pm.stubFor(WireMock.get(WireMock
-				.urlEqualTo(PeerManagerPaths.collectiveGet.replace("{collective_id}", "5")))
-				.willReturn(WireMock.aResponse()
-						.withHeader("Content-Type",
-								MediaType.APPLICATION_JSON.toString())
-						.withBody(readJsonFileHelper("Collective.json"))));
-	}
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+        pm = new WireMockServer(8080);
+        pm.start();
+        pm.stubFor(WireMock.get(WireMock
+                .urlEqualTo(PeerManagerPaths.collectiveGet.replace("{collective_id}", "5")))
+                .willReturn(WireMock.aResponse()
+                        .withHeader("Content-Type",
+                                MediaType.APPLICATION_JSON.toString())
+                        .withBody(readJsonFileHelper("Collective.json"))));
+    }
 
-	@Before
-	public void setUp() {
-		proxy = new PeerManagerProxy("http", "127.0.0.1", 8080);
-	}
+    @Before
+    public void setUp() {
+        proxy = new PeerManagerProxy("http", "127.0.0.1", 8080);
+    }
 
-	@After
-	public void tearDown() {
-	}
+    @After
+    public void tearDown() {
+    }
 
-	@Test
-	public void testPersistCollective() {
-	}
+    @Test
+    public void testPersistCollective() {
+    }
 
-	@Test
-	public void testReadCollectiveById() {
-		ResidentCollectiveIntermediary inter = this.proxy.readCollectiveById("5");
-		assertEquals("5", inter.getId());
-		for (Peer p : inter.getMembers()) {
-			assertTrue(p.toString().contains("JhonnyD")
-					|| p.toString().contains("Niceguy2")
-					|| p.toString().contains("AlbertW"));
-		}
-	}
+    @Test
+    public void testReadCollectiveById() {
+        ResidentCollectiveIntermediary inter = this.proxy.readCollectiveById("5");
+        assertEquals("5", inter.getId());
+        for (Peer p : inter.getMembers()) {
+            assertTrue(p.toString().contains("JhonnyD")
+                    || p.toString().contains("Niceguy2")
+                    || p.toString().contains("AlbertW"));
+        }
+    }
 
-	@Test
-	public void testReadCollectiveByQuery() {
-	}
+    @Test
+    public void testReadCollectiveByQuery() {
+    }
 
 }

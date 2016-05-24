@@ -12,34 +12,34 @@ import java.util.Collection;
 /**
  * This class has only the function to encapsulate the incoming data from the
  * PeerManager and to bring them into a well known format.
- * 
+ *
  * This way the ResidentCollective itself does not have to care about the real
  * structure of the returned data.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class ResidentCollectiveIntermediary {
-	String id;
-	Collection<Peer> members = new ArrayList<>();
-	
-	//todo-sv: think about the attributes:
-	//--> are they allways simple key->values
-	//--> or do they also have key->objects/array mapings?
-	//Map<String, String> attributes = new HashMap<>();
 
-	public String getId() {
-		return id;
-	}
+    String id;
+    Collection<Peer> members = new ArrayList<>();
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    //todo-sv: think about the attributes:
+    //--> are they allways simple key->values
+    //--> or do they also have key->objects/array mapings?
+    //Map<String, String> attributes = new HashMap<>();
+    public String getId() {
+        return id;
+    }
 
-	public void addMember(Peer member) {
-		this.members.add(member);
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public Collection<Peer> getMembers() {
-		return members;
-	}
+    public void addMember(Peer member) {
+        this.members.add(member);
+    }
+
+    public Collection<Peer> getMembers() {
+        return members;
+    }
 }
