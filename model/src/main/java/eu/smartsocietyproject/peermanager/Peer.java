@@ -11,7 +11,7 @@ public abstract class Peer {
         this.id = id;
     }
 
-    protected String getId() {
+    public String getId() {
         return this.id;
     }
 

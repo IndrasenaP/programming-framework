@@ -6,8 +6,11 @@
 package eu.smartsocietyproject.peermanager.helper;
 
 import eu.smartsocietyproject.peermanager.Peer;
+import eu.smartsocietyproject.pf.Attribute;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class has only the function to encapsulate the incoming data from the
@@ -20,8 +23,9 @@ import java.util.Collection;
  */
 public class ResidentCollectiveIntermediary {
 
-    String id;
-    Collection<Peer> members = new ArrayList<>();
+    private String id;
+    private Collection<Peer> members = new ArrayList<>();
+    private Map<String, Attribute> attributes = new HashMap<>();
 
     //todo-sv: think about the attributes:
     //--> are they allways simple key->values
@@ -41,5 +45,13 @@ public class ResidentCollectiveIntermediary {
 
     public Collection<Peer> getMembers() {
         return members;
+    }
+
+    public Map<String, Attribute> getAttributes() {
+        return attributes;
+    }
+    
+    public void addAttribute(String key, Attribute att) {
+        this.attributes.put(key, att);
     }
 }

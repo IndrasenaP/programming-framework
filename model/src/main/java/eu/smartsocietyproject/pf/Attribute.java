@@ -10,7 +10,6 @@ package eu.smartsocietyproject.pf;
 public abstract class Attribute {
 
     public Attribute() {
-
     }
 
     public abstract Attribute clone();

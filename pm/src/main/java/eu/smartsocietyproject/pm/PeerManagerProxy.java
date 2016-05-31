@@ -3,7 +3,7 @@ package eu.smartsocietyproject.pm;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.PersistablePeer;
+import eu.smartsocietyproject.peermanager.helper.SimplePeer;
 import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
 import eu.smartsocietyproject.pf.CollectiveBase;
 import java.util.logging.Level;
@@ -58,7 +58,7 @@ public class PeerManagerProxy implements PeerManager {
             JSONArray users = new JSONObject(response.getBody())
                     .getJSONArray("collectedUsers");
             for (int i = 0; i < users.length(); i++) {
-                collective.addMember(new PersistablePeer(users.getString(i)));
+                collective.addMember(new SimplePeer(users.getString(i)));
             }
         } catch (JSONException ex) {
             //todo-sv: handle
