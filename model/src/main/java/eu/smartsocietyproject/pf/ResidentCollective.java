@@ -5,7 +5,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public final class ResidentCollective extends CollectiveBase {
             SmartSocietyApplicationContext context,
             PeerQuery query) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
-        ResidentCollectiveIntermediary collective
+        CollectiveIntermediary collective
                 = peerManager.readCollectiveByQuery(query);
         //todo-sv: createFromQuery missing kind?
         return new ResidentCollective(context,
@@ -60,7 +60,7 @@ public final class ResidentCollective extends CollectiveBase {
             String id,
             Optional<String> verify_kind) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
-        ResidentCollectiveIntermediary collective
+        CollectiveIntermediary collective
                 = peerManager.readCollectiveById(id);
         //todo-sv: verify kind with context
         return new ResidentCollective(context,

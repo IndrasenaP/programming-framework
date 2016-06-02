@@ -4,7 +4,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.SimplePeer;
-import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.pf.CollectiveBase;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +43,7 @@ public class PeerManagerProxy implements PeerManager {
     }
 
     @Override
-    public ResidentCollectiveIntermediary readCollectiveById(String id) {
+    public CollectiveIntermediary readCollectiveById(String id) {
         RequestEntity<Void> request = RequestEntity
                 .get(this.collectiveById.expand(id).encode().toUri())
                 .build();
@@ -51,8 +51,8 @@ public class PeerManagerProxy implements PeerManager {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate
                 .exchange(request, String.class);
-        ResidentCollectiveIntermediary collective
-                = new ResidentCollectiveIntermediary();
+        CollectiveIntermediary collective
+                = new CollectiveIntermediary();
         collective.setId(id);
         try {
             JSONArray users = new JSONObject(response.getBody())
@@ -68,7 +68,7 @@ public class PeerManagerProxy implements PeerManager {
     }
 
     @Override
-    public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+    public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -8,7 +8,7 @@ package eu.smartsocietyproject.pm;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
@@ -62,7 +62,7 @@ public class PeerManagerProxyTest {
 
     @Test
     public void testReadCollectiveById() {
-        ResidentCollectiveIntermediary inter = this.proxy.readCollectiveById("5");
+        CollectiveIntermediary inter = this.proxy.readCollectiveById("5");
         assertEquals("5", inter.getId());
         for (Peer p : inter.getMembers()) {
             assertTrue(p.toString().contains("JhonnyD")

@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class ResidentCollectiveIntermediary {
+public class CollectiveIntermediary {
 
     private String id;
     private Collection<Peer> members = new ArrayList<>();
