@@ -2,10 +2,12 @@ package eu.smartsocietyproject.pm;
 
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
-import eu.smartsocietyproject.peermanager.PeerQuery;
+import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.SimplePeer;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.CollectiveBase;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.HTTP;
@@ -69,6 +71,11 @@ public class PeerManagerProxy implements PeerManager {
 
     @Override
     public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -3,37 +3,38 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.peermanager;
+package eu.smartsocietyproject.peermanager.query;
 
+import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.pf.Attribute;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerQueryRule {
+public class QueryRule {
     
     private String key;
     private Attribute attribute;
-    private PeerQueryOperation operation;
+    private QueryOperation operation;
     
-    public PeerQueryRule withKey(String key) {
+    public QueryRule withKey(String key) {
         this.key = key;
         return this;
     }
     
-    public PeerQueryRule withValue(Attribute attribute) {
+    public QueryRule withValue(Attribute attribute) {
         this.attribute = attribute;
         return this;
     }
     
-    public PeerQueryRule withOperation(PeerQueryOperation operation) {
+    public QueryRule withOperation(QueryOperation operation) {
         this.operation = operation;
         return this;
     }
     
-    public static PeerQueryRule create(String key) {
-        return new PeerQueryRule().withKey(key);
+    public static QueryRule create(String key) {
+        return new QueryRule().withKey(key);
     }
 
     public String getKey() {
@@ -44,7 +45,7 @@ public class PeerQueryRule {
         return attribute;
     }
 
-    public PeerQueryOperation getOperation() {
+    public QueryOperation getOperation() {
         return operation;
     }
 }

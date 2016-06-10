@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.peermanager;
+package eu.smartsocietyproject.peermanager.query;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public enum PeerQueryOperation {
+public enum QueryOperation {
     equals
 }
