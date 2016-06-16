@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * SimplePeer is a basic Peer implementation which allows the local PM proxy to 
+ * operate.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */

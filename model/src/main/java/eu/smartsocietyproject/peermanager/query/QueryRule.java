@@ -5,11 +5,13 @@
  */
 package eu.smartsocietyproject.peermanager.query;
 
-import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.pf.Attribute;
 
 /**
- *
+ * A QueryRule represents how to compare a given attribute value.
+ * This especially means that the value behind the given attribute key will 
+ * be compared to the value it has in this rule with the operation defined in 
+ * this rule.
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class QueryRule {

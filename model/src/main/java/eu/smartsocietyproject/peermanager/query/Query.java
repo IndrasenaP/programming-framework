@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * The abstract Query with the basic common query data.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */

@@ -27,10 +27,6 @@ public class CollectiveIntermediary {
     private Collection<Peer> members = new ArrayList<>();
     private Map<String, Attribute> attributes = new HashMap<>();
 
-    //todo-sv: think about the attributes:
-    //--> are they allways simple key->values
-    //--> or do they also have key->objects/array mapings?
-    //Map<String, String> attributes = new HashMap<>();
     public String getId() {
         return id;
     }

@@ -8,6 +8,10 @@ import java.util.List;
 
 public interface PeerManager {
 
+    /**
+     * This will persist the collective with the peer manager.
+     * @param collective 
+     */
     void persistCollective(CollectiveBase collective);
  
     /**
@@ -20,11 +24,17 @@ public interface PeerManager {
 
     /**
      * This function will load existing peers which fit the given peer query and
-     * create a new collective they are in.
+     * return a new collective holding this peers.
+     * This new collective is not persisted.
      * @param query
      * @return 
      */
     CollectiveIntermediary readCollectiveByQuery(PeerQuery query);
 
+    /**
+     * Reads a already persisted collective via the given id.
+     * @param id
+     * @return 
+     */
     CollectiveIntermediary readCollectiveById(String id);
 }

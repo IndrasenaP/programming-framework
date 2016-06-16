@@ -6,7 +6,9 @@
 package eu.smartsocietyproject.peermanager.query;
 
 /**
- *
+ * Up to the name it is the same as the PeerQuery.
+ * It is represented by a separate class to illustrate that one of the PM functions
+ * queries peers and the other queries collectives.
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class CollectiveQuery extends Query {

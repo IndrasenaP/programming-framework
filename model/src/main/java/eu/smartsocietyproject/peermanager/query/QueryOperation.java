@@ -6,7 +6,8 @@
 package eu.smartsocietyproject.peermanager.query;
 
 /**
- *
+ * This enum represents the till now supported operations between attribute value
+ * and query value for this attribute.
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public enum QueryOperation {
