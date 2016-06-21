@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.pm;
+package eu.smartsocietyproject.pm.helper;
 
 import eu.smartsocietyproject.pf.Attribute;
 
@@ -11,15 +11,15 @@ import eu.smartsocietyproject.pf.Attribute;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class TestIntAttribute extends Attribute {
+public class TestStringAttribute extends Attribute {
     
-    private int value;
+    private String value;
     
-    public TestIntAttribute() {
+    public TestStringAttribute() {
         
     }
     
-    public TestIntAttribute(int value) {
+    public TestStringAttribute(String value) {
         this.value = value;
     }
 
@@ -40,12 +40,12 @@ public class TestIntAttribute extends Attribute {
 
     @Override
     public String toString() {
-        return String.valueOf(this.value);
+        return this.value;
     }
 
     @Override
     public void parseValueFromString(String attributeValue) {
-        this.value = Integer.parseInt(attributeValue);
+        this.value = attributeValue;
     }
     
 }

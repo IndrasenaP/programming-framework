@@ -5,6 +5,9 @@
  */
 package eu.smartsocietyproject.pm;
 
+import eu.smartsocietyproject.pm.helper.TestIntAttribute;
+import eu.smartsocietyproject.pm.helper.TestCollective;
+import eu.smartsocietyproject.pm.helper.TestStringAttribute;
 import com.mongodb.client.MongoCollection;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;

@@ -10,16 +10,15 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
 import org.springframework.http.MediaType;
 
 /**
+ * Work in progress. This class will hold the tests for the real PM when ready.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
@@ -56,11 +55,11 @@ public class PeerManagerProxyTest {
     public void tearDown() {
     }
 
-    @Test
+    //@Test
     public void testPersistCollective() {
     }
 
-    @Test
+    //@Test
     public void testReadCollectiveById() {
         CollectiveIntermediary inter = this.proxy.readCollectiveById("5");
         assertEquals("5", inter.getId());
@@ -71,7 +70,7 @@ public class PeerManagerProxyTest {
         }
     }
 
-    @Test
+    //@Test
     public void testReadCollectiveByQuery() {
     }
 
