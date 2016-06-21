@@ -2,8 +2,9 @@ package eu.smartsocietyproject.pf.orchestration;
 
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
-import eu.smartsocietyproject.peermanager.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.ResidentCollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
+import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -22,12 +23,17 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         }
 
         @Override
-        public ResidentCollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+        public CollectiveIntermediary readCollectiveById(String id) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
-        public ResidentCollectiveIntermediary readCollectiveById(String id) {
+        public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     };
