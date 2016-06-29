@@ -2,6 +2,9 @@ package eu.smartsocietyproject.pf.orchestration;
 
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
+import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.pf.*;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
@@ -13,14 +16,34 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     String basicKindId = "basic";
     CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
     CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
-    PeerManager peerManager = new PeerManager(){};
+    PeerManager peerManager = new PeerManager() {
+        @Override
+        public void persistCollective(CollectiveBase collective) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CollectiveIntermediary readCollectiveById(String id) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    };
     SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
 
     @Test
     public void testCompose() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
 
-        Collective provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
+        CollectiveBase provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
         List<CollectiveWithPlan> result = target.compose(provisionedCollective, new TaskRequest());
         assertThat(result).hasSize(1);
         assertThat(result).are(withCollective(provisionedCollective));
@@ -50,7 +73,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         target.withdraw(new CollectiveBasedTask());
     }
 
-    Condition<CollectiveWithPlan> withCollective(final Collective expected) {
+    Condition<CollectiveWithPlan> withCollective(final CollectiveBase expected) {
         return new Condition<CollectiveWithPlan>() {
             @Override
             public boolean matches(CollectiveWithPlan value) {

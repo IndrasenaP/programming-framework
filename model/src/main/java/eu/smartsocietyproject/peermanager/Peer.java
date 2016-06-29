@@ -3,17 +3,26 @@ package eu.smartsocietyproject.peermanager;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public class Peer {
+public abstract class Peer {
+
     private final String id;
 
     public Peer(String id) {
         this.id = id;
     }
 
+    public String getId() {
+        return this.id;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Peer that = (Peer) o;
 
@@ -25,12 +34,11 @@ public class Peer {
         return Objects.hashCode(id);
     }
 
-
     @Override
     public String toString() {
         return MoreObjects
-            .toStringHelper(this)
-            .add("id", id)
-            .toString();
+                .toStringHelper(this)
+                .add("id", id)
+                .toString();
     }
 }
