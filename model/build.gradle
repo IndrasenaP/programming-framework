@@ -1,4 +1,5 @@
 dependencies {
     compile libraries.compileShared
     testCompile libraries.testShared
+    compile 'org.squirrelframework:squirrel-foundation:0.3.8'
 }

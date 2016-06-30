@@ -6,10 +6,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import eu.smartsocietyproject.peermanager.Peer;
+import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
+import eu.smartsocietyproject.peermanager.query.PeerQuery;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * CollectiveBase was introduced for internal purposes to allow us to access the
@@ -342,5 +348,45 @@ public abstract class CollectiveBase implements Collective {
                 boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }
+    }
+
+    /**
+     * Just used for internal debugging. Do not use. Will be removed.
+     *
+     * @return
+     */
+    @Deprecated
+    public static CollectiveBase emptyCollective() {
+        String basicKindId = "basic";
+        CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
+        CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
+        PeerManager peerManager = new PeerManager() {
+            @Override
+            public void persistCollective(CollectiveBase collective) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public CollectiveIntermediary readCollectiveById(String id) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
+
+        CollectiveBase c = null;
+        try {
+            c = ApplicationBasedCollective.empty(context, "theEmptyCollective", basicKindId);
+        } catch (Exception e) {}
+        return c;
     }
 }

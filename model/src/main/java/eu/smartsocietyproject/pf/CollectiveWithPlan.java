@@ -1,23 +1,21 @@
-package eu.smartsocietyproject.pf.orchestration;
+package eu.smartsocietyproject.pf;
 
 import com.google.common.base.Objects;
-import eu.smartsocietyproject.pf.CollectiveBase;
-import eu.smartsocietyproject.pf.Plan;
 
 public class CollectiveWithPlan {
-    private final CollectiveBase collective;
+    private final Collective collective;
     private final Plan plan;
 
-    private CollectiveWithPlan(CollectiveBase collective, Plan plan) {
+    private CollectiveWithPlan(Collective collective, Plan plan) {
         this.collective = collective;
         this.plan = plan;
     }
 
-    public static CollectiveWithPlan of(CollectiveBase collective, Plan plan) {
+    public static CollectiveWithPlan of(Collective collective, Plan plan) {
         return new CollectiveWithPlan(collective, plan);
     }
 
-    public CollectiveBase getCollective() {
+    public Collective getCollective() {
         return collective;
     }
 
