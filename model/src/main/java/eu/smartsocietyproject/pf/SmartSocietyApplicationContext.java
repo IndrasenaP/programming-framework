@@ -1,37 +1,18 @@
 package eu.smartsocietyproject.pf;
 
-import com.google.common.base.MoreObjects;
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
 
-public class SmartSocietyApplicationContext {
-    private final UUID id = java.util.UUID.randomUUID();
-    private final CollectiveKindRegistry kindRegistry;
-    private final PeerManager peerManager;
+public interface SmartSocietyApplicationContext {
+    UUID getId();
 
-    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, PeerManager peerManager) {
-        this.kindRegistry = kindRegistry;
-        this.peerManager = peerManager;
-    }
+    CollectiveKindRegistry getKindRegistry();
 
-    public UUID getId() {
-        return id;
-    }
+    PeerManager getPeerManager();
 
-    public CollectiveKindRegistry getKindRegistry() {
-        return kindRegistry;
-    }
+    boolean startTask(TaskDefinition definition);
 
-    public PeerManager getPeerManager() {
-        return peerManager;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("id", id)
-                          .toString();
-    }
-
+    JsonNode monitor(UUID taskId);
 }

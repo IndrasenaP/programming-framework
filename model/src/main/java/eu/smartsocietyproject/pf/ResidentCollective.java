@@ -8,7 +8,6 @@ import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,7 +41,7 @@ public final class ResidentCollective extends CollectiveBase {
     }
 
     public static ResidentCollective createFromQuery(
-            SmartSocietyApplicationContext context,
+            DefaultSmartSocietyApplicationContext context,
             PeerQuery query) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
         CollectiveIntermediary collective

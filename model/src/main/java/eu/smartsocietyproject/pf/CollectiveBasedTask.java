@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.smartsocietyproject.pf.cbthandlers.*;
 
 import java.util.*;
@@ -13,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class CollectiveBasedTask implements Future {
+public class CollectiveBasedTask implements Future<TaskResult> {
 
     Logger logger = LoggerFactory.getLogger(CollectiveBasedTask.class);
 
@@ -28,6 +29,14 @@ public class CollectiveBasedTask implements Future {
     protected static final int DO_EXECUTION       = 8;
     protected static final int DO_CONTINUOUS_ORCHESTRATION = 16;
 
+    // TODO: REMOVE and put in the constructor.
+    private final TaskRequest taskRequest = new TaskRequest(new TaskDefinition(new ObjectMapper().createObjectNode()), "FAKE") {
+        @Override
+        public String getRequest() {
+            return "FakeRequest";
+        }
+    };
+
     private final int labor_model;
     private volatile CollectiveBasedTask.State state;
     private double finalStateQoS = 0.0;
@@ -41,8 +50,7 @@ public class CollectiveBasedTask implements Future {
                                     DO_EXECUTION |
                                     DO_CONTINUOUS_ORCHESTRATION;
 
-
-    public enum State{
+    public enum State {
         INITIAL,
         PROVISIONING, COMPOSITION, NEGOTIATION, EXECUTION, CONTINUOUS_ORCHESTRATION,
         WAITING_FOR_PROVISIONING, WAITING_FOR_COMPOSITION, WAITING_FOR_NEGOTIATION, WAITING_FOR_EXECUTION, WAITING_FOR_CONTINUOUS_ORCHESTRATION,
@@ -73,10 +81,8 @@ public class CollectiveBasedTask implements Future {
     // TODO: Change
     public static CollectiveBasedTask createCBT(){
         CollectiveBasedTask cbt = new CollectiveBasedTask(CollectiveBasedTask.ON_DEMAND);
-
         return cbt;
     }
-
 
     private final static ExecutorService executor = new ThreadPoolExecutor(  //can return both Executor and ExecutorService
                 30, // the number of threads to keep active in the pool, even if they are idle
@@ -145,18 +151,17 @@ public class CollectiveBasedTask implements Future {
 
     private TaskResult result = null; // result of execution
 
+
+    public TaskRequest getTaskRequest() {
+        return taskRequest;
+    }
+
     private void invokeHandlerForCurrentState(){
         switch (state){
             case PROVISIONING:
                 Callable<Collective> provisioningCallable= () -> {
                     ProvisioningHandler handler = new DummyProvisioningHandlerImpl();
-                    TaskRequest treq = new TaskRequest() {
-                        @Override
-                        public String getRequest() {
-                            return "blah blah";
-                        }
-                    };
-                    Collective provisioned = handler.provision(treq, null); // this will last...
+                    Collective provisioned = handler.provision(getTaskRequest(), null); // this will last...
                     return provisioned;
                 };
                 this.provisioningFuture = executor.submit(provisioningCallable);
@@ -165,13 +170,7 @@ public class CollectiveBasedTask implements Future {
             case COMPOSITION:
                 Callable<List<CollectiveWithPlan>> compositionCallable= () -> {
                     CompositionHandler handler = new DummyCompositionHandlerImpl();
-                    TaskRequest treq = new TaskRequest() {
-                        @Override
-                        public String getRequest() {
-                            return "blah blah";
-                        }
-                    };
-                    return handler.compose(this.provisioned, treq);
+                    return handler.compose(this.provisioned, getTaskRequest());
                 };
                 this.compositionFuture = executor.submit(compositionCallable);
                 break;
@@ -204,6 +203,7 @@ public class CollectiveBasedTask implements Future {
     private boolean isOpenCall(){
         return ((labor_model | CollectiveBasedTask.OPEN_CALL) > 0);
     }
+
     private class CBTRunnable implements Runnable {
         @Override
         public void run() {
@@ -685,9 +685,7 @@ public class CollectiveBasedTask implements Future {
      *                               while waiting
      */
     @Override
-    public Object get() throws InterruptedException, ExecutionException, CancellationException {
-
-
+    public TaskResult get() throws InterruptedException, ExecutionException, CancellationException {
         getMethodlock.lock();
         if (isCancelled()) {
             getMethodlock.unlock();
@@ -713,8 +711,6 @@ public class CollectiveBasedTask implements Future {
             return null;
         }
 
-
-
     }
 
     /**
@@ -732,7 +728,7 @@ public class CollectiveBasedTask implements Future {
      * @throws TimeoutException      if the wait timed out
      */
     @Override
-    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public TaskResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return null;
     }
 

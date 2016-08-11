@@ -2,7 +2,8 @@
 ext.libraries = [
         compileShared: [
                 'com.google.guava:guava:19.0',
-                'org.slf4j:slf4j-log4j12:1.7.12'
+                'org.slf4j:slf4j-log4j12:1.7.12',
+                'com.fasterxml.jackson.core:jackson-databind:2.8.1'
         ],
         testShared: [
                 'junit:junit:4.11',

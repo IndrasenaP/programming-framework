@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf.orchestration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
@@ -37,14 +38,14 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     };
-    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
+    DefaultSmartSocietyApplicationContext context = new DefaultSmartSocietyApplicationContext(kindRegistry, peerManager);
 
     @Test
     public void testCompose() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
 
         CollectiveBase provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
-        List<CollectiveWithPlan> result = target.compose(provisionedCollective, new TaskRequest());
+        List<CollectiveWithPlan> result = target.compose(provisionedCollective, createFakeRequest());
         assertThat(result).hasSize(1);
         assertThat(result).are(withCollective(provisionedCollective));
 
@@ -64,7 +65,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     @Test(expected=UnsupportedOperationException.class)
     public void testContinuousOrchestration() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
-        target.continuousOrchestration(new TaskRequest());
+        target.continuousOrchestration(createFakeRequest());
     }
 
     @Test(expected=UnsupportedOperationException.class)
@@ -81,6 +82,17 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
                 return expected.equals(value.getCollective());
             }
         };
+    }
+
+    private TaskRequest createFakeRequest() {
+        return
+            new TaskRequest(
+                new TaskDefinition(new ObjectMapper().createObjectNode()), "") {
+                @Override
+                public String getRequest() {
+                    return "FAKE";
+                }
+            };
     }
 
 }
