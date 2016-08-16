@@ -3,6 +3,8 @@ package eu.smartsocietyproject.runtime;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import eu.smartsocietyproject.pf.*;
 
 import java.util.HashMap;
@@ -16,7 +18,7 @@ public class Runtime {
     private final SmartSocietyApplicationContext context;
     private final Application application;
     private final HashMap<UUID, TaskRunnerDescriptor> runnerDescriptors = new HashMap<>();
-
+    private final ImmutableMap<String, TaskFlowDefinition> flowsByType;
     private final ExecutorService executor = new ThreadPoolExecutor( //can return both Executor and ExecutorService
      30,// the number of threads to keep active in the pool, even if they are idle
      1000,// the maximum number of threads to allow in the pool. After that, the tasks are queued
@@ -25,15 +27,27 @@ public class Runtime {
     );
 
     public Runtime(SmartSocietyApplicationContext context, Application application) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(application);
         this.context = context;
         this.application = application;
+        this.flowsByType = ImmutableMap.copyOf(application.defineTaskFlowsByType());
     }
 
     boolean startTask(TaskDefinition definition) {
-        TaskRequest request = application.extractTaskRequest(definition);
-        CollectiveBasedTask cbt = new CollectiveBasedTask(); /* new CollectiveBasedTask(definition) */
+        TaskRequest request = application.createTaskRequest(definition);
+        TaskFlowDefinition flowDefinition = flowsByType.get(request.getType());
 
-        TaskRunner runner = application.getTaskRunner(request, cbt);
+        if (flowDefinition == null) {
+            /* Exception or logging */
+            return false;
+        }
+
+        CBTBuilder cbtBuilder = new CBTBuilder(context, flowDefinition, request);
+
+        CollectiveBasedTask cbt = cbtBuilder.build();
+
+        TaskRunner runner = application.getTaskRunner(cbt);
         executor.execute(runner);
         return true;
     }

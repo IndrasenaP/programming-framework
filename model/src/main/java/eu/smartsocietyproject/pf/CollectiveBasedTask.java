@@ -1,6 +1,5 @@
 package eu.smartsocietyproject.pf;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.smartsocietyproject.pf.cbthandlers.*;
 
 import java.util.*;
@@ -16,11 +15,9 @@ import org.slf4j.LoggerFactory;
 
 public class CollectiveBasedTask implements Future<TaskResult> {
 
+    private final SmartSocietyApplicationContext context;
+    private final TaskRequest request;
     Logger logger = LoggerFactory.getLogger(CollectiveBasedTask.class);
-
-    // labor modes
-    protected static final int ON_DEMAND          = 1; // 0001
-    protected static final int OPEN_CALL          = 2; // 0010
 
     // transition flag constants
     protected static final int DO_PROVISIONING    = 1;
@@ -29,15 +26,7 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     protected static final int DO_EXECUTION       = 8;
     protected static final int DO_CONTINUOUS_ORCHESTRATION = 16;
 
-    // TODO: REMOVE and put in the constructor.
-    private final TaskRequest taskRequest = new TaskRequest(new TaskDefinition(new ObjectMapper().createObjectNode()), "FAKE") {
-        @Override
-        public String getRequest() {
-            return "FakeRequest";
-        }
-    };
-
-    private final int labor_model;
+    private final Set<LaborMode> laborMode;
     private volatile CollectiveBasedTask.State state;
     private double finalStateQoS = 0.0;
     public final UUID uuid;
@@ -66,29 +55,36 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     @Deprecated
     public CollectiveBasedTask() {
         this.uuid = UUID.randomUUID();
-        this.labor_model = CollectiveBasedTask.ON_DEMAND;
+        this.laborMode = EnumSet.of(LaborMode.ON_DEMAND);
         this.state = CollectiveBasedTask.State.INITIAL;
         executor.execute(new CBTRunnable());
+        context=null;
+        request=null;
     }
 
-    private CollectiveBasedTask(int labor_model) {
+    private CollectiveBasedTask(
+        SmartSocietyApplicationContext context,
+        TaskRequest request,
+        TaskFlowDefinition definition) {
+        this.context = context;
+        this.request = request;
         this.uuid = UUID.randomUUID();
-        this.labor_model = labor_model;
+        this.laborMode = definition.getLaborMode();
         this.state = CollectiveBasedTask.State.INITIAL;
         executor.execute(new CBTRunnable());
     }
 
-    // TODO: Change
-    public static CollectiveBasedTask createCBT(){
-        CollectiveBasedTask cbt = new CollectiveBasedTask(CollectiveBasedTask.ON_DEMAND);
-        return cbt;
+    public static CollectiveBasedTask create(
+        SmartSocietyApplicationContext context, TaskRequest request,
+        TaskFlowDefinition definition) {
+        return new CollectiveBasedTask(context, request, definition);
     }
 
     private final static ExecutorService executor = new ThreadPoolExecutor(  //can return both Executor and ExecutorService
-                30, // the number of threads to keep active in the pool, even if they are idle
-                1000, // the maximum number of threads to allow in the pool. After that, the tasks are queued
-                1L, TimeUnit.HOURS, // when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
-                new LinkedBlockingQueue<Runnable>()
+        30, // the number of threads to keep active in the pool, even if they are idle
+        1000, // the maximum number of threads to allow in the pool. After that, the tasks are queued
+        1L, TimeUnit.HOURS, // when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
+        new LinkedBlockingQueue<Runnable>()
     );
 
     private final Lock lock = new ReentrantLock();
@@ -151,9 +147,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
 
     private TaskResult result = null; // result of execution
 
-
     public TaskRequest getTaskRequest() {
-        return taskRequest;
+        return request;
     }
 
     private void invokeHandlerForCurrentState(){
@@ -184,7 +179,6 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                 logger.debug("initialized negotiation handler.");
                 break;
 
-
             case EXECUTION:
                 Callable<TaskResult> executionCallable= () -> {
                     ExecutionHandler handler = new DummyExecutionHandlerImpl();
@@ -197,11 +191,11 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     }
 
     private boolean isOnDemand(){
-        return ((labor_model | CollectiveBasedTask.ON_DEMAND) > 0);
+        return laborMode.contains(LaborMode.ON_DEMAND);
     }
 
-    private boolean isOpenCall(){
-        return ((labor_model | CollectiveBasedTask.OPEN_CALL) > 0);
+    private boolean isOpenCall() {
+        return laborMode.contains(LaborMode.OPEN_CALL);
     }
 
     private class CBTRunnable implements Runnable {
@@ -859,6 +853,11 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     }
 
 
+    public enum LaborMode {
+        ON_DEMAND,
+        OPEN_CALL
+    }
+}
 
-}// end CBT class
+
 

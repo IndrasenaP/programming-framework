@@ -1,6 +1,5 @@
 package eu.smartsocietyproject.pf;
 
-
 import java.util.UUID;
 
 public abstract class TaskRequest {
@@ -22,4 +21,7 @@ public abstract class TaskRequest {
         return definition.getId();
     }
 
+    public String getType() {
+        return type;
+    }
 }
