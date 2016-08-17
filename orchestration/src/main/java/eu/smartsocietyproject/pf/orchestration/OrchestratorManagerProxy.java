@@ -8,11 +8,6 @@ import eu.smartsocietyproject.pf.cbthandlers.*;
 
 import java.util.List;
 
-public interface OrchestratorManagerProxy extends CompositionHandler, NegotiationHandler {
-    //List<CollectiveWithPlan> compose(CollectiveBase provisioned, TaskRequest t) throws CBTLifecycleException;
-
-    //CollectiveWithPlan negotiate(List<CollectiveWithPlan> negotiables) throws CBTLifecycleException;
-
-    CollectiveWithPlan continuousOrchestration(TaskRequest t) throws CBTLifecycleException;
+public interface OrchestratorManagerProxy extends CompositionHandler, NegotiationHandler, ContinuousOrchestrationHandler {
     boolean withdraw(CollectiveBasedTask cbt) throws CBTLifecycleException;
 }

@@ -1,10 +1,27 @@
 package eu.smartsocietyproject.pf;
 
+import java.util.UUID;
 
-// TODO: Make this an abstract class, and have concrete scenarios implement subclasses
-public class TaskRequest {
+public abstract class TaskRequest {
+    private final TaskDefinition definition;
+    private final String type;
 
-    public String getRequest() {
-        return "abc";
+    public TaskRequest(TaskDefinition definition, String type) {
+        this.definition = definition;
+        this.type = type;
+    }
+
+    public abstract String getRequest();
+
+    public TaskDefinition getDefinition() {
+        return definition;
+    }
+
+    public UUID getId() {
+        return definition.getId();
+    }
+
+    public String getType() {
+        return type;
     }
 }
