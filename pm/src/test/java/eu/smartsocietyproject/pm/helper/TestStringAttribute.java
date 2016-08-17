@@ -11,7 +11,7 @@ import eu.smartsocietyproject.pf.Attribute;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class TestStringAttribute extends Attribute {
+public class TestStringAttribute implements Attribute {
     
     private String value;
     
@@ -24,27 +24,12 @@ public class TestStringAttribute extends Attribute {
     }
 
     @Override
-    public Attribute clone() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public int hashCode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public String toString() {
+    public String toJson() {
         return this.value;
     }
 
     @Override
-    public void parseValueFromString(String attributeValue) {
+    public void parseJson(String attributeValue) {
         this.value = attributeValue;
     }
     

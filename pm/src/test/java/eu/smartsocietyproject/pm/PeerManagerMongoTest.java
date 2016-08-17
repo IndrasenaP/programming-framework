@@ -13,7 +13,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.peermanager.helper.SimplePeer;
+import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.Attribute;
@@ -104,9 +104,9 @@ public class PeerManagerMongoTest {
 
     private List<Peer> getPeersForCollective() {
         List<Peer> members = new ArrayList<>();
-        members.add(new SimplePeer(this.expectedMemberTim));
-        members.add(new SimplePeer(this.expectedMemberTom));
-        members.add(new SimplePeer(this.expectedMemberTum));
+        members.add(new PeerIntermediary(this.expectedMemberTim));
+        members.add(new PeerIntermediary(this.expectedMemberTom));
+        members.add(new PeerIntermediary(this.expectedMemberTum));
         return members;
     }
 
@@ -119,8 +119,8 @@ public class PeerManagerMongoTest {
                 this.expAge29, this.expCommentBlab));
     }
 
-    private SimplePeer getPeer(String userName, int age, String comment) {
-        SimplePeer peer = new SimplePeer(userName);
+    private PeerIntermediary getPeer(String userName, int age, String comment) {
+        PeerIntermediary peer = new PeerIntermediary(userName);
         peer.addAttribute(this.expPeerAge, new TestIntAttribute(age));
         peer.addAttribute(this.expPeerComment, new TestStringAttribute(comment));
         return peer;
@@ -201,11 +201,11 @@ public class PeerManagerMongoTest {
         assertTrue(actualAttributes.get(this.expAttLanguage) instanceof TestStringAttribute);
 
         assertEquals(String.valueOf(this.expSince5), actualAttributes
-                .get(this.expAttSince).toString());
+                .get(this.expAttSince).toJson());
         assertEquals(this.expCountryA, actualAttributes
-                .get(this.expAttCountry).toString());
+                .get(this.expAttCountry).toJson());
         assertEquals(this.expLangEnglish, actualAttributes
-                .get(this.expAttLanguage).toString());
+                .get(this.expAttLanguage).toJson());
     }
 
     @Test
@@ -251,13 +251,13 @@ public class PeerManagerMongoTest {
 
             assertTrue(coll.getAttributes().containsKey(this.expAttLanguage));
             assertEquals(this.expLangEnglish, coll.getAttributes()
-                    .get(this.expAttLanguage).toString());
+                    .get(this.expAttLanguage).toJson());
 
             assertTrue(coll.getAttributes().containsKey(this.expAttCountry));
             assertTrue(this.expCountryA.equals(coll.getAttributes()
-                    .get(this.expAttCountry).toString())
+                    .get(this.expAttCountry).toJson())
                     || this.expCountryE.equals(coll.getAttributes()
-                            .get(this.expAttCountry).toString()));
+                            .get(this.expAttCountry).toJson()));
         }
     }
 }

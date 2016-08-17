@@ -22,7 +22,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.peermanager.helper.SimplePeer;
+import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
@@ -114,7 +114,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
             Document att = new Document();
             att.append(MongoConstants.key, entry.getKey());
-            att.append(MongoConstants.value, entry.getValue().toString());
+            att.append(MongoConstants.value, entry.getValue().toJson());
             att.append(MongoConstants.type, entry.getValue().getClass().getName());
 
             atts.add(att);
@@ -134,7 +134,7 @@ public class PeerManagerMongoProxy implements PeerManager {
             try {
                 Class clazz = Class.forName(d.getString(MongoConstants.type));
                 Attribute att = (Attribute) clazz.newInstance();
-                att.parseValueFromString(d.getString(MongoConstants.value));
+                att.parseJson(d.getString(MongoConstants.value));
                 atts.put(d.getString(MongoConstants.key), att);
             } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                 Logger.getLogger(PeerManagerMongoProxy.class.getName()).log(Level.SEVERE, null, ex);
@@ -153,13 +153,13 @@ public class PeerManagerMongoProxy implements PeerManager {
         List<Peer> mems = new ArrayList<>();
         
         for(String member: (ArrayList<String>)members) {
-            mems.add(new SimplePeer(member));
+            mems.add(new PeerIntermediary(member));
         }
         
         return mems;
     }
 
-    public void persistPeer(SimplePeer peer) {
+    public void persistPeer(PeerIntermediary peer) {
         Document p = new Document(MongoConstants.id, peer.getId());
         p.append(MongoConstants.attributes, convertAttributes(peer.getAttributes()));
         peersCollection.insertOne(p);
@@ -179,7 +179,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         List<Document> atts = new ArrayList<>();
         for (QueryRule rule : query.getQueryRules()) {
             Document att = new Document(MongoConstants.key, rule.getKey());
-            att.append(MongoConstants.value, rule.getAttribute().toString());
+            att.append(MongoConstants.value, rule.getAttribute().toJson());
             att.append(MongoConstants.type, rule.getAttribute().getClass().getName());
             atts.add(att);
         }
@@ -216,7 +216,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         CollectiveIntermediary collective = new CollectiveIntermediary();
 
         for (Document p : peers) {
-            SimplePeer peer = new SimplePeer(p.getString(MongoConstants.id));
+            PeerIntermediary peer = new PeerIntermediary(p.getString(MongoConstants.id));
             peer.addAll(extractAttributesFromDocument(p));
             collective.addMember(peer);
         }
@@ -246,7 +246,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         }
 
         for (String peerId : (List<String>) peersObject) {
-            collective.addMember(new SimplePeer(peerId));
+            collective.addMember(new PeerIntermediary(peerId));
         }
         
         collective.getAttributes().putAll(extractAttributesFromDocument(doc));

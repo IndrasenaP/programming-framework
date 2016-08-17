@@ -17,11 +17,11 @@ import java.util.Map;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class SimplePeer extends Peer {
+public class PeerIntermediary extends Peer {
     
     private Map<String, Attribute> attributes = new HashMap<>();
 
-    public SimplePeer(String id) {
+    public PeerIntermediary(String id) {
         super(id);
     }
     
