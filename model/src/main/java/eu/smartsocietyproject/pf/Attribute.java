@@ -7,7 +7,7 @@ package eu.smartsocietyproject.pf;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public interface Attribute {
+public interface Attribute {    
     public void parseJson(String attributeValue);
     
     public String toJson();

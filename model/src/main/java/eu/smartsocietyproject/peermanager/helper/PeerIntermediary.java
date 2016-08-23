@@ -5,11 +5,8 @@
  */
 package eu.smartsocietyproject.peermanager.helper;
 
-import com.google.common.collect.ImmutableMap;
+import com.fasterxml.jackson.databind.JsonNode;
 import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.pf.Attribute;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * SimplePeer is a basic Peer implementation which allows the local PM proxy to 
@@ -17,23 +14,28 @@ import java.util.Map;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerIntermediary extends Peer {
+public class PeerIntermediary extends EntityHandler implements Peer {
     
-    private Map<String, Attribute> attributes = new HashMap<>();
-
-    public PeerIntermediary(String id) {
-        super(id);
+    protected PeerIntermediary() {
+        super("id");
     }
     
-    public void addAttribute(String key, Attribute attribute) {
-        this.attributes.put(key, attribute);
+    public static PeerIntermediary createEmpty(String id) {
+        PeerIntermediary peer = new PeerIntermediary();
+        peer.setId(id);
+        return peer;
     }
     
-    public void addAll(Map<String, Attribute> atts) {
-        this.attributes.putAll(atts);
+    public static PeerIntermediary createFromJson(String json) {
+        PeerIntermediary peer = new PeerIntermediary();
+        peer.parseThis(json);
+        //todo-sv: check eventually if there is an id?
+        return peer;
     }
-
-    public ImmutableMap<String, Attribute> getAttributes() {
-        return ImmutableMap.copyOf(attributes);
+    
+    protected static PeerIntermediary createFromJson(JsonNode node) {
+        PeerIntermediary peer = new PeerIntermediary();
+        peer.root = node;
+        return peer;
     }
 }

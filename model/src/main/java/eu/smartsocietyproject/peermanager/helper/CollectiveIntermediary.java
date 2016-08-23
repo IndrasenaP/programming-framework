@@ -6,11 +6,7 @@
 package eu.smartsocietyproject.peermanager.helper;
 
 import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.pf.Attribute;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class has only the function to encapsulate the incoming data from the
@@ -21,33 +17,54 @@ import java.util.Map;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class CollectiveIntermediary {
+public class CollectiveIntermediary extends EntityHandler {
 
-    private String id;
-    private Collection<Peer> members = new ArrayList<>();
-    private Map<String, Attribute> attributes = new HashMap<>();
-
-    public String getId() {
-        return id;
+    private String keyMembers = "members";
+    private MembersAttribute members;
+    
+    protected CollectiveIntermediary() {
+        super("id");
+        this.members = super.addAttributeNode(this.keyMembers, 
+                MembersAttribute.create());
+    }
+    
+    public void addMember(String peerId) {
+        
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void addMember(Peer member) {
-        this.members.add(member);
+    public void addMember(PeerIntermediary member) {
+        this.members.addMember(member.getId());
     }
 
     public Collection<Peer> getMembers() {
-        return members;
-    }
-
-    public Map<String, Attribute> getAttributes() {
-        return attributes;
+        return members.getPeers();
     }
     
-    public void addAttribute(String key, Attribute att) {
-        this.attributes.put(key, att);
+    @Override
+    protected final void parseThis(String json) {
+        super.parseThis(json);
+        MembersAttribute parsedMembers = getAttributeNode(keyMembers, 
+                MembersAttribute.create());
+        if(parsedMembers.root.isMissingNode()) {
+            parsedMembers = members;
+            addAttributeNode(keyMembers, members);
+        }
+        this.members = parsedMembers;
+    }
+    
+    public static CollectiveIntermediary createEmpty() {
+        return new CollectiveIntermediary();
+    }
+    
+    public static CollectiveIntermediary createEmpty(String id) {
+        CollectiveIntermediary coll = createEmpty();
+        coll.setId(id);
+        return coll;
+    }
+    
+    public static CollectiveIntermediary create(String json) {
+        CollectiveIntermediary coll = new CollectiveIntermediary();
+        coll.parseThis(json);
+        return coll;
     }
 }

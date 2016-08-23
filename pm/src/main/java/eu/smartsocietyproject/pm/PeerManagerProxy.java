@@ -1,19 +1,11 @@
 package eu.smartsocietyproject.pm;
 
-import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.CollectiveBase;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.json.HTTP;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +32,7 @@ public class PeerManagerProxy implements PeerManager {
     }
 
     @Override
-    public void persistCollective(CollectiveBase collective) {
+    public void persistCollective(CollectiveIntermediary collective) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -53,18 +45,19 @@ public class PeerManagerProxy implements PeerManager {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> response = restTemplate
                 .exchange(request, String.class);
-        CollectiveIntermediary collective
-                = new CollectiveIntermediary();
-        collective.setId(id);
-        try {
-            JSONArray users = new JSONObject(response.getBody())
-                    .getJSONArray("collectedUsers");
-            for (int i = 0; i < users.length(); i++) {
-                collective.addMember(new PeerIntermediary(users.getString(i)));
-            }
-        } catch (JSONException ex) {
-            //todo-sv: handle
-        }
+        //todo: fix this with new API
+        CollectiveIntermediary collective = CollectiveIntermediary.createEmpty();
+//                = new CollectiveIntermediary();
+//        collective.setId(id);
+//        try {
+//            JSONArray users = new JSONObject(response.getBody())
+//                    .getJSONArray("collectedUsers");
+//            for (int i = 0; i < users.length(); i++) {
+//                collective.addMember(new PeerIntermediary(users.getString(i)));
+//            }
+//        } catch (JSONException ex) {
+//            //todo-sv: handle
+//        }
 
         return collective;
     }
