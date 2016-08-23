@@ -7,6 +7,7 @@ package eu.smartsocietyproject.peermanager.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import eu.smartsocietyproject.peermanager.Member;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.pf.Attribute;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class MembersAttribute extends EntityCore implements Attribute {
         List<Peer> peers = new ArrayList<>();
         if (this.root.isArray()) {
             for (JsonNode node : root) {
-                peers.add(PeerIntermediary.createEmpty(node.asText()));
+                peers.add(new Member(node.asText()));
             }
         }
         return peers;

@@ -14,7 +14,7 @@ import eu.smartsocietyproject.peermanager.Peer;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerIntermediary extends EntityHandler implements Peer {
+public class PeerIntermediary extends EntityHandler {
     
     protected PeerIntermediary() {
         super("id");

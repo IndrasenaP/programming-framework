@@ -29,11 +29,15 @@ public class CollectiveIntermediary extends EntityHandler {
     }
     
     public void addMember(String peerId) {
-        
+        this.members.addMember(peerId);
+    }
+    
+    public void addMember(Peer peer) {
+        this.addMember(peer.getId());
     }
 
     public void addMember(PeerIntermediary member) {
-        this.members.addMember(member.getId());
+        this.addMember(member.getId());
     }
 
     public Collection<Peer> getMembers() {
