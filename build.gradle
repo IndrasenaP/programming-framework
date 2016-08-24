@@ -3,7 +3,8 @@ ext.libraries = [
         compileShared: [
                 'com.google.guava:guava:19.0',
                 'org.slf4j:slf4j-log4j12:1.7.12',
-                'com.fasterxml.jackson.core:jackson-databind:2.8.1'
+                'com.fasterxml.jackson.core:jackson-databind:2.8.1',
+                'com.typesafe:config:1.3.0'
         ],
         testShared: [
                 'junit:junit:4.11',
@@ -17,9 +18,17 @@ subprojects {
     version '1.0-SNAPSHOT'
 
     apply plugin: 'java'
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 
+    compileJava {
+        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+
+    }
+
+    compileTestJava {
+        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+    }
     repositories {
         mavenCentral()
     }

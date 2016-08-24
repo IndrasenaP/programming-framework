@@ -101,7 +101,6 @@ public abstract class CollectiveBase implements Collective {
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects
                 .toStringHelper(this)
-                .add("context", context.getId())
                 .add("id", id)
                 .add("kind", kind.getId())
                 .add("members", members)

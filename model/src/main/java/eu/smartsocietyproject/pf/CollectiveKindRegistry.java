@@ -1,15 +1,17 @@
 package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public final class CollectiveKindRegistry {
-    private final Map<String, CollectiveKind> kinds;
+    private final ImmutableMap<String, CollectiveKind> kinds;
 
     public CollectiveKindRegistry(Map<String, CollectiveKind> kinds) {
-        this.kinds = kinds;
+        this.kinds = ImmutableMap.copyOf(kinds);
     }
 
     public Optional<CollectiveKind> get(String kind) {
