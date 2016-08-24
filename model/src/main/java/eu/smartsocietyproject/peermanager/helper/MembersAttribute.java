@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class represents the members array attribute like returned by 
+ * the peer manager.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */

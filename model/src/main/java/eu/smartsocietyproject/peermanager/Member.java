@@ -6,6 +6,7 @@
 package eu.smartsocietyproject.peermanager;
 
 /**
+ * A simple {@link Peer} implementation.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */

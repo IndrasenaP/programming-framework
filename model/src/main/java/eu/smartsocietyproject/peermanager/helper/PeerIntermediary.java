@@ -6,10 +6,9 @@
 package eu.smartsocietyproject.peermanager.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.smartsocietyproject.peermanager.Peer;
 
 /**
- * SimplePeer is a basic Peer implementation which allows the local PM proxy to 
+ * PeerIntermediary is a DTO class which allows the local PM proxy to 
  * operate.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>

@@ -13,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This class is the base for every object which is represented by 
+ * an arbitrary JSON.
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
@@ -24,6 +26,12 @@ public abstract class EntityCore {
         parseThis(defaultJson);
     }
     
+    /**
+     * Will convert the object stored in the underlying JSON structure 
+     * into a properly formated JSON-String.
+     * 
+     * @return - object as JSON-String
+     */
     public String toJson(){
         try {
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
@@ -33,6 +41,12 @@ public abstract class EntityCore {
         return "";
     }
     
+    /**
+     * This function performs a default mapping between a JSON-String and a
+     * {@link JsonNode}.
+     * 
+     * @param json - a JSON-String
+     */
     protected void parseThis(String json) {
         try {
             this.root = mapper.readTree(json);
@@ -46,6 +60,14 @@ public abstract class EntityCore {
         }
     }
     
+    /**
+     * Allows for setting the root node directly in case it exists already.
+     * 
+     * The node will only be set if {@link JsonNode#isMissingNode()} does not
+     * return true.
+     * 
+     * @param node - The {@link JsonNode}
+     */
     protected void setNode(JsonNode node) {
         if(node.isMissingNode()) {
             return;

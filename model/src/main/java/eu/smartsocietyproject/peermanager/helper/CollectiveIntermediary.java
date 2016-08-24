@@ -24,8 +24,8 @@ public class CollectiveIntermediary extends EntityHandler {
     
     protected CollectiveIntermediary() {
         super("id");
-        this.members = super.addAttributeNode(this.keyMembers, 
-                MembersAttribute.create());
+        this.members = MembersAttribute.create();
+        super.addAttributeNode(this.keyMembers, this.members);
     }
     
     public void addMember(String peerId) {
