@@ -43,11 +43,7 @@ public class Runtime {
             return false;
         }
 
-        CBTBuilder cbtBuilder = new CBTBuilder(context, flowDefinition, request);
-
-        CollectiveBasedTask cbt = cbtBuilder.build();
-
-        TaskRunner runner = application.getTaskRunner(cbt);
+        TaskRunner runner = application.getTaskRunner(request);
         executor.execute(runner);
         return true;
     }
