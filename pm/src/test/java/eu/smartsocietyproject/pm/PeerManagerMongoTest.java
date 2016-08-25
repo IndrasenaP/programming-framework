@@ -12,6 +12,8 @@ import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
 import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.EntityHandler;
+import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.attributes.IntegerAttribute;
 import eu.smartsocietyproject.pf.attributes.StringAttribute;
@@ -30,10 +32,11 @@ import static org.junit.Assert.*;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class PeerManagerMongoTest {
+
     private final String expectedMemberTim = "tim";
     private final String expectedMemberTom = "tom";
     private final String expectedMemberTum = "tum";
-    
+
     private final String expPeerAge = "age";
     private final String expPeerComment = "comment";
     private final String expAttCountry = "country";
@@ -51,7 +54,7 @@ public class PeerManagerMongoTest {
     private final int expAge29 = 29;
     private final String expCommentBlub = "blub";
     private final String expCommentBlab = "blab";
-    
+
     private PeerManagerMongoProxy pm;
 
     public PeerManagerMongoTest() {
@@ -74,71 +77,73 @@ public class PeerManagerMongoTest {
     }
 
     private void createCollectives(PeerManagerMongoProxy pm) {
-        
         pm.persistCollective(
-                addPeersToCollective(
-                        addAttributesToCollective(
-                                CollectiveIntermediary.createEmpty(this.expColl1Key), 
-                                this.expLangEnglish, 
-                                this.expCountryA)));
-        
+                addAttributesToCollective(
+                        this.expColl1Key,
+                        this.expLangEnglish,
+                        this.expCountryA));
+
         pm.persistCollective(
-                addPeersToCollective(
-                        addAttributesToCollective(
-                                CollectiveIntermediary.createEmpty(this.expColl2Key), 
-                                this.expLangGerman, 
-                                this.expCountryA)));
-        
+                addAttributesToCollective(
+                        this.expColl2Key,
+                        this.expLangGerman,
+                        this.expCountryA));
+
         pm.persistCollective(
-                addPeersToCollective(
-                        addAttributesToCollective(
-                                CollectiveIntermediary.createEmpty(this.expColl3Key), 
-                                this.expLangEnglish, 
-                                this.expCountryE)));
+                addAttributesToCollective(
+                        this.expColl3Key,
+                        this.expLangEnglish,
+                        this.expCountryE));
     }
-    
-    private CollectiveIntermediary addAttributesToCollective(CollectiveIntermediary collective, 
-            String language, String country) {
-        collective.addAttribute(this.expAttLanguage, StringAttribute.create(language));
-        collective.addAttribute(this.expAttCountry, StringAttribute.create(country));
-        collective.addAttribute(this.expAttSince, IntegerAttribute.create(this.expSince5));
-        return collective;
+
+    private CollectiveIntermediary addAttributesToCollective(String id,
+            String language,
+            String country) {
+        EntityHandler.Builder builder = CollectiveIntermediary.builder();
+        builder.addAttribute("id", StringAttribute.create(id));
+        builder.addAttribute(this.expAttLanguage, StringAttribute.create(language));
+        builder.addAttribute(this.expAttCountry, StringAttribute.create(country));
+        builder.addAttribute(this.expAttSince, IntegerAttribute.create(this.expSince5));
+        builder.addAttributeNode(MongoConstants.members, addPeersToCollective());
+        return CollectiveIntermediary.create(builder.build());
     }
-    
-    private CollectiveIntermediary addPeersToCollective(CollectiveIntermediary collective) {
-        collective.addMember(PeerIntermediary.createEmpty(this.expectedMemberTim));
-        collective.addMember(PeerIntermediary.createEmpty(this.expectedMemberTom));
-        collective.addMember(PeerIntermediary.createEmpty(this.expectedMemberTum));
-        return collective;
+
+    private MembersAttribute addPeersToCollective() {
+        MembersAttribute.Builder membersCollective = MembersAttribute.builder();
+        membersCollective.addMember(this.expectedMemberTim);
+        membersCollective.addMember(this.expectedMemberTom);
+        membersCollective.addMember(this.expectedMemberTum);
+        return membersCollective.build();
     }
 
     private void createPeers(PeerManagerMongoProxy pm) {
-        pm.persistPeer(getPeer(expectedMemberTim, 
+        pm.persistPeer(getPeer(expectedMemberTim,
                 this.expAge27, this.expCommentBlub));
-        pm.persistPeer(getPeer(expectedMemberTom, 
+        pm.persistPeer(getPeer(expectedMemberTom,
                 this.expAge29, this.expCommentBlub));
-        pm.persistPeer(getPeer(expectedMemberTum, 
+        pm.persistPeer(getPeer(expectedMemberTum,
                 this.expAge29, this.expCommentBlab));
     }
 
     private PeerIntermediary getPeer(String userName, int age, String comment) {
-        PeerIntermediary peer = PeerIntermediary.createEmpty(userName);
-        peer.addAttribute(this.expPeerAge, IntegerAttribute.create(age));
-        peer.addAttribute(this.expPeerComment, StringAttribute.create(comment));
-        return peer;
+        PeerIntermediary.Builder builder = PeerIntermediary.builder();
+        builder.addAttribute("id", StringAttribute.create(userName));
+        builder.addAttribute(this.expPeerAge, IntegerAttribute.create(age));
+        builder.addAttribute(this.expPeerComment, StringAttribute.create(comment));
+        return PeerIntermediary.create(builder.build());
     }
-    
+
     private void assertPeerName(String actualMember) {
         assertTrue(this.expectedMemberTim.equals(actualMember)
-                    || this.expectedMemberTom.equals(actualMember)
-                    || this.expectedMemberTum.equals(actualMember));
+                || this.expectedMemberTom.equals(actualMember)
+                || this.expectedMemberTum.equals(actualMember));
     }
-    
+
     @Test
     public void tesLoadPeers() throws IOException {
         MongoCollection<Document> peersCollection = pm.getMongoDb()
                 .getCollection(MongoConstants.peer);
-        
+
         assertEquals(3, peersCollection.count());
         Document peer = peersCollection.find().first();
         assertNotNull(peer);
@@ -169,7 +174,7 @@ public class PeerManagerMongoTest {
         assertTrue(actualCollective.containsKey(this.expAttCountry));
         assertTrue(actualCollective.containsKey(this.expAttLanguage));
         assertTrue(actualCollective.containsKey(this.expAttSince));
-        
+
         assertEquals(this.expCountryA, actualCollective.get(this.expAttCountry));
         assertEquals(this.expLangEnglish, actualCollective.get(this.expAttLanguage));
         assertEquals(this.expSince5, actualCollective.get(this.expAttSince));
@@ -186,17 +191,17 @@ public class PeerManagerMongoTest {
         for (Peer actualMember : members) {
             assertPeerName(actualMember.getId());
         }
-        
-        StringAttribute actualCountry = collective
-                .getAttribute(this.expAttCountry, StringAttribute.create());
+
+        StringAttribute actualCountry = StringAttribute
+                .createFromJson(collective.getAttribute(this.expAttCountry));
         assertEquals(this.expCountryA, actualCountry.getValue());
-        
-        StringAttribute actualLanguage = collective
-                .getAttribute(this.expAttLanguage, StringAttribute.create());
+
+        StringAttribute actualLanguage = StringAttribute
+                .createFromJson(collective.getAttribute(this.expAttLanguage));
         assertEquals(this.expLangEnglish, actualLanguage.getValue());
-        
-        IntegerAttribute actualSince = collective
-                .getAttribute(this.expAttSince, IntegerAttribute.create());
+
+        IntegerAttribute actualSince = IntegerAttribute
+                .createFromJson(collective.getAttribute(this.expAttSince));
         assertEquals(this.expSince5, actualSince.getValue().intValue());
     }
 
@@ -237,15 +242,16 @@ public class PeerManagerMongoTest {
             for (Peer peer : coll.getMembers()) {
                 assertPeerName(peer.getId());
             }
-            
-            assertEquals(this.expLangEnglish, 
-                    coll.getAttribute(this.expAttLanguage, 
-                            StringAttribute.create()).getValue());
-            
-            String expectedCountry = coll.getAttribute(this.expAttCountry, 
-                    StringAttribute.create()).getValue();
-            
-            assertTrue(this.expCountryA.equals(expectedCountry) 
+
+            assertEquals(this.expLangEnglish,
+                    StringAttribute
+                            .createFromJson(coll.getAttribute(this.expAttLanguage))
+                            .getValue());
+
+            String expectedCountry = StringAttribute
+                    .createFromJson(coll.getAttribute(this.expAttCountry)).getValue();
+
+            assertTrue(this.expCountryA.equals(expectedCountry)
                     || this.expCountryE.equals(expectedCountry));
         }
     }

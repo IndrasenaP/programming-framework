@@ -175,6 +175,17 @@ public class EntityHandler extends EntityCore {
         public Builder() {
             handler = EntityHandler.create("{}");
         }
+        
+        public void addAttribute(String name, Attribute attribute) {
+            if(handler.root.isObject()) {
+                try {
+                    ((ObjectNode) handler.root).set(name,
+                            mapper.readTree(attribute.toJson()));
+                } catch (IOException ex) {
+                    Logger.getLogger(EntityHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
 
         public void addAttributeNode(String name, EntityCore attribute) {
             if (handler.root.isObject()) {

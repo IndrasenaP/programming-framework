@@ -22,6 +22,10 @@ public class PeerIntermediary extends EntityHandler {
         super(json);
     }
     
+    protected PeerIntermediary(EntityHandler handler) {
+        super(handler.root);
+    }
+    
     public String getId() {
         return StringAttribute
                 .createFromJson(this.getAttribute(this.keyId))
@@ -30,5 +34,9 @@ public class PeerIntermediary extends EntityHandler {
     
     public static PeerIntermediary createFromJson(String json) {
         return new PeerIntermediary(json);
+    }
+    
+    public static PeerIntermediary create(EntityHandler attributes) {
+        return new PeerIntermediary(attributes);
     }
 }

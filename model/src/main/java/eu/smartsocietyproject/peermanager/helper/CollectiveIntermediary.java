@@ -81,4 +81,8 @@ public class CollectiveIntermediary extends EntityHandler {
         builder.addAttributeNode(keyMembers, members);
         return new CollectiveIntermediary(builder.build());
     }
+    
+    public static CollectiveIntermediary create(EntityHandler handler) {
+        return new CollectiveIntermediary(handler);
+    }
 }
