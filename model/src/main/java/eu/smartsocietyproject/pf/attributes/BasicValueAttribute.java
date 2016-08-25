@@ -17,29 +17,25 @@ import java.util.logging.Logger;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public abstract class BasicValueAttribute<T> implements Attribute {
-    protected ObjectMapper mapper = new ObjectMapper();
-    protected T value;
-    private Class<T> clazz;
+    private static ObjectMapper mapper = new ObjectMapper();
+    private final T value;
     
-    protected BasicValueAttribute(Class<T> clazz) {
-        this.clazz = clazz;
+    protected BasicValueAttribute(T value) {
+        this.value = value;
     }
 
     public T getValue() {
         return value;
     }
-
-    public void setValue(T value) {
-        this.value = value;
-    }
     
-    @Override
-    public void parseJson(String attributeValue) {
+    protected static <T> T parseValue(String json, Class<T> clazz) {
         try {
-            value = mapper.readValue(attributeValue, clazz);
+            return mapper.readValue(json, clazz);
         } catch (IOException ex) {
             Logger.getLogger(StringAttribute.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        return null;
     }
 
     @Override
@@ -60,12 +56,10 @@ public abstract class BasicValueAttribute<T> implements Attribute {
         
         BasicValueAttribute that = (BasicValueAttribute)obj;
         
-        if(!this.clazz.equals(that.clazz)) {
+        if(!this.getClass().equals(that.getClass())) {
             return false;
         }
         
         return this.value.equals(that.value);
     }
-    
-    
 }

@@ -46,7 +46,7 @@ public class PeerManagerProxy implements PeerManager {
         ResponseEntity<String> response = restTemplate
                 .exchange(request, String.class);
         //todo: fix this with new API
-        CollectiveIntermediary collective = CollectiveIntermediary.createEmpty();
+        //CollectiveIntermediary collective = CollectiveIntermediary.createEmpty();
 //                = new CollectiveIntermediary();
 //        collective.setId(id);
 //        try {
@@ -59,7 +59,7 @@ public class PeerManagerProxy implements PeerManager {
 //            //todo-sv: handle
 //        }
 
-        return collective;
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

@@ -13,17 +13,19 @@ import eu.smartsocietyproject.pf.Attribute;
  */
 public class StringAttribute extends BasicValueAttribute<String> implements Attribute {
 
-    public StringAttribute() {
-        super(String.class);
-    }
-    
-    public static StringAttribute create() {
-        return new StringAttribute();
+    public StringAttribute(String value) {
+        super(value);
     }
     
     public static StringAttribute create(String value) {
-        StringAttribute att = new StringAttribute();
-        att.setValue(value);
-        return att;
+        return new StringAttribute(value);
+    }
+    
+    public static StringAttribute createFromJson(String json) {
+        String value = parseValue(json, String.class);
+        if(value != null) {
+            return create(value);
+        }
+        return null;
     }
 }

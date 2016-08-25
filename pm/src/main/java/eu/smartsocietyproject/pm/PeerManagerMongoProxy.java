@@ -24,6 +24,7 @@ import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
 import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
 import java.io.IOException;
@@ -126,18 +127,16 @@ public class PeerManagerMongoProxy implements PeerManager {
     public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
         FindIterable<Document> peers = peersCollection
                 .find(getAttributesMongoQuery(query));
-
-        CollectiveIntermediary collective = CollectiveIntermediary.createEmpty();
+        
+        MembersAttribute.Builder builder = MembersAttribute.builder();
 
         for (Document p : peers) {
-            collective.addMember(PeerIntermediary.createFromJson(p.toJson()));
+            builder.addMember(PeerIntermediary
+                    .createFromJson(p.toJson())
+                    .getId());
         }
 
-        if (collective.getMembers().isEmpty()) {
-            return null;
-        }
-
-        return collective;
+        return CollectiveIntermediary.create(builder.build());
     }
 
     @Override

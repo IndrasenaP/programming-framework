@@ -7,6 +7,7 @@ package eu.smartsocietyproject.peermanager.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.Member;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.pf.Attribute;
@@ -21,38 +22,71 @@ import java.util.List;
  */
 public class MembersAttribute extends EntityCore implements Attribute {
 
-    public MembersAttribute() {
-        super("[]");
+    protected MembersAttribute(String json) {
+        super(json);
+    }
+    
+    protected MembersAttribute(JsonNode node) {
+        super(node);
     }
 
-    public void addMember(String peer) {
-        if (this.root.isArray()) {
-            ((ArrayNode) root).add(peer);
-        }
-    }
+//    public void addMember(String peer) {
+//        if (this.root.isArray()) {
+//            ((ArrayNode) root).add(peer);
+//        }
+//    }
 
     public List<Peer> getPeers() {
         List<Peer> peers = new ArrayList<>();
+        ImmutableList.Builder<Peer> builder = ImmutableList.builder();
         if (this.root.isArray()) {
             for (JsonNode node : root) {
-                peers.add(new Member(node.asText()));
+                builder.add(new Member(node.asText()));
             }
         }
-        return peers;
+        return builder.build();
     }
 
-    @Override
-    public void parseJson(String attributeValue) {
-        super.parseThis(attributeValue);
-    }
+//    @Override
+//    public void parseJson(String attributeValue) {
+//        super.parseThis(attributeValue);
+//    }
 
     @Override
     public String toJson() {
         return super.toJson();
     }
     
-    public static MembersAttribute create() {
-        return new MembersAttribute();
+    protected static MembersAttribute createFromJson(JsonNode node) {
+        return new MembersAttribute(node);
+    }
+    
+    public static MembersAttribute createFromJson(String json) {
+        return new MembersAttribute(json);
+    }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    public static final class Builder{
+        private MembersAttribute attribute;
+        
+        public Builder() {
+            attribute = createFromJson("[]");
+        }
+        
+        public void addMember(String peer) {
+            if (attribute.root.isArray()) {
+                ((ArrayNode) attribute.root).add(peer);
+            }
+        }
+        
+        public MembersAttribute build() {
+            MembersAttribute done = attribute;
+            this.attribute = createFromJson("[]");
+            return done;
+        }
     }
 
 }

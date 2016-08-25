@@ -13,17 +13,19 @@ import eu.smartsocietyproject.pf.Attribute;
  */
 public class IntegerAttribute extends BasicValueAttribute<Integer> implements Attribute {
     
-    public IntegerAttribute() {
-        super(Integer.class);
+    public IntegerAttribute(int value) {
+        super(value);
     }    
     
-    public static IntegerAttribute create() {
-        return new IntegerAttribute();
+    public static IntegerAttribute create(int value) {
+        return new IntegerAttribute(value);
     }
     
-    public static IntegerAttribute create(int value) {
-        IntegerAttribute att = new IntegerAttribute();
-        att.setValue(value);
-        return att;
+    public static IntegerAttribute createFromJson(String json) {
+        Integer value = parseValue(json, Integer.class);
+        if(value != null) {
+            return create(value);
+        }
+        return null;
     }
 }

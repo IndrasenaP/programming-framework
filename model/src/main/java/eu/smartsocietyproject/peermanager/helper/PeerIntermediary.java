@@ -6,6 +6,7 @@
 package eu.smartsocietyproject.peermanager.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import eu.smartsocietyproject.pf.attributes.StringAttribute;
 
 /**
  * PeerIntermediary is a DTO class which allows the local PM proxy to 
@@ -15,26 +16,19 @@ import com.fasterxml.jackson.databind.JsonNode;
  */
 public class PeerIntermediary extends EntityHandler {
     
-    protected PeerIntermediary() {
-        super("id");
+    private String keyId = "id";
+    
+    protected PeerIntermediary(String json) {
+        super(json);
     }
     
-    public static PeerIntermediary createEmpty(String id) {
-        PeerIntermediary peer = new PeerIntermediary();
-        peer.setId(id);
-        return peer;
+    public String getId() {
+        return StringAttribute
+                .createFromJson(this.getAttribute(this.keyId))
+                .getValue();
     }
     
     public static PeerIntermediary createFromJson(String json) {
-        PeerIntermediary peer = new PeerIntermediary();
-        peer.parseThis(json);
-        //todo-sv: check eventually if there is an id?
-        return peer;
-    }
-    
-    protected static PeerIntermediary createFromJson(JsonNode node) {
-        PeerIntermediary peer = new PeerIntermediary();
-        peer.root = node;
-        return peer;
+        return new PeerIntermediary(json);
     }
 }

@@ -19,11 +19,15 @@ import java.util.logging.Logger;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public abstract class EntityCore {
-    protected ObjectMapper mapper = new ObjectMapper();
-    protected JsonNode root;
+    protected static ObjectMapper mapper = new ObjectMapper();
+    protected final JsonNode root;
     
-    protected EntityCore(String defaultJson) {
-        parseThis(defaultJson);
+    protected EntityCore(String json) {
+        this.root = EntityCore.parseJson(json);
+    }
+    
+    protected EntityCore(JsonNode root) {
+        this.root = root;
     }
     
     /**
@@ -47,17 +51,19 @@ public abstract class EntityCore {
      * 
      * @param json - a JSON-String
      */
-    protected void parseThis(String json) {
+    protected static JsonNode parseJson(String json) {
         try {
-            this.root = mapper.readTree(json);
+            return mapper.readTree(json);
         } catch (IOException ex) {
             Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-            try {
-                this.root = mapper.readTree("{}");
-            } catch (IOException ex1) {
-                Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex1);
-            }
+           //not needed since adding is not possible anymore so empty entities are useless
+//            try {
+//                return mapper.readTree("{}");
+//            } catch (IOException ex1) {
+//                Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex1);
+//            }
         }
+        return null;
     }
     
     /**
@@ -68,11 +74,11 @@ public abstract class EntityCore {
      * 
      * @param node - The {@link JsonNode}
      */
-    protected void setNode(JsonNode node) {
-        if(node.isMissingNode()) {
-            return;
-        }
-        
-        this.root = node;
-    }
+//    protected void setNode(JsonNode node) {
+//        if(node.isMissingNode()) {
+//            return;
+//        }
+//        
+//        this.root = node;
+//    }
 }
