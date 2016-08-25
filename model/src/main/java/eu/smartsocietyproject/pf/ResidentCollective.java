@@ -50,8 +50,8 @@ public final class ResidentCollective extends CollectiveBase {
         return new ResidentCollective(context,
                 collective.getId(),
                 null, //todo-sv figure this out 
-                collective.getMembers(),
-                collective.getAttributes());
+                collective.getMembers(),null);
+                //todo-sv: fix this collective.getAttributes());
     }
 
     public static ResidentCollective createFromId(
@@ -65,8 +65,8 @@ public final class ResidentCollective extends CollectiveBase {
         return new ResidentCollective(context,
                 id,
                 null, //todo-sv figure this out 
-                collective.getMembers(),
-                collective.getAttributes());
+                collective.getMembers(),null);
+                //todo-sv: fix this collective.getAttributes());
     }
 
 }

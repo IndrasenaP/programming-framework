@@ -360,7 +360,7 @@ public abstract class CollectiveBase implements Collective {
         CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
         PeerManager peerManager = new PeerManager() {
             @Override
-            public void persistCollective(CollectiveBase collective) {
+            public void persistCollective(CollectiveIntermediary collective) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 

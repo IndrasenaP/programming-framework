@@ -1,3 +1,9 @@
+repositories {
+        mavenLocal()
+    }
+
 dependencies {
+    compile project(':programming-framework-model')
+    compile 'at.ac.tuwien.dsg:smartcom-impl:1.0-SNAPSHOT'
     testCompile libraries.testShared
 }

@@ -10,6 +10,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.util.JSON;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -18,27 +19,18 @@ import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
-import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.peermanager.helper.SimplePeer;
+import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
-import eu.smartsocietyproject.pf.Attribute;
-import eu.smartsocietyproject.pf.CollectiveBase;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bson.BsonArray;
-import org.bson.BsonString;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 /**
  * The PM-Mongo-Proxy provides a local MongoDB store where all persistence
@@ -98,130 +90,50 @@ public class PeerManagerMongoProxy implements PeerManager {
         }
     }
 
-    private BsonArray convertMembers(Set<Peer> members) {
-        BsonArray peers = new BsonArray();
-
-        for (Peer p : members) {
-            peers.add(new BsonString(p.getId()));
-        }
-
-        return peers;
-    }
-
-    private List<Document> convertAttributes(Map<String, Attribute> attributes) {
-        List<Document> atts = new ArrayList<>();
-
-        for (Map.Entry<String, Attribute> entry : attributes.entrySet()) {
-            Document att = new Document();
-            att.append(MongoConstants.key, entry.getKey());
-            att.append(MongoConstants.value, entry.getValue().toString());
-            att.append(MongoConstants.type, entry.getValue().getClass().getName());
-
-            atts.add(att);
-        }
-        return atts;
-    }
-    
-    private Map<String, Attribute> extractAttributesFromDocument(Document doc) {
-        Object attributes = doc.get(MongoConstants.attributes);
-        if (!(attributes instanceof List)) {
-            throw new UnsupportedOperationException();
-        }
-        
-        Map<String, Attribute> atts = new HashMap<>();
-
-        for (Document d : (List<Document>) attributes) {
-            try {
-                Class clazz = Class.forName(d.getString(MongoConstants.type));
-                Attribute att = (Attribute) clazz.newInstance();
-                att.parseValueFromString(d.getString(MongoConstants.value));
-                atts.put(d.getString(MongoConstants.key), att);
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(PeerManagerMongoProxy.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        return atts;
-    }
-    
-    private List<Peer> extractPeersFromDocument(Document doc) {
-        Object members = doc.get(MongoConstants.peers);
-        if(!(members instanceof ArrayList)) {
-            throw new UnsupportedOperationException();
-        }
-        
-        List<Peer> mems = new ArrayList<>();
-        
-        for(String member: (ArrayList<String>)members) {
-            mems.add(new SimplePeer(member));
-        }
-        
-        return mems;
-    }
-
-    public void persistPeer(SimplePeer peer) {
-        Document p = new Document(MongoConstants.id, peer.getId());
-        p.append(MongoConstants.attributes, convertAttributes(peer.getAttributes()));
-        peersCollection.insertOne(p);
+    public void persistPeer(PeerIntermediary peer) {
+        peersCollection.insertOne(Document.parse(peer.toJson()));
     }
 
     @Override
-    public void persistCollective(CollectiveBase collective) {
-        Document doc = new Document(MongoConstants.id, collective.getId());
-
-        doc.put(MongoConstants.peers, convertMembers(collective.getMembers()));
-        doc.put(MongoConstants.attributes, convertAttributes(collective.getAttributes()));
-
-        collectivesCollection.insertOne(doc);
+    public void persistCollective(CollectiveIntermediary collective) {
+        collectivesCollection.insertOne(Document.parse(collective.toJson()));
     }
-    
-    private List<Document> getAttributesMongoQuery(Query query) {
-        List<Document> atts = new ArrayList<>();
+
+    private Bson getAttributesMongoQuery(Query query) {
+        List<Bson> filters = new ArrayList<>();
         for (QueryRule rule : query.getQueryRules()) {
-            Document att = new Document(MongoConstants.key, rule.getKey());
-            att.append(MongoConstants.value, rule.getAttribute().toString());
-            att.append(MongoConstants.type, rule.getAttribute().getClass().getName());
-            atts.add(att);
+            filters.add(Filters.eq(rule.getKey(),
+                    JSON.parse(rule.getAttribute().toJson())));
         }
-        return atts;
+        return Filters.and(filters);
     }
 
     @Override
     public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
-        List<Document> atts = this.getAttributesMongoQuery(query);
-        
         FindIterable<Document> collectives = collectivesCollection
-                .find(Filters.all(MongoConstants.attributes, atts));
-        
+                .find(getAttributesMongoQuery(query));
+
         List<CollectiveIntermediary> colls = new ArrayList<>();
-        
-        for(Document c: collectives) {
-            CollectiveIntermediary coll = new CollectiveIntermediary();
-            coll.setId(c.getString(MongoConstants.id));
-            coll.getAttributes().putAll(extractAttributesFromDocument(c));
-            coll.getMembers().addAll(extractPeersFromDocument(c));
-            colls.add(coll);
+
+        for (Document c : collectives) {
+            colls.add(CollectiveIntermediary.create(c.toJson()));
         }
-        
+
         return colls;
     }
-    
+
     @Override
     public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
-        List<Document> atts = this.getAttributesMongoQuery(query);
-
         FindIterable<Document> peers = peersCollection
-                .find(Filters.all(MongoConstants.attributes, atts));
+                .find(getAttributesMongoQuery(query));
 
-        CollectiveIntermediary collective = new CollectiveIntermediary();
+        CollectiveIntermediary collective = CollectiveIntermediary.createEmpty();
 
         for (Document p : peers) {
-            SimplePeer peer = new SimplePeer(p.getString(MongoConstants.id));
-            peer.addAll(extractAttributesFromDocument(p));
-            collective.addMember(peer);
+            collective.addMember(PeerIntermediary.createFromJson(p.toJson()));
         }
-        
-        if(collective.getMembers().isEmpty()) {
+
+        if (collective.getMembers().isEmpty()) {
             return null;
         }
 
@@ -237,21 +149,6 @@ public class PeerManagerMongoProxy implements PeerManager {
             return null;
         }
 
-        CollectiveIntermediary collective = new CollectiveIntermediary();
-        collective.setId(doc.getString(MongoConstants.id));
-
-        Object peersObject = doc.get(MongoConstants.peers);
-        if (!(peersObject instanceof List)) {
-            return null;
-        }
-
-        for (String peerId : (List<String>) peersObject) {
-            collective.addMember(new SimplePeer(peerId));
-        }
-        
-        collective.getAttributes().putAll(extractAttributesFromDocument(doc));
-
-        return collective;
+        return CollectiveIntermediary.create(doc.toJson());
     }
-
 }

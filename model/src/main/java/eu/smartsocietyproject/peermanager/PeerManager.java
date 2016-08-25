@@ -3,7 +3,6 @@ package eu.smartsocietyproject.peermanager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
-import eu.smartsocietyproject.pf.CollectiveBase;
 import java.util.List;
 
 public interface PeerManager {
@@ -12,7 +11,7 @@ public interface PeerManager {
      * This will persist the collective with the peer manager.
      * @param collective 
      */
-    void persistCollective(CollectiveBase collective);
+    void persistCollective(CollectiveIntermediary collective);
  
     /**
      * This function will load existing collectives which fit the given collective 
