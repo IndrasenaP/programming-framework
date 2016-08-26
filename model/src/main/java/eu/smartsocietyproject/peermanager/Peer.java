@@ -6,13 +6,24 @@ import com.google.common.base.Objects;
 public abstract class Peer {
 
     private final String id;
+    private final String role;
 
-    public Peer(String id) {
+    public Peer(String id, String role) {
         this.id = id;
+        this.role = role;
     }
 
     public String getId() {
         return this.id;
+    }
+
+    /**
+     * Role makes sense only within a collective. Unlike Peer attributes that are generally describing the peer as
+     * entity, the role is the only 'special' attribute, describing the participation of the peer in a collective.
+     * @return the name of the role
+     */
+    public String getRole() {
+        return role;
     }
 
     @Override
