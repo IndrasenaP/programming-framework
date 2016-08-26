@@ -2,7 +2,9 @@ package eu.smartsocietyproject.pf;
 
 import com.typesafe.config.Config;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Application {
 
@@ -16,8 +18,8 @@ public abstract class Application {
      */
     public abstract void init(Config config);
 
-    /* Defines a map of types (as a String) to TaskFlowDefinitions, called once after initialization */
-    public abstract Map<String, TaskFlowDefinition> defineTaskFlowsByType();
+    /* Returns the collective kind that will be used by the application */
+    public abstract Set<CollectiveKind> listCollectiveKinds();
 
     /**
      * Extract Domain dependent TaskRequest from the TaskDefinition
@@ -31,7 +33,7 @@ public abstract class Application {
      * @param request the TaskRequest describing the task to be performed
      * @return the task runner implementing application logic
      */
-    public abstract TaskRunner getTaskRunner(TaskRequest request);
+    public abstract TaskRunner createTaskRunner(TaskRequest request);
 
 
 
