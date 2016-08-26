@@ -10,20 +10,20 @@ import eu.smartsocietyproject.pf.cbthandlers.ProvisioningHandler;
  * and most of the methods are used for setting up such definition.
  *
  * To create a {@link CollectiveBasedTask} one needs to create a valid definition and to specify a request. A Builder
- * can be used only after it has been registered into a {@link SmartSocietyApplicationContext} through the method
- * {@link SmartSocietyApplicationContext#registerBuilderForCBTType(String, CBTBuilder)}.
+ * can be used only after it has been registered into a {@link ApplicationContext} through the method
+ * {@link ApplicationContext#registerBuilderForCBTType(String, CBTBuilder)}.
  *
  * The class is immutable and designed with a fluent interface.
  *
  *
  */
 public class CBTBuilder {
-    private SmartSocietyApplicationContext context;
+    private ApplicationContext context;
     private final TaskFlowDefinition definition;
     private final TaskRequest request;
 
     private CBTBuilder(
-        SmartSocietyApplicationContext context,
+        ApplicationContext context,
         TaskFlowDefinition definition,
         TaskRequest request) {
         this.context = context;
@@ -37,7 +37,7 @@ public class CBTBuilder {
         this.request = null;
     }
 
-    CBTBuilder registerToContext(SmartSocietyApplicationContext ctx) {
+    CBTBuilder registerToContext(ApplicationContext ctx) {
         Preconditions.checkNotNull(ctx);
         Preconditions.checkState(context == null, "Cannot change the builder context");
 
@@ -120,7 +120,7 @@ public class CBTBuilder {
      *      <li>the definition must be valid</li>
      *      <li>Request must be set</li>
      *      <li>CBTBuilder must have been registered to a context through the
-     *      {@link SmartSocietyApplicationContext#registerBuilderForCBTType(String, CBTBuilder)} method</li>
+     *      {@link ApplicationContext#registerBuilderForCBTType(String, CBTBuilder)} method</li>
      *  </ul>
      * @exception IllegalStateException one of the prerequisites is not satisfied
      * @return a CBTBuilder with the negotiation changed accordingly */

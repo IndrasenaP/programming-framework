@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public abstract class Collective {
 
-    private final SmartSocietyApplicationContext context;
+    private final ApplicationContext context;
     private final String id;
     protected final CollectiveKind kind;
     private final ImmutableSet<Peer> members;
@@ -32,7 +32,7 @@ public abstract class Collective {
 
 
     protected Collective(
-            SmartSocietyApplicationContext context,
+            ApplicationContext context,
             String id,
             CollectiveKind collectiveKind,
             Collection<Peer> members,
@@ -52,7 +52,7 @@ public abstract class Collective {
         return id;
     }
 
-    protected SmartSocietyApplicationContext getContext() {
+    protected ApplicationContext getContext() {
         return context;
     }
 
@@ -380,7 +380,7 @@ public abstract class Collective {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
         };
-        SmartSocietyApplicationContext context = new DefaultSmartSocietyApplicationContext(kindRegistry, peerManager);
+        ApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
 
         Collective c = null;
         try {
@@ -396,7 +396,7 @@ public abstract class Collective {
     public static abstract class WithVisibleMembers extends Collective {
 
         protected WithVisibleMembers(
-                SmartSocietyApplicationContext context,
+                ApplicationContext context,
                 String id,
                 CollectiveKind collectiveKind,
                 Collection<Peer> members,
@@ -417,7 +417,7 @@ public abstract class Collective {
      */
     public static class Testing extends WithVisibleMembers {
         protected Testing(
-                SmartSocietyApplicationContext context,
+                ApplicationContext context,
                 String id,
                 CollectiveKind collectiveKind,
                 Collection<Peer> members,

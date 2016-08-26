@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf.cbthandlers;
 
+import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
 
@@ -13,7 +14,7 @@ public interface ExecutionHandler{
      *
      * */
 
-    TaskResult execute(CollectiveWithPlan agreed) throws CBTLifecycleException;
+    TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException;
     double resultQoR(); // returns [0-1]
 
     // boolean isDone(); // returns if the execution is done

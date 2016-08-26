@@ -1,11 +1,9 @@
 package eu.smartsocietyproject.pf;
 
-import com.fasterxml.jackson.databind.introspect.WithMember;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import eu.smartsocietyproject.peermanager.Peer;
 
@@ -42,7 +40,7 @@ public final class ApplicationBasedCollective extends Collective {
     private final ImmutableMap<String, Attribute> userAttributes;
 
     private ApplicationBasedCollective(
-            SmartSocietyApplicationContext context,
+            ApplicationContext context,
             String id,
             CollectiveKind kind,
             Collection<Peer> members,
@@ -143,7 +141,7 @@ public final class ApplicationBasedCollective extends Collective {
      * @param kind the kind of the collective
      * @return a new collective
      */
-    public static ApplicationBasedCollective empty(SmartSocietyApplicationContext context, String id, String kind)
+    public static ApplicationBasedCollective empty(ApplicationContext context, String id, String kind)
             throws CollectiveCreationException {
 
         return new ApplicationBasedCollective(
@@ -156,7 +154,7 @@ public final class ApplicationBasedCollective extends Collective {
     }
 
     static ApplicationBasedCollective of(
-            SmartSocietyApplicationContext context,
+            ApplicationContext context,
             String id,
             CollectiveKind collectiveKind,
             Collection<Peer> members) {
@@ -171,7 +169,7 @@ public final class ApplicationBasedCollective extends Collective {
                 ImmutableMap.of());
     }
 
-    private static CollectiveKind getKindFromString(SmartSocietyApplicationContext context, String kind)
+    private static CollectiveKind getKindFromString(ApplicationContext context, String kind)
             throws CollectiveCreationException {
         Optional<CollectiveKind> collectiveKind
                 = context
