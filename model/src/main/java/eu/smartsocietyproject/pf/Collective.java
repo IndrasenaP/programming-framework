@@ -37,6 +37,11 @@ public abstract class Collective {
             CollectiveKind collectiveKind,
             Collection<Peer> members,
             Map<String, ? extends Attribute> attributes) {
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(id);
+        Preconditions.checkNotNull(collectiveKind);
+        Preconditions.checkNotNull(members);
+        Preconditions.checkNotNull(attributes);
         this.context = context;
         this.id = id;
         this.kind = collectiveKind;
