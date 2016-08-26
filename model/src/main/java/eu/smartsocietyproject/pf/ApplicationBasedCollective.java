@@ -1,9 +1,11 @@
 package eu.smartsocietyproject.pf;
 
+import com.fasterxml.jackson.databind.introspect.WithMember;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import eu.smartsocietyproject.peermanager.Peer;
 
@@ -35,7 +37,7 @@ import java.util.Optional;
  * While attributes must be consistent with the collective kind user attributes
  * can be completely free
  */
-public final class ApplicationBasedCollective extends CollectiveBase {
+public final class ApplicationBasedCollective extends Collective {
 
     private final ImmutableMap<String, Attribute> userAttributes;
 
@@ -370,4 +372,28 @@ public final class ApplicationBasedCollective extends CollectiveBase {
                 .add("attributes", getAttributes())
                 .toString();
     }
+
+    @Override
+    protected Collective.WithVisibleMembers makeMembersVisible() {
+        return new WithVisibleMembers();
+    }
+
+    private final class WithVisibleMembers extends Collective.WithVisibleMembers {
+
+        private WithVisibleMembers(){
+            super(ApplicationBasedCollective.this);
+        }
+
+        @Override
+        public ApplicationBasedCollective toApplicationBasedCollective() {
+            return ApplicationBasedCollective.this;
+        }
+
+        @Override
+        protected WithVisibleMembers makeMembersVisible() {
+            return this;
+        }
+    }
+
+
 }

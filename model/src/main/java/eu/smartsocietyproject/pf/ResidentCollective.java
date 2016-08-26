@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
@@ -11,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ResidentCollective extends CollectiveBase {
+public final class ResidentCollective extends Collective.WithVisibleMembers {
 
     private ResidentCollective(
             SmartSocietyApplicationContext context,
@@ -36,9 +37,10 @@ public final class ResidentCollective extends CollectiveBase {
     }
 
     @Override
-    public ImmutableSet<Peer> getMembers() {
-        return super.getMembers();
+    protected Collective.WithVisibleMembers makeMembersVisible() {
+        return this;
     }
+
 
     public static ResidentCollective createFromQuery(
             DefaultSmartSocietyApplicationContext context,

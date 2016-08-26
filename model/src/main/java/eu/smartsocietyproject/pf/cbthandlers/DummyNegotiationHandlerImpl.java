@@ -1,9 +1,6 @@
 package eu.smartsocietyproject.pf.cbthandlers;
 
-import eu.smartsocietyproject.pf.ApplicationBasedCollective;
-import eu.smartsocietyproject.pf.CollectiveBase;
-import eu.smartsocietyproject.pf.CollectiveWithPlan;
-import eu.smartsocietyproject.pf.Plan;
+import eu.smartsocietyproject.pf.*;
 
 import java.util.List;
 
@@ -13,6 +10,10 @@ public class DummyNegotiationHandlerImpl implements NegotiationHandler{
         System.out.println("Doing some negotiation");
         try{Thread.sleep(200);}catch (InterruptedException ie){}
         System.out.println("Finished doing negotiation");
-        return CollectiveWithPlan.of((ApplicationBasedCollective) CollectiveBase.emptyCollective(), new Plan());
+        try {
+            return CollectiveWithPlan.of(ApplicationBasedCollective.empty(null, "", ""), new Plan());
+        } catch (Collective.CollectiveCreationException e) {
+            return null;
+        }
     }
 }

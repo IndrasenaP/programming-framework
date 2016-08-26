@@ -74,7 +74,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         target.withdraw(new CollectiveBasedTask());
     }
 
-    Condition<CollectiveWithPlan> withCollective(final CollectiveBase expected) {
+    Condition<CollectiveWithPlan> withCollective(final Collective expected) {
         return new Condition<CollectiveWithPlan>() {
             @Override
             public boolean matches(CollectiveWithPlan value) {

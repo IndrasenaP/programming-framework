@@ -9,7 +9,7 @@ import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.Attribute;
 import eu.smartsocietyproject.pf.Collective;
-import eu.smartsocietyproject.pf.CollectiveBase;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class TestCollective extends CollectiveBase implements Collective {
+public class TestCollective extends Collective.Testing {
     
     public TestCollective(String id,
             Collection<Peer> members,

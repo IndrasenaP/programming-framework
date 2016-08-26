@@ -4,7 +4,7 @@ import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
-import eu.smartsocietyproject.pf.CollectiveBase;
+
 import java.util.List;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;

@@ -26,6 +26,10 @@ public class Peer {
         return role;
     }
 
+    public Peer withRole(String role){
+        return new Peer(this.id, role);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
