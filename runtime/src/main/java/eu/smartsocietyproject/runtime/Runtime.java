@@ -4,13 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import com.typesafe.config.Config;
-import eu.smartsocietyproject.peermanager.PeerManager;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
-import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
-import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.pf.*;
 
 import java.io.IOException;
@@ -22,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class Runtime {
     private static ObjectMapper jsonMapper = new  ObjectMapper();
-    private final SmartSocietyApplicationContext context;
+    private final ApplicationContext context;
     private final Application application;
     private final ConcurrentHashMap<UUID, TaskRunnerDescriptor> runnerDescriptors = new ConcurrentHashMap<>();
     private final ExecutorService executor = new ThreadPoolExecutor( //can return both Executor and ExecutorService
@@ -32,7 +27,7 @@ public class Runtime {
      new LinkedBlockingQueue<Runnable>()
     );
 
-    public Runtime(SmartSocietyApplicationContext context, Application application) {
+    public Runtime(ApplicationContext context, Application application) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(application);
         this.context = context;
@@ -120,8 +115,8 @@ public class Runtime {
     public static Runtime fromApplication(Config config, SmartSocietyComponents components) throws IOException, InstantiationException {
         Class<? extends Application> applicationClass = getApplicationClass();
         Application application = instantiateApplication(applicationClass);
-        DefaultSmartSocietyApplicationContext context =
-            new DefaultSmartSocietyApplicationContext(
+        SmartSocietyApplicationContext context =
+            new SmartSocietyApplicationContext(
                 createCollectiveKindRegistry(application),
                 components.getPeerManager());
 

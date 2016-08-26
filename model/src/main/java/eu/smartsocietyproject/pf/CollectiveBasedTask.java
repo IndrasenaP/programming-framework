@@ -15,8 +15,9 @@ import org.slf4j.LoggerFactory;
 
 public class CollectiveBasedTask implements Future<TaskResult> {
 
-    private final SmartSocietyApplicationContext context;
+    private final ApplicationContext context;
     private final TaskRequest request;
+    private final TaskFlowDefinition definition;
     Logger logger = LoggerFactory.getLogger(CollectiveBasedTask.class);
 
     // transition flag constants
@@ -60,14 +61,16 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         executor.execute(new CBTRunnable());
         context=null;
         request=null;
+        definition=null;
     }
 
     private CollectiveBasedTask(
-        SmartSocietyApplicationContext context,
+        ApplicationContext context,
         TaskRequest request,
         TaskFlowDefinition definition) {
         this.context = context;
         this.request = request;
+        this.definition = definition;
         this.uuid = UUID.randomUUID();
         this.laborMode = definition.getLaborMode();
         this.state = CollectiveBasedTask.State.INITIAL;
@@ -75,7 +78,7 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     }
 
     public static CollectiveBasedTask create(
-        SmartSocietyApplicationContext context, TaskRequest request,
+        ApplicationContext context, TaskRequest request,
         TaskFlowDefinition definition) {
         return new CollectiveBasedTask(context, request, definition);
     }
@@ -155,8 +158,9 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         switch (state){
             case PROVISIONING:
                 Callable<ApplicationBasedCollective> provisioningCallable= () -> {
-                    ProvisioningHandler handler = new DummyProvisioningHandlerImpl();
-                    ApplicationBasedCollective provisioned = handler.provision(getTaskRequest(), null); // this will last...
+                    ProvisioningHandler handler = definition.getProvisioningHandler();
+                    ApplicationBasedCollective provisioned = handler
+                        .provision(context, getTaskRequest(), definition.getCollectiveforProvisioning());
                     return provisioned;
                 };
                 this.provisioningFuture = executor.submit(provisioningCallable);
@@ -164,16 +168,16 @@ public class CollectiveBasedTask implements Future<TaskResult> {
 
             case COMPOSITION:
                 Callable<List<CollectiveWithPlan>> compositionCallable= () -> {
-                    CompositionHandler handler = new DummyCompositionHandlerImpl();
-                    return handler.compose(this.provisioned, getTaskRequest());
+                    CompositionHandler handler = definition.getCompositionHandler();
+                    return handler.compose(context, this.provisioned, getTaskRequest());
                 };
                 this.compositionFuture = executor.submit(compositionCallable);
                 break;
 
             case NEGOTIATION:
                 Callable<CollectiveWithPlan> negotiationCallable= () -> {
-                    NegotiationHandler handler = new DummyNegotiationHandlerImpl();
-                    return handler.negotiate(this.negotiables);
+                    NegotiationHandler handler = definition.getNegotiationHandler();
+                    return handler.negotiate(context, this.negotiables);
                 };
                 this.negotiationFuture = executor.submit(negotiationCallable);
                 logger.debug("initialized negotiation handler.");
@@ -181,8 +185,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
 
             case EXECUTION:
                 Callable<TaskResult> executionCallable= () -> {
-                    ExecutionHandler handler = new DummyExecutionHandlerImpl();
-                    return handler.execute(this.agreed);
+                    ExecutionHandler handler = definition.getExecutionHandler();
+                    return handler.execute(context, this.agreed);
                 };
                 this.executionFuture = executor.submit(executionCallable);
                 logger.debug("initialized execution handler.");

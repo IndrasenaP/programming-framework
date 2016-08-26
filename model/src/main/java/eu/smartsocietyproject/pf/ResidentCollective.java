@@ -1,7 +1,5 @@
 package eu.smartsocietyproject.pf;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
@@ -15,7 +13,7 @@ import java.util.Optional;
 public final class ResidentCollective extends Collective.WithVisibleMembers {
 
     private ResidentCollective(
-            SmartSocietyApplicationContext context,
+            ApplicationContext context,
             String id,
             CollectiveKind kind,
             Collection<Peer> members,
@@ -43,7 +41,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
 
 
     public static ResidentCollective createFromQuery(
-            DefaultSmartSocietyApplicationContext context,
+            SmartSocietyApplicationContext context,
             PeerQuery query) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
         CollectiveIntermediary collective
@@ -57,7 +55,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
     }
 
     public static ResidentCollective createFromId(
-            SmartSocietyApplicationContext context,
+            ApplicationContext context,
             String id,
             Optional<String> verify_kind) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();

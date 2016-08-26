@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
     @Override
-    public List<CollectiveWithPlan> compose(
+    public List<CollectiveWithPlan> compose(ApplicationContext context,
         ApplicationBasedCollective provisioned, TaskRequest t) throws CBTLifecycleException {
 //        throw new UnsupportedOperationException("TODO"); // -=TODO=-
 //        OMInstance omi=new OMInstance();
@@ -21,13 +21,13 @@ public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
     }
 
     @Override
-    public CollectiveWithPlan negotiate(List<CollectiveWithPlan> negotiables) throws CBTLifecycleException {
+    public CollectiveWithPlan negotiate(ApplicationContext context, List<CollectiveWithPlan> negotiables) throws CBTLifecycleException {
 //        throw new UnsupportedOperationException("TODO"); // -=TODO=-
         return negotiables.get(0);
     }
 
     @Override
-    public CollectiveWithPlan continuousOrchestration(TaskRequest t) throws CBTLifecycleException {
+    public CollectiveWithPlan continuousOrchestration(ApplicationContext context, TaskRequest t) throws CBTLifecycleException {
         throw new UnsupportedOperationException("TODO");
     }
 
