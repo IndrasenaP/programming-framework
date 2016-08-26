@@ -8,7 +8,6 @@ package eu.smartsocietyproject.peermanager.helper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.ImmutableList;
-import eu.smartsocietyproject.peermanager.Member;
 import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.pf.Attribute;
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class MembersAttribute extends EntityCore implements Attribute {
         ImmutableList.Builder<Peer> builder = ImmutableList.builder();
         if (this.root.isArray()) {
             for (JsonNode node : root) {
-                builder.add(new Member(node.asText()));
+                builder.add(new Peer(node.asText(), ""));
             }
         }
         return builder.build();

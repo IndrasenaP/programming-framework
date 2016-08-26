@@ -3,19 +3,19 @@ package eu.smartsocietyproject.pf;
 import com.google.common.base.Objects;
 
 public class CollectiveWithPlan {
-    private final Collective collective;
+    private final ApplicationBasedCollective collective;
     private final Plan plan;
 
-    private CollectiveWithPlan(Collective collective, Plan plan) {
+    private CollectiveWithPlan(ApplicationBasedCollective collective, Plan plan) {
         this.collective = collective;
         this.plan = plan;
     }
 
-    public static CollectiveWithPlan of(Collective collective, Plan plan) {
+    public static CollectiveWithPlan of(ApplicationBasedCollective collective, Plan plan) {
         return new CollectiveWithPlan(collective, plan);
     }
 
-    public Collective getCollective() {
+    public ApplicationBasedCollective getCollective() {
         return collective;
     }
 

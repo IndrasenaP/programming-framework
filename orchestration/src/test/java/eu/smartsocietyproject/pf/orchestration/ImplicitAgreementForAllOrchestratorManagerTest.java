@@ -44,7 +44,7 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     public void testCompose() throws Exception {
         ImplicitAgreementForAllOM target = new ImplicitAgreementForAllOM();
 
-        CollectiveBase provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
+        ApplicationBasedCollective provisionedCollective = ApplicationBasedCollective.empty(context, "id", basicKindId);
         List<CollectiveWithPlan> result = target.compose(provisionedCollective, createFakeRequest());
         assertThat(result).hasSize(1);
         assertThat(result).are(withCollective(provisionedCollective));

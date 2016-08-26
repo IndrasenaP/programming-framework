@@ -134,14 +134,14 @@ public class CollectiveBasedTask implements Future<TaskResult> {
 
     }
 
-    private Future<Collective> provisioningFuture = null;
+    private Future<ApplicationBasedCollective> provisioningFuture = null;
     private Future<List<CollectiveWithPlan>> compositionFuture = null;
     private Future<CollectiveWithPlan> negotiationFuture = null;
     private Future<TaskResult> executionFuture = null;
     private Future<CollectiveWithPlan> continuousOrchestrationFuture = null;
 
     private Collective inputCollective = null;
-    private Collective provisioned = null;
+    private ApplicationBasedCollective provisioned = null;
     private CollectiveWithPlan agreed = null;
     private List<CollectiveWithPlan> negotiables = null;
 
@@ -154,9 +154,9 @@ public class CollectiveBasedTask implements Future<TaskResult> {
     private void invokeHandlerForCurrentState(){
         switch (state){
             case PROVISIONING:
-                Callable<Collective> provisioningCallable= () -> {
+                Callable<ApplicationBasedCollective> provisioningCallable= () -> {
                     ProvisioningHandler handler = new DummyProvisioningHandlerImpl();
-                    Collective provisioned = handler.provision(getTaskRequest(), null); // this will last...
+                    ApplicationBasedCollective provisioned = handler.provision(getTaskRequest(), null); // this will last...
                     return provisioned;
                 };
                 this.provisioningFuture = executor.submit(provisioningCallable);

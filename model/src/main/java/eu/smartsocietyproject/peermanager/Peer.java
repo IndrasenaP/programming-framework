@@ -3,7 +3,7 @@ package eu.smartsocietyproject.peermanager;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
-public abstract class Peer {
+public class Peer {
 
     private final String id;
     private final String role;
