@@ -30,12 +30,12 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         }
 
         @Override
-        public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+        public List<CollectiveIntermediary> findCollectives(CollectiveQuery query) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
-        public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+        public CollectiveIntermediary createCollectiveFromQuery(PeerQuery query) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     };

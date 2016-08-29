@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.pm.helper;
+package eu.smartsocietyproject.pf.helper;
 
-import eu.smartsocietyproject.peermanager.Peer;
+import eu.smartsocietyproject.pf.Peer;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.Attribute;
 import eu.smartsocietyproject.pf.Collective;

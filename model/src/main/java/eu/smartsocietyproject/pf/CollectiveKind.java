@@ -1,10 +1,12 @@
 package eu.smartsocietyproject.pf;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public final class CollectiveKind {
     private final String id;
@@ -27,8 +29,15 @@ public final class CollectiveKind {
         Attribute defaultValue = defaultValues.get(name);
         return
             defaultValue != null &&
-            defaultValues.get(name).getClass().isInstance(value);
+            defaultValue.getType().isOfValidType(value);
     }
+
+    public Optional<Attribute> fromJson(String name, JsonNode node) {
+        Attribute defaultValue = defaultValues.get(name);
+        return defaultValue.getType().fromJson(node);
+    }
+
+    public static CollectiveKind EMPTY = new CollectiveKind("EMPTY", ImmutableMap.of());
 
     public boolean areAttributesValid(Map<String, Attribute> attributes) {
         return

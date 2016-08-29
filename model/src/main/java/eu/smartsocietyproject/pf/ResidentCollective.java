@@ -1,6 +1,6 @@
 package eu.smartsocietyproject.pf;
 
-import eu.smartsocietyproject.peermanager.Peer;
+import com.google.common.collect.ImmutableMap;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
@@ -16,7 +16,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
             ApplicationContext context,
             String id,
             CollectiveKind kind,
-            Collection<Peer> members,
+            Collection<Member> members,
             Map<String, Attribute> attributes) {
         super(context, id, kind, members, attributes);
     }
@@ -40,18 +40,21 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
     }
 
 
-    public static ResidentCollective createFromQuery(
-            SmartSocietyApplicationContext context,
-            PeerQuery query) throws PeerManagerException {
-        PeerManager peerManager = context.getPeerManager();
-        CollectiveIntermediary collective
-                = peerManager.readCollectiveByQuery(query);
-        //todo-sv: createFromQuery missing kind?
+    static ResidentCollective createFromIntermediary(
+        ApplicationContext context,
+        Optional<String> kind,
+        CollectiveIntermediary intermediary) {
+            CollectiveKind collectiveKind =
+                kind.flatMap( k -> context.getKindRegistry().get(k))
+                .orElse(CollectiveKind.EMPTY);
+
+        Map<String, Attribute> attributes = intermediary.getAttributes(collectiveKind);
+
         return new ResidentCollective(context,
-                collective.getId(),
-                null, //todo-sv figure this out 
-                collective.getMembers(),null);
-                //todo-sv: fix this collective.getAttributes());
+                                      intermediary.getId(),
+                                      collectiveKind,
+                                      intermediary.getMembers(),
+                                      attributes);
     }
 
     public static ResidentCollective createFromId(
@@ -59,14 +62,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
             String id,
             Optional<String> verify_kind) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
-        CollectiveIntermediary collective
-                = peerManager.readCollectiveById(id);
-        //todo-sv: verify kind with context
-        return new ResidentCollective(context,
-                id,
-                null, //todo-sv figure this out 
-                collective.getMembers(),null);
-                //todo-sv: fix this collective.getAttributes());
+        return peerManager.readCollectiveById(id);
     }
 
 }

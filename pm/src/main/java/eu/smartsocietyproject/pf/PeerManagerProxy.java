@@ -1,4 +1,4 @@
-package eu.smartsocietyproject.pm;
+package eu.smartsocietyproject.pf;
 
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
+/*
 public class PeerManagerProxy implements PeerManager {
 
     private UriComponents collectiveById;
@@ -63,12 +63,13 @@ public class PeerManagerProxy implements PeerManager {
     }
 
     @Override
-    public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+    public CollectiveIntermediary createCollectiveFromQuery(PeerQuery query) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+    public List<CollectiveIntermediary> findCollectives(CollectiveQuery query) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
+*/

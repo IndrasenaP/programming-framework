@@ -36,13 +36,8 @@ public abstract class EntityCore {
      * 
      * @return - object as JSON-String
      */
-    public String toJson(){
-        try {
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
+    public JsonNode toJson(){
+        return root;
     }
     
     /**

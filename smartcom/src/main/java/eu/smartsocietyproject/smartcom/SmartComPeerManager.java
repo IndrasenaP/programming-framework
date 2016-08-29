@@ -17,7 +17,10 @@ import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.IdentifierType;
 import at.ac.tuwien.dsg.smartcom.model.PeerInfo;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.pf.ResidentCollective;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,12 +46,16 @@ public class SmartComPeerManager implements PeerAuthenticationCallback, PeerInfo
 
     @Override
     public CollectiveInfo getCollectiveInfo(Identifier collective) throws NoSuchCollectiveException {
-        CollectiveIntermediary coll = this.peerManager
-                .readCollectiveById(collective.getId());
-        
+        ResidentCollective coll;
+        try {
+            coll = this.peerManager.readCollectiveById(collective.getId());
+        } catch (PeerManagerException e) {
+            throw new  NoSuchCollectiveException();
+        }
+
         List<Identifier> peerIdentifiers = new ArrayList<>();
-        coll.getMembers().forEach(peer -> peerIdentifiers
-                .add(new Identifier(IdentifierType.PEER, peer.getId(), null)));
+        coll.getMembers().forEach(member -> peerIdentifiers
+                .add(new Identifier(IdentifierType.PEER, member.getPeerId(), null)));
         
         //todo-sv: which delivery policy to set?
         return new CollectiveInfo(

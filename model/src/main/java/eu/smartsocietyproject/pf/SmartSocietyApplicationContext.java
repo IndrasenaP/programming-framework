@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /** The default implementation of the application context
  *
  */
-public class SmartSocietyApplicationContext implements ApplicationContext {
+public class SmartSocietyApplicationContext extends ApplicationContext {
     private final UUID uuid=UUID.randomUUID();
     private final CollectiveKindRegistry kindRegistry;
     private final PeerManager peerManager;

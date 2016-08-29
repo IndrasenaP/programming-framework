@@ -1,16 +1,23 @@
-package eu.smartsocietyproject.peermanager;
+package eu.smartsocietyproject.pf;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public class Peer {
-
     private final String id;
-    private final String role;
+    private final JsonNode data;
 
-    public Peer(String id, String role) {
+
+    public Peer(String id) {
         this.id = id;
-        this.role = role;
+        this.data = new ObjectMapper().createObjectNode();
+    }
+
+    public Peer(String id, JsonNode data) {
+        this.id = id;
+        this.data = data.deepCopy();
     }
 
     public String getId() {
@@ -18,16 +25,12 @@ public class Peer {
     }
 
     /**
-     * Role makes sense only within a collective. Unlike Peer attributes that are generally describing the peer as
-     * entity, the role is the only 'special' attribute, describing the participation of the peer in a collective.
-     * @return the name of the role
+     *  This field is not actually used at the moment, and the way we store peer data
+     *  might change.
+     * @return
      */
-    public String getRole() {
-        return role;
-    }
-
-    public Peer withRole(String role){
-        return new Peer(this.id, role);
+    public JsonNode getData() {
+        return this.data.deepCopy();
     }
 
     @Override
@@ -41,7 +44,10 @@ public class Peer {
 
         Peer that = (Peer) o;
 
-        return Objects.equal(this.id, that.id);
+        return
+            Objects.equal(this.id, that.id) &&
+                Objects.equal(this.data, that.data)
+            ;
     }
 
     @Override
@@ -54,6 +60,7 @@ public class Peer {
         return MoreObjects
                 .toStringHelper(this)
                 .add("id", id)
+                .add("data", data)
                 .toString();
     }
 }

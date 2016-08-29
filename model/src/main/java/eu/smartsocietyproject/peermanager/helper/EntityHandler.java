@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.smartsocietyproject.pf.Attribute;
-import eu.smartsocietyproject.pf.attributes.StringAttribute;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -102,14 +101,7 @@ public class EntityHandler extends EntityCore {
 //        return this.getAttributeValue(name, attribute);
 //    }
     public String getAttribute(String name) {
-        try {
-            return mapper
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(root.path(name));
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
+        return root.get(name).asText();
     }
 
     /**
@@ -163,7 +155,11 @@ public class EntityHandler extends EntityCore {
     public static EntityHandler create(String json) {
         return new EntityHandler(json);
     }
-    
+
+    public static EntityHandler create(JsonNode node) {
+        return new EntityHandler(node);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -178,12 +174,8 @@ public class EntityHandler extends EntityCore {
         
         public void addAttribute(String name, Attribute attribute) {
             if(handler.root.isObject()) {
-                try {
-                    ((ObjectNode) handler.root).set(name,
-                            mapper.readTree(attribute.toJson()));
-                } catch (IOException ex) {
-                    Logger.getLogger(EntityHandler.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                ((ObjectNode) handler.root).set(name,
+                        attribute.toJson());
             }
         }
 

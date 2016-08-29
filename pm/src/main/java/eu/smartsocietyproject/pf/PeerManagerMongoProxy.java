@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.pm;
+package eu.smartsocietyproject.pf;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.util.JSON;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
@@ -20,6 +22,8 @@ import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
+import eu.smartsocietyproject.peermanager.helper.EntityCore;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
 import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
@@ -30,6 +34,11 @@ import eu.smartsocietyproject.peermanager.query.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -42,7 +51,8 @@ import org.bson.conversions.Bson;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class PeerManagerMongoProxy implements PeerManager {
-
+    private static ObjectMapper mapper = new ObjectMapper();
+    private ApplicationContext context;
     private MongoDatabase db;
     private MongodProcess mongoProcess;
     private MongodExecutable mongodExecutable;
@@ -51,7 +61,8 @@ public class PeerManagerMongoProxy implements PeerManager {
 
     //todo: provide a constructor for passing in mongo
     //todo: is persisting over shutdowns needed?
-    public PeerManagerMongoProxy(int mongoPort) throws IOException {
+    public PeerManagerMongoProxy(int mongoPort, ApplicationContext context) throws IOException {
+        this.context = context;
         try {
             MongodStarter starter = MongodStarter.getDefaultInstance();
             IMongodConfig mongodConfig = new MongodConfigBuilder()
@@ -71,7 +82,8 @@ public class PeerManagerMongoProxy implements PeerManager {
         }
     }
 
-    public PeerManagerMongoProxy(MongoDatabase db) {
+    public PeerManagerMongoProxy(ApplicationContext context, MongoDatabase db) {
+        this.context = context;
         this.db = db;
         loadCollection();
     }
@@ -92,25 +104,44 @@ public class PeerManagerMongoProxy implements PeerManager {
     }
 
     public void persistPeer(PeerIntermediary peer) {
-        peersCollection.insertOne(Document.parse(peer.toJson()));
+        peersCollection.insertOne(Document.parse(jsonToString(peer.toJson())));
     }
 
     @Override
-    public void persistCollective(CollectiveIntermediary collective) {
-        collectivesCollection.insertOne(Document.parse(collective.toJson()));
+    public void persistCollective(ApplicationBasedCollective collective) {
+        CollectiveIntermediary ci = toCollectiveIntermediary(collective);
+        collectivesCollection.insertOne(Document.parse(jsonToString(ci.toJson())));
+    }
+
+    /* TODO raise exception */
+    private String jsonToString(JsonNode node) {
+        try {
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
+    }
+
+    private CollectiveIntermediary toCollectiveIntermediary(Collective collective) {
+        MembersAttribute.Builder builder = MembersAttribute.builder();
+        for (Member member : collective.makeMembersVisible().getMembers()) {
+            builder.addMember(member);
+        }
+        return CollectiveIntermediary.create(collective.getId(), builder.build());
     }
 
     private Bson getAttributesMongoQuery(Query query) {
         List<Bson> filters = new ArrayList<>();
         for (QueryRule rule : query.getQueryRules()) {
             filters.add(Filters.eq(rule.getKey(),
-                    JSON.parse(rule.getAttribute().toJson())));
+                                   rule.getAttribute().toJson()));
         }
         return Filters.and(filters);
     }
 
     @Override
-    public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
+    public List<ResidentCollective> findCollectives(CollectiveQuery query) {
         FindIterable<Document> collectives = collectivesCollection
                 .find(getAttributesMongoQuery(query));
 
@@ -120,34 +151,51 @@ public class PeerManagerMongoProxy implements PeerManager {
             colls.add(CollectiveIntermediary.create(c.toJson()));
         }
 
-        return colls;
+        return colls.stream()
+                    .map(c -> ResidentCollective.createFromIntermediary(context, Optional.empty(), c))
+                    .collect(Collectors.toList());
     }
 
     @Override
-    public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query) {
+        return createCollectiveFromQuery(query, Optional.empty());
+    }
+
+    @Override
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, String kind) {
+        return createCollectiveFromQuery(query, Optional.of(kind));
+    }
+
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, Optional<String> kind) {
         FindIterable<Document> peers = peersCollection
-                .find(getAttributesMongoQuery(query));
-        
+            .find(getAttributesMongoQuery(query));
+
         MembersAttribute.Builder builder = MembersAttribute.builder();
 
         for (Document p : peers) {
             builder.addMember(PeerIntermediary
-                    .createFromJson(p.toJson())
-                    .getId());
+                                  .createFromJson(p.toJson())
+                                  .getId());
         }
-
-        return CollectiveIntermediary.create(builder.build());
+        CollectiveIntermediary collectiveIntermediary = CollectiveIntermediary.create(builder.build());
+        return
+            ResidentCollective
+                .createFromIntermediary(context, kind, collectiveIntermediary)
+                .toApplicationBasedCollective();
     }
 
+
     @Override
-    public CollectiveIntermediary readCollectiveById(String id) {
+    public ResidentCollective readCollectiveById(String id) throws PeerManagerException {
         Document doc = collectivesCollection.find(Filters
                 .eq(MongoConstants.id, id)).first();
 
         if (doc == null) {
-            return null;
+            throw new PeerManagerException(
+                String.format("Collective not found: %s", id));
         }
-
-        return CollectiveIntermediary.create(doc.toJson());
+        CollectiveIntermediary collectiveIntermediary = CollectiveIntermediary.create(doc.toJson());
+        return ResidentCollective
+            .createFromIntermediary(context, Optional.empty(), collectiveIntermediary);
     }
 }

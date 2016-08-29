@@ -5,7 +5,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import eu.smartsocietyproject.peermanager.Peer;
+import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
+import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.query.PeerQuery;
 
 import java.util.Collection;
 import java.util.Map;
@@ -43,7 +46,7 @@ public final class ApplicationBasedCollective extends Collective {
             ApplicationContext context,
             String id,
             CollectiveKind kind,
-            Collection<Peer> members,
+            Collection<Member> members,
             Map<String, ? extends Attribute> attributes,
             Map<String, ? extends Attribute> userAttribute) {
         super(context, id, kind, members, attributes);
@@ -157,7 +160,7 @@ public final class ApplicationBasedCollective extends Collective {
             ApplicationContext context,
             String id,
             CollectiveKind collectiveKind,
-            Collection<Peer> members) {
+            Collection<Member> members) {
         Map<String, Attribute> newAttributes = collectiveKind.getDefaultValues();
 
         return new ApplicationBasedCollective(
@@ -319,7 +322,9 @@ public final class ApplicationBasedCollective extends Collective {
                 withUserAttributes(this.getUserAttributes());
     }
 
-    private ApplicationBasedCollective withMembers(Collection<Peer> members) {
+
+
+    private ApplicationBasedCollective withMembers(Collection<Member> members) {
         return new ApplicationBasedCollective(
                 this.getContext(),
                 this.getId(),
@@ -370,6 +375,16 @@ public final class ApplicationBasedCollective extends Collective {
                 .add("attributes", getAttributes())
                 .toString();
     }
+
+
+    public static ApplicationBasedCollective createFromQuery(
+        SmartSocietyApplicationContext context,
+        PeerQuery query) throws PeerManagerException {
+        PeerManager peerManager = context.getPeerManager();
+        return  peerManager.createCollectiveFromQuery(query);
+    }
+
+
 
     @Override
     protected Collective.WithVisibleMembers makeMembersVisible() {

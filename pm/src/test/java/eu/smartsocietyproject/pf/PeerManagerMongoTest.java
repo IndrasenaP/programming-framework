@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.pm;
+package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableMap;
 import com.mongodb.client.MongoCollection;
-import eu.smartsocietyproject.peermanager.Peer;
+import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
@@ -20,6 +21,9 @@ import eu.smartsocietyproject.pf.attributes.StringAttribute;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -33,27 +37,64 @@ import static org.junit.Assert.*;
  */
 public class PeerManagerMongoTest {
 
-    private final String expectedMemberTim = "tim";
-    private final String expectedMemberTom = "tom";
-    private final String expectedMemberTum = "tum";
 
-    private final String expPeerAge = "age";
-    private final String expPeerComment = "comment";
-    private final String expAttCountry = "country";
-    private final String expAttLanguage = "language";
-    private final String expAttSince = "since";
-    private final String expColl1Key = "coll1";
-    private final String expColl2Key = "coll2";
-    private final String expColl3Key = "coll3";
-    private final String expLangEnglish = "english";
-    private final String expLangGerman = "german";
-    private final String expCountryA = "Austria";
-    private final String expCountryE = "England";
-    private final int expSince5 = 5;
-    private final int expAge27 = 27;
-    private final int expAge29 = 29;
-    private final String expCommentBlub = "blub";
-    private final String expCommentBlab = "blab";
+
+
+    private static final String expectedMemberTim = "tim";
+    private static final String expectedMemberTom = "tom";
+    private static final String expectedMemberTum = "tum";
+
+    private static final String expPeerAge = "age";
+    private static final String expPeerComment = "comment";
+    private static final String expAttCountry = "country";
+    private static final String expAttLanguage = "language";
+    private static final String expAttSince = "since";
+    private static final String expColl1Key = "coll1";
+    private static final String expColl2Key = "coll2";
+    private static final String expColl3Key = "coll3";
+    private static final String expLangEnglish = "english";
+    private static final String expLangGerman = "german";
+    private static final String expCountryA = "Austria";
+    private static final String expCountryE = "England";
+    private static final int expSince5 = 5;
+    private static final int expAge27 = 27;
+    private static final int expAge29 = 29;
+    private static final String expCommentBlub = "blub";
+    private static final String expCommentBlab = "blab";
+
+    private static final CollectiveKind collectiveKind =
+        new CollectiveKind("defaultKind",
+                           ImmutableMap.of(
+                               expAttCountry, AttributeType.from("uk")
+                           ));
+
+    private static final ApplicationContext context =
+        new ApplicationContext() {
+            @Override
+            public UUID getId() {
+                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+            }
+
+            @Override
+            PeerManager getPeerManager() {
+                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+            }
+
+            @Override
+            public CollectiveKindRegistry getKindRegistry() {
+                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+            }
+
+            @Override
+            public CBTBuilder registerBuilderForCBTType(String type, CBTBuilder builder) {
+                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+            }
+
+            @Override
+            public CBTBuilder getCBTBuilder(String type) {
+                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+            }
+        };
 
     private PeerManagerMongoProxy pm;
 
@@ -66,7 +107,7 @@ public class PeerManagerMongoTest {
 
     @Before
     public void setUp() throws IOException {
-        pm = new PeerManagerMongoProxy(6666);
+        pm = new PeerManagerMongoProxy(6666, context);
         createPeers(pm);
         createCollectives(pm);
     }
@@ -96,14 +137,14 @@ public class PeerManagerMongoTest {
                         this.expCountryE));
     }
 
-    private CollectiveIntermediary addAttributesToCollective(String id,
+    private Collective addAttributesToCollective(String id,
             String language,
             String country) {
-        EntityHandler.Builder builder = CollectiveIntermediary.builder();
+        EntityHandler.Builder builder = ApplicationBasedCollective.empty(context, id, "kind");
         builder.addAttribute("id", StringAttribute.create(id));
         builder.addAttribute(this.expAttLanguage, StringAttribute.create(language));
         builder.addAttribute(this.expAttCountry, StringAttribute.create(country));
-        builder.addAttribute(this.expAttSince, IntegerAttribute.create(this.expSince5));
+        builder.addAttribute(this.expAttSince, AttributeType.from(this.expSince5));
         builder.addAttributeNode(MongoConstants.members, addPeersToCollective());
         return CollectiveIntermediary.create(builder.build());
     }
@@ -208,7 +249,7 @@ public class PeerManagerMongoTest {
     @Test
     public void testReadCollectiveByPeerQuery() throws IOException {
         CollectiveIntermediary res = pm
-                .readCollectiveByQuery(PeerQuery
+                .createCollectiveFromQuery(PeerQuery
                         .create()
                         .withRule(QueryRule
                                 .create(this.expPeerAge)
@@ -227,7 +268,7 @@ public class PeerManagerMongoTest {
     @Test
     public void testReadCollectiveByCollectiveQuery() throws IOException {
         List<CollectiveIntermediary> res = pm
-                .readCollectiveByQuery(CollectiveQuery
+                .findCollectives(CollectiveQuery
                         .create()
                         .withRule(QueryRule
                                 .create(this.expAttLanguage)

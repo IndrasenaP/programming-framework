@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.pm;
+package eu.smartsocietyproject.pf;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.smartsocietyproject.peermanager.Peer;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;

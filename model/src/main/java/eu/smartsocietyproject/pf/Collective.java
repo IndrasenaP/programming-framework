@@ -10,14 +10,8 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import eu.smartsocietyproject.peermanager.Peer;
-import eu.smartsocietyproject.peermanager.PeerManager;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
-import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
-import eu.smartsocietyproject.peermanager.query.PeerQuery;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,7 +21,7 @@ public abstract class Collective {
     private final ApplicationContext context;
     private final String id;
     protected final CollectiveKind kind;
-    private final ImmutableSet<Peer> members;
+    private final ImmutableSet<Member> members;
     private final ImmutableMap<String, Attribute> attributes;
 
 
@@ -35,7 +29,7 @@ public abstract class Collective {
             ApplicationContext context,
             String id,
             CollectiveKind collectiveKind,
-            Collection<Peer> members,
+            Collection<Member> members,
             Map<String, ? extends Attribute> attributes) {
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(id);
@@ -75,14 +69,14 @@ public abstract class Collective {
      * Return the members of this collective. This function is only for the
      * internal use public. Do not publish it to external developers.
      *
-     * @return ImmutableSet<Peer>
+     * @return ImmutableSet<Member>
      */
-    public ImmutableSet<Peer> getMembers() {
+    public ImmutableSet<Member> getMembers() {
         return members;
     }
 
     @Deprecated
-    protected void setMembers(Collection<Peer> newMembers) {
+    protected void setMembers(Collection<Member> newMembers) {
         throw new UnsupportedOperationException("Collective classes are now immutable");
     }
 
@@ -354,45 +348,6 @@ public abstract class Collective {
         }
     }
 
-    /**
-     * Just used for internal debugging. Do not use. Will be removed.
-     *
-     * @return
-     */
-    @Deprecated
-    public static Collective emptyCollective() {
-        String basicKindId = "basic";
-        CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
-        CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
-        PeerManager peerManager = new PeerManager() {
-            
-            public void persistCollective(CollectiveIntermediary collective) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            
-            public CollectiveIntermediary readCollectiveById(String id) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            
-            public List<CollectiveIntermediary> readCollectiveByQuery(CollectiveQuery query) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-
-            
-            public CollectiveIntermediary readCollectiveByQuery(PeerQuery query) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        };
-        ApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
-
-        Collective c = null;
-        try {
-            c = ApplicationBasedCollective.empty(context, "theEmptyCollective", basicKindId);
-        } catch (Exception e) {}
-        return c;
-    }
 
     public abstract ApplicationBasedCollective toApplicationBasedCollective();
     
@@ -404,15 +359,18 @@ public abstract class Collective {
                 ApplicationContext context,
                 String id,
                 CollectiveKind collectiveKind,
-                Collection<Peer> members,
+                Collection<Member> members,
                 Map<String, ? extends Attribute> attributes) {
             super(context, id, collectiveKind, members, attributes);
 
         }
+
         protected WithVisibleMembers(Collective c){
             super(c);
         }
-        public ImmutableSet<Peer> getMembers(){
+
+        @Override
+        public ImmutableSet<Member> getMembers(){
             return super.getMembers();
         }
     }
@@ -425,7 +383,7 @@ public abstract class Collective {
                 ApplicationContext context,
                 String id,
                 CollectiveKind collectiveKind,
-                Collection<Peer> members,
+                Collection<Member> members,
                 Map<String, ? extends Attribute> attributes) {
             super(context, id, collectiveKind, members, attributes);
 
