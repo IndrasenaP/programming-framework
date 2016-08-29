@@ -1,4 +1,7 @@
 dependencies {
+    compile project(':programming-framework-model')
+    compile project(':programming-framework-pm')
+    compile project(':programming-framework-runtime')
     compile libraries.compileShared
     testCompile libraries.testShared
 }

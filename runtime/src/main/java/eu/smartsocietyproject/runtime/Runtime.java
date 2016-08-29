@@ -34,10 +34,16 @@ public class Runtime {
         this.application = application;
     }
 
-    boolean startTask(TaskDefinition definition) {
+    public Runtime init(Config config) {
+        application.init(config);
+        return this;
+    }
+
+    public boolean startTask(TaskDefinition definition) {
         TaskRequest request = application.createTaskRequest(definition);
 
         TaskRunner runner = application.createTaskRunner(request);
+        runnerDescriptors.put(definition.getId(), new TaskRunnerDescriptor(executor, definition, runner));
         executor.execute(runner);
         return true;
     }
@@ -56,27 +62,36 @@ public class Runtime {
         }
     }
 
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+        runnerDescriptors.values().forEach(r->r.cancel());
+    }
+
     private static class TaskRunnerDescriptor {
         private final long creationTimestamp = java.time.Instant.now().toEpochMilli();
         private final ExecutorService executor;
         private final TaskDefinition definition;
-        private final CollectiveBasedTask cbt;
         private final TaskRunner runner;
         private final Function<Runnable, TaskResult> taskSubmitter;
         private Future<?> runnerFuture=null;
 
-        public TaskRunnerDescriptor(ExecutorService executor, TaskDefinition definition, CollectiveBasedTask cbt, TaskRunner runner) {
+        public TaskRunnerDescriptor(ExecutorService executor, TaskDefinition definition, TaskRunner runner) {
             this.executor = executor;
             this.definition = definition;
-            this.cbt = cbt;
             this.runner = runner;
             runnerFuture = executor.submit(runner);
             taskSubmitter = r -> {
                 try {
                     /* TODO: CHECK HOW TO SYNCHRONIZE THE TWO RUNNERS */
                     executor.submit(runner).wait();
-                    return cbt.get();
-                } catch (InterruptedException | ExecutionException e) {
+                    return null; /*TODO CHECK WHAT SHOULD BE RETURNED */
+                } catch (InterruptedException e) {
                     throw new RuntimeWrapperException("Error on runner runs", e);
                 }
             };
@@ -84,16 +99,11 @@ public class Runtime {
 
         public void cancel() {
             runnerFuture.cancel(true);
-            cbt.cancel(true);
         }
 
 
         public TaskDefinition getDefinition() {
             return definition;
-        }
-
-        public CollectiveBasedTask getCbt() {
-            return cbt;
         }
 
         public TaskRunner getRunner() {
@@ -107,7 +117,6 @@ public class Runtime {
         public JsonNode getStateDescription() {
             ObjectNode node = jsonMapper.createObjectNode();
             node.set("applicationState", runner.getStateDescription());
-            node.put("cbtState", cbt.getCurrentState().toString());
             return node;
         }
     }
@@ -118,9 +127,9 @@ public class Runtime {
         SmartSocietyApplicationContext context =
             new SmartSocietyApplicationContext(
                 createCollectiveKindRegistry(application),
-                components.getPeerManager());
+                components.getPeerManagerFactory());
 
-        return new Runtime(context, application);
+        return new Runtime(context, application).init(config);
     }
 
     @SuppressWarnings("unchecked")

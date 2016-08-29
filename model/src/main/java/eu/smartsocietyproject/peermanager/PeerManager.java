@@ -4,6 +4,7 @@ import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
+import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.CollectiveKind;
 import eu.smartsocietyproject.pf.ResidentCollective;
 
@@ -43,4 +44,8 @@ public interface PeerManager {
      * @return 
      */
     ResidentCollective readCollectiveById(String id) throws PeerManagerException;
+
+    interface Factory {
+        PeerManager create(ApplicationContext context);
+    }
 }

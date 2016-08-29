@@ -16,11 +16,11 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     private final PeerManager peerManager;
     private final ConcurrentHashMap<String, CBTBuilder> buildersByType = new ConcurrentHashMap<>();
 
-    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, PeerManager peerManager) {
+    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, PeerManager.Factory pmFactory) {
         Preconditions.checkNotNull(kindRegistry);
-        Preconditions.checkNotNull(peerManager);
+        Preconditions.checkNotNull(pmFactory);
         this.kindRegistry = kindRegistry;
-        this.peerManager = peerManager;
+        this.peerManager = pmFactory.create(this);
     }
 
     /** Retrieve the registry of Collective kinds with attribute schema description

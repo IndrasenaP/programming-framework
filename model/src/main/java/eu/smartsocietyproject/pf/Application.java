@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class Application {
-
     /** Application ID assigned by the SmartSociety during the application registration
      * @return
      */

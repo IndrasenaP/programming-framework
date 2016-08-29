@@ -7,14 +7,13 @@ import eu.smartsocietyproject.peermanager.PeerManager;
  *
  */
 public class SmartSocietyComponents {
-    private final PeerManager peerManager;
+    private final PeerManager.Factory pmFactory;
 
-
-    public SmartSocietyComponents(PeerManager peerManager) {
-        this.peerManager = peerManager;
+    public SmartSocietyComponents(PeerManager.Factory pmFactory) {
+        this.pmFactory = pmFactory;
     }
 
-    public PeerManager getPeerManager() {
-        return peerManager;
+    public PeerManager.Factory getPeerManagerFactory() {
+        return pmFactory;
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-/*
+/* TODO ADAPT TO NEW INTERFACE + FACTORY
 public class PeerManagerProxy implements PeerManager {
 
     private UriComponents collectiveById;

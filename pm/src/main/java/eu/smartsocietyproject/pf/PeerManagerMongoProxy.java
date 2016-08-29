@@ -54,35 +54,10 @@ public class PeerManagerMongoProxy implements PeerManager {
     private static ObjectMapper mapper = new ObjectMapper();
     private ApplicationContext context;
     private MongoDatabase db;
-    private MongodProcess mongoProcess;
-    private MongodExecutable mongodExecutable;
     private MongoCollection<Document> collectivesCollection;
     private MongoCollection<Document> peersCollection;
 
-    //todo: provide a constructor for passing in mongo
-    //todo: is persisting over shutdowns needed?
-    public PeerManagerMongoProxy(int mongoPort, ApplicationContext context) throws IOException {
-        this.context = context;
-        try {
-            MongodStarter starter = MongodStarter.getDefaultInstance();
-            IMongodConfig mongodConfig = new MongodConfigBuilder()
-                    .version(Version.Main.PRODUCTION)
-                    .net(new Net(mongoPort, Network.localhostIsIPv6()))
-                    .build();
-
-            mongodExecutable = starter.prepare(mongodConfig);
-            mongoProcess = mongodExecutable.start();
-
-            MongoClient mongoClient = new MongoClient("localhost", mongoPort);
-            db = mongoClient.getDatabase("smartSocietyLocalMongoDB");
-            loadCollection();
-        } catch (IOException ex) {
-            close();
-            throw ex;
-        }
-    }
-
-    public PeerManagerMongoProxy(ApplicationContext context, MongoDatabase db) {
+    private PeerManagerMongoProxy(ApplicationContext context, MongoDatabase db) {
         this.context = context;
         this.db = db;
         loadCollection();
@@ -97,11 +72,6 @@ public class PeerManagerMongoProxy implements PeerManager {
         return db;
     }
 
-    public void close() {
-        if (mongodExecutable != null) {
-            mongodExecutable.stop();
-        }
-    }
 
     public void persistPeer(PeerIntermediary peer) {
         peersCollection.insertOne(Document.parse(jsonToString(peer.toJson())));
@@ -197,5 +167,23 @@ public class PeerManagerMongoProxy implements PeerManager {
         CollectiveIntermediary collectiveIntermediary = CollectiveIntermediary.create(doc.toJson());
         return ResidentCollective
             .createFromIntermediary(context, Optional.empty(), collectiveIntermediary);
+    }
+
+    public static Factory factory(MongoDatabase db) {
+        return new Factory(db);
+    }
+
+
+    public static class Factory implements PeerManager.Factory {
+        private final MongoDatabase db;
+
+        private Factory(MongoDatabase db) {
+            this.db = db;
+        }
+
+        @Override
+        public PeerManager create(ApplicationContext context) {
+            return new PeerManagerMongoProxy(context, db);
+        }
     }
 }
