@@ -182,7 +182,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         }
 
         @Override
-        public PeerManager create(ApplicationContext context) {
+        public PeerManagerMongoProxy create(ApplicationContext context) {
             return new PeerManagerMongoProxy(context, db);
         }
     }

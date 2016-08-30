@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
+/*
 public class PeerManagerProxyTest {
 
     private static WireMockServer pm;
@@ -74,3 +75,4 @@ public class PeerManagerProxyTest {
     }
 
 }
+*/

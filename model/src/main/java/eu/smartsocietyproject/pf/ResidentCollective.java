@@ -22,16 +22,8 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
     }
 
     public ApplicationBasedCollective toApplicationBasedCollective() {
-        try {
-            return ApplicationBasedCollective
-                    .of(this.getContext(), this.getId(), this.getKindInstance(), this.getMembers())
-                    .withAttributes(getAttributes());
-        } catch (CollectiveCreationException e) {
-            throw new IllegalStateException(
-                    String.format(
-                            "Failed creation of an Application Based Collective from a Resident Collective: %s",
-                            toString()), e);
-        }
+        return ApplicationBasedCollective
+                .of(this.getContext(), this.getId(), this.getKindInstance(), this.getMembers(), getAttributes());
     }
 
     @Override

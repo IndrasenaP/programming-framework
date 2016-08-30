@@ -5,44 +5,46 @@
  */
 package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.client.MongoCollection;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
+import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
+import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
+import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
-import eu.smartsocietyproject.peermanager.helper.EntityHandler;
-import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
-import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
-import eu.smartsocietyproject.pf.attributes.IntegerAttribute;
-import eu.smartsocietyproject.pf.attributes.StringAttribute;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class PeerManagerMongoTest {
-
-
-
-
     private static final String expectedMemberTim = "tim";
     private static final String expectedMemberTom = "tom";
     private static final String expectedMemberTum = "tum";
+
+    private static final Collection<String> validMembersId =
+        ImmutableList.of(
+            expectedMemberTim,
+            expectedMemberTom,
+            expectedMemberTum
+        );
 
     private static final String expPeerAge = "age";
     private static final String expPeerComment = "comment";
@@ -63,10 +65,15 @@ public class PeerManagerMongoTest {
     private static final String expCommentBlab = "blab";
 
     private static final CollectiveKind collectiveKind =
-        new CollectiveKind("defaultKind",
-                           ImmutableMap.of(
-                               expAttCountry, AttributeType.from("uk")
-                           ));
+        CollectiveKind
+            .builder("defaultKind")
+            .addAttribute(expAttLanguage, AttributeType.from(""))
+            .addAttribute(expAttCountry, AttributeType.from(""))
+            .addAttribute(expAttSince, AttributeType.from(0))
+            .build();
+
+    private static final CollectiveKindRegistry registry =
+        CollectiveKindRegistry.builder().register(collectiveKind).build();
 
     private static final ApplicationContext context =
         new ApplicationContext() {
@@ -82,7 +89,7 @@ public class PeerManagerMongoTest {
 
             @Override
             public CollectiveKindRegistry getKindRegistry() {
-                throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
+                return registry;
             }
 
             @Override
@@ -96,6 +103,8 @@ public class PeerManagerMongoTest {
             }
         };
 
+    MongoRunner runner;
+
     private PeerManagerMongoProxy pm;
 
     public PeerManagerMongoTest() {
@@ -106,56 +115,58 @@ public class PeerManagerMongoTest {
     }
 
     @Before
-    public void setUp() throws IOException {
-        pm = new PeerManagerMongoProxy(6666, context);
+    public void setUp() throws IOException, Collective.CollectiveCreationException {
+        runner = MongoRunner.withPort(6666);
+        pm = PeerManagerMongoProxy.factory(runner.getMongoDb()).create(context);
         createPeers(pm);
         createCollectives(pm);
     }
 
     @After
     public void tearDown() {
-        pm.close();
+        runner.close();
     }
 
-    private void createCollectives(PeerManagerMongoProxy pm) {
+    private void createCollectives(PeerManagerMongoProxy pm) throws Collective.CollectiveCreationException {
         pm.persistCollective(
                 addAttributesToCollective(
-                        this.expColl1Key,
-                        this.expLangEnglish,
-                        this.expCountryA));
+                    this.expColl1Key,
+                    this.expLangEnglish,
+                    this.expCountryA).toApplicationBasedCollective());
 
         pm.persistCollective(
                 addAttributesToCollective(
-                        this.expColl2Key,
-                        this.expLangGerman,
-                        this.expCountryA));
+                    this.expColl2Key,
+                    this.expLangGerman,
+                    this.expCountryA).toApplicationBasedCollective());
 
         pm.persistCollective(
                 addAttributesToCollective(
-                        this.expColl3Key,
-                        this.expLangEnglish,
-                        this.expCountryE));
+                    this.expColl3Key,
+                    this.expLangEnglish,
+                    this.expCountryE).toApplicationBasedCollective());
     }
 
     private Collective addAttributesToCollective(String id,
-            String language,
-            String country) {
-        EntityHandler.Builder builder = ApplicationBasedCollective.empty(context, id, "kind");
-        builder.addAttribute("id", StringAttribute.create(id));
-        builder.addAttribute(this.expAttLanguage, StringAttribute.create(language));
-        builder.addAttribute(this.expAttCountry, StringAttribute.create(country));
-        builder.addAttribute(this.expAttSince, AttributeType.from(this.expSince5));
-        builder.addAttributeNode(MongoConstants.members, addPeersToCollective());
-        return CollectiveIntermediary.create(builder.build());
+                                                 String language,
+                                                 String country) throws Collective.CollectiveCreationException {
+        return
+            ApplicationBasedCollective
+                .empty(context, id, "defaultKind")
+                .withAttributes(
+                    ImmutableMap.of(
+                        expAttLanguage, AttributeType.from(language),
+                        expAttCountry, AttributeType.from(country),
+                        expAttSince, AttributeType.from(this.expSince5)))
+
+                .makeMembersVisible()
+                .withMembers(
+                    ImmutableList.of(
+                        Member.of(this.expectedMemberTim, ""),
+                        Member.of(this.expectedMemberTom, ""),
+                        Member.of(this.expectedMemberTum, "")));
     }
 
-    private MembersAttribute addPeersToCollective() {
-        MembersAttribute.Builder membersCollective = MembersAttribute.builder();
-        membersCollective.addMember(this.expectedMemberTim);
-        membersCollective.addMember(this.expectedMemberTom);
-        membersCollective.addMember(this.expectedMemberTum);
-        return membersCollective.build();
-    }
 
     private void createPeers(PeerManagerMongoProxy pm) {
         pm.persistPeer(getPeer(expectedMemberTim,
@@ -168,27 +179,45 @@ public class PeerManagerMongoTest {
 
     private PeerIntermediary getPeer(String userName, int age, String comment) {
         PeerIntermediary.Builder builder = PeerIntermediary.builder();
-        builder.addAttribute("id", StringAttribute.create(userName));
-        builder.addAttribute(this.expPeerAge, IntegerAttribute.create(age));
-        builder.addAttribute(this.expPeerComment, StringAttribute.create(comment));
+        builder.addAttribute("id", AttributeType.from(userName));
+        builder.addAttribute(this.expPeerAge, AttributeType.from(age));
+        builder.addAttribute(this.expPeerComment, AttributeType.from(comment));
         return PeerIntermediary.create(builder.build());
     }
 
-    private void assertPeerName(String actualMember) {
-        assertTrue(this.expectedMemberTim.equals(actualMember)
-                || this.expectedMemberTom.equals(actualMember)
-                || this.expectedMemberTum.equals(actualMember));
+    private void assertMembers(Collection<Member> members, Collection<String> expectedPeerIds) {
+        Set<String> membersIds =
+            members
+                .stream()
+                .map(m -> m.getPeerId())
+                .collect(Collectors.toSet());
+        assertPeersId(membersIds);
+    }
+
+    private void assertMembers(Collection<Member> members) {
+        assertMembers(members, validMembersId);
+    }
+
+    private void assertPeersId(Collection<String> memberIds, Collection<String> expectedPeerIds) {
+        assertThat(memberIds)
+            .isSubsetOf(expectedPeerIds);
+    }
+
+    private void assertPeersId(Collection<String> memberIds) {
+        assertPeersId(memberIds, validMembersId);
     }
 
     @Test
-    public void tesLoadPeers() throws IOException {
+    public void testLoadPeers() throws IOException {
         MongoCollection<Document> peersCollection = pm.getMongoDb()
                 .getCollection(MongoConstants.peer);
 
-        assertEquals(3, peersCollection.count());
+        assertThat(peersCollection.count()).isEqualTo(3);
+
         Document peer = peersCollection.find().first();
         assertNotNull(peer);
-        assertPeerName(peer.getString(MongoConstants.id));
+        assertThat(peer.getString(MongoConstants.id))
+            .isIn(validMembersId);
     }
 
     @Test
@@ -202,98 +231,90 @@ public class PeerManagerMongoTest {
         Document actualCollective = collectivesCollection.find().first();
         assertEquals(this.expColl1Key, actualCollective.get(MongoConstants.id));
 
-        List<String> actualMembers = actualCollective
-                .get(MongoConstants.members, List.class);
-        assertEquals(3, actualMembers.size());
-        for (String actualMember : actualMembers) {
-            assertPeerName(actualMember);
-        }
+        String actualMembersString = actualCollective
+                .get(MongoConstants.members, String.class);
+
+        List<Member> actualMembers =
+            MembersAttribute.createFromJson(actualMembersString).getMembers();
+
+        assertMembers(actualMembers);
 
         int expectedCount = 1 + 1 + 1 + 3;//mongoId, collId, members, 3 attributes
 
-        assertEquals(expectedCount, actualCollective.size());
-        assertTrue(actualCollective.containsKey(this.expAttCountry));
-        assertTrue(actualCollective.containsKey(this.expAttLanguage));
-        assertTrue(actualCollective.containsKey(this.expAttSince));
+        assertThat(actualCollective).hasSize(expectedCount);
 
-        assertEquals(this.expCountryA, actualCollective.get(this.expAttCountry));
-        assertEquals(this.expLangEnglish, actualCollective.get(this.expAttLanguage));
-        assertEquals(this.expSince5, actualCollective.get(this.expAttSince));
+        assertThat(actualCollective).containsKeys(
+            this.expAttCountry,
+            this.expAttLanguage,
+            this.expAttSince);
+
+        assertThat(actualCollective.get(this.expAttCountry)).isEqualTo(expCountryA);
+        assertThat(actualCollective.get(this.expAttLanguage)).isEqualTo(expLangEnglish);
+        assertThat(actualCollective.get(this.expAttSince)).isEqualTo(expSince5);
     }
 
     @Test
-    public void testReadCollective() throws IOException {
-        CollectiveIntermediary collective
-                = pm.readCollectiveById(this.expColl1Key);
-        assertNotNull(collective);
+    public void testReadCollective() throws IOException, PeerManagerException {
+        ResidentCollective collective = pm.readCollectiveById(this.expColl1Key);
+        assertMembers(collective.getMembers());
 
-        Collection<Peer> members = collective.getMembers();
-        assertEquals(3, members.size());
-        for (Peer actualMember : members) {
-            assertPeerName(actualMember.getId());
-        }
-
-        StringAttribute actualCountry = StringAttribute
-                .createFromJson(collective.getAttribute(this.expAttCountry));
-        assertEquals(this.expCountryA, actualCountry.getValue());
-
-        StringAttribute actualLanguage = StringAttribute
-                .createFromJson(collective.getAttribute(this.expAttLanguage));
-        assertEquals(this.expLangEnglish, actualLanguage.getValue());
-
-        IntegerAttribute actualSince = IntegerAttribute
-                .createFromJson(collective.getAttribute(this.expAttSince));
-        assertEquals(this.expSince5, actualSince.getValue().intValue());
+        /* TODO readCollectiveById without kind returns a collective without attributes,
+           we should add a version with kind and then check for the right attributes */
+        assertThat(collective.getAttributes()).isEmpty();
+        /*
+        assertThat(collective.getAttribute(this.expAttCountry))
+            .contains(AttributeType.from(this.expCountryA));
+        assertThat(collective.getAttribute(this.expAttLanguage))
+            .contains(AttributeType.from(this.expLangEnglish));
+        assertThat(collective.getAttribute(this.expAttSince))
+            .contains(AttributeType.from(this.expSince5));
+            */
     }
 
     @Test
     public void testReadCollectiveByPeerQuery() throws IOException {
-        CollectiveIntermediary res = pm
+        ApplicationBasedCollective res = pm
                 .createCollectiveFromQuery(PeerQuery
                         .create()
                         .withRule(QueryRule
                                 .create(this.expPeerAge)
                                 .withOperation(QueryOperation.equals)
-                                .withValue(IntegerAttribute.create(29))));
+                                .withValue(AttributeType.from(29))));
 
         assertNotNull(res);
-        assertEquals(2, res.getMembers().size());
+        Collection<Member> members = res.getMembers();
+        assertThat(members).hasSize(2);
 
-        for (Peer peer : res.getMembers()) {
-            assertTrue(expectedMemberTom.equals(peer.getId())
-                    || expectedMemberTum.equals(peer.getId()));
-        }
+        assertMembers(members, ImmutableList.of(expectedMemberTom, expectedMemberTum));
     }
 
     @Test
     public void testReadCollectiveByCollectiveQuery() throws IOException {
-        List<CollectiveIntermediary> res = pm
-                .findCollectives(CollectiveQuery
-                        .create()
-                        .withRule(QueryRule
-                                .create(this.expAttLanguage)
-                                .withOperation(QueryOperation.equals)
-                                .withValue(StringAttribute.create(this.expLangEnglish))));
+        CollectiveQuery query =
+            CollectiveQuery
+                .create()
+                .withRule(QueryRule
+                              .create(this.expAttLanguage)
+                              .withOperation(QueryOperation.equals)
+                              .withValue(AttributeType.from(this.expLangEnglish)));
+        List<ResidentCollective> res = pm.findCollectives(query);
+        assertThat(res).hasSize(2);
 
-        assertEquals(2, res.size());
+        for (ResidentCollective coll : res) {
+            Collection<Member> members = coll.getMembers();
+            assertThat(members).hasSize(3);
+            assertMembers(members);
 
-        for (CollectiveIntermediary coll : res) {
-            assertEquals(3, coll.getMembers().size());
 
-            for (Peer peer : coll.getMembers()) {
-                assertPeerName(peer.getId());
-            }
 
-            assertEquals(this.expLangEnglish,
-                    StringAttribute
-                            .createFromJson(coll.getAttribute(this.expAttLanguage))
-                            .getValue());
+            assertThat(coll.getAttribute(this.expAttLanguage))
+                .isEqualTo(AttributeType.from(this.expLangEnglish));
 
-            String expectedCountry = StringAttribute
-                    .createFromJson(coll.getAttribute(this.expAttCountry)).getValue();
 
-            assertTrue(this.expCountryA.equals(expectedCountry)
-                    || this.expCountryE.equals(expectedCountry));
+            Optional<Attribute> actualCountry = coll.getAttribute(this.expAttCountry);
+            assertThat(actualCountry).isPresent();
+            assertThat(actualCountry.get())
+                .isIn(AttributeType.from(expCountryE), AttributeType.from(expCountryA));
         }
     }
 }

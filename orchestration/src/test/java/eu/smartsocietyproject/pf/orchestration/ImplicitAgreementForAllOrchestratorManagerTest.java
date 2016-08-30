@@ -3,6 +3,7 @@ package eu.smartsocietyproject.pf.orchestration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
@@ -18,28 +19,47 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
     CollectiveKind basicKind = CollectiveKind.builder(basicKindId).build();
     CollectiveKindRegistry kindRegistry = CollectiveKindRegistry.builder().register(basicKind).build();
 
-    PeerManager peerManager = new PeerManager() {
-        @Override
-        public void persistCollective(CollectiveIntermediary collective) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+    PeerManager.Factory peerManagerFactory =
+        new PeerManager.Factory() {
+            @Override
+            public PeerManager create(ApplicationContext context) {
+               return
+                   new PeerManager() {
 
-        @Override
-        public CollectiveIntermediary readCollectiveById(String id) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+                       @Override
+                       public ResidentCollective readCollectiveById(String id) {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
 
-        @Override
-        public List<CollectiveIntermediary> findCollectives(CollectiveQuery query) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+                       @Override
+                       public void persistCollective(ApplicationBasedCollective collective) {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
 
-        @Override
-        public CollectiveIntermediary createCollectiveFromQuery(PeerQuery query) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-    };
-    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManager);
+                       @Override
+                       public List<ResidentCollective> findCollectives(CollectiveQuery query) {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
+
+
+                       @Override
+                       public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, String kind)
+                           throws PeerManagerException {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
+
+                       @Override
+                       public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query)
+                           throws PeerManagerException {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
+                   };
+
+            }
+        };
+
+
+    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManagerFactory);
 
     @Test
     public void testCompose() throws Exception {

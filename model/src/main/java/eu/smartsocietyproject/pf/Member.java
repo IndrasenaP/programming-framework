@@ -7,7 +7,7 @@ public class Member {
     private String peerId;
     private String role;
 
-    public Member(String peerId, String role) {
+    private Member(String peerId, String role) {
         this.peerId = peerId;
         this.role = role;
     }
@@ -20,6 +20,9 @@ public class Member {
         return role;
     }
 
+    public static Member of(String peerId, String role) {
+        return new Member(peerId, role);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -44,4 +47,5 @@ public class Member {
                           .add("role", role)
                           .toString();
     }
+
 }

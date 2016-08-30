@@ -5,10 +5,7 @@
  */
 package eu.smartsocietyproject.pf.helper;
 
-import eu.smartsocietyproject.pf.Peer;
-import eu.smartsocietyproject.pf.ApplicationBasedCollective;
-import eu.smartsocietyproject.pf.Attribute;
-import eu.smartsocietyproject.pf.Collective;
+import eu.smartsocietyproject.pf.*;
 
 import java.util.Collection;
 import java.util.Map;
@@ -20,7 +17,7 @@ import java.util.Map;
 public class TestCollective extends Collective.Testing {
     
     public TestCollective(String id,
-            Collection<Peer> members,
+            Collection<Member> members,
             Map<String, ? extends Attribute> attributes) {
         super(null, id, null, members, attributes);
     }

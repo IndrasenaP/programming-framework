@@ -51,7 +51,7 @@ public class MembersAttribute extends EntityCore  {
         /* TODO This should raise a deserialization error when id or role are not present */
         List<Member> members=
             StreamSupport.stream(root.spliterator(), false)
-                .map(node -> new Member(node.get(idFieldName).asText(), node.get(roleFieldName).asText()))
+                .map(node -> Member.of(node.get(idFieldName).asText(), node.get(roleFieldName).asText()))
                 .collect(Collectors.toList());
 
         return ImmutableList.copyOf(members);

@@ -22,4 +22,10 @@ public abstract class Attribute {
     }
 
     public abstract JsonNode toJson();
+
+    @Override
+    public abstract boolean equals(Object o);
+
+    @Override
+    public abstract int hashCode();
 }

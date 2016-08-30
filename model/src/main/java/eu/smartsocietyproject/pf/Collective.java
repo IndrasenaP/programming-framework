@@ -71,8 +71,12 @@ public abstract class Collective {
      *
      * @return ImmutableSet<Member>
      */
-    public ImmutableSet<Member> getMembers() {
+    ImmutableSet<Member> getMembers() {
         return members;
+    }
+
+    ApplicationBasedCollective withMembers(Collection<Member> members) {
+        return ApplicationBasedCollective.of(getContext(), getId(), getKindInstance(), members, getAttributes());
     }
 
     @Deprecated
@@ -223,8 +227,7 @@ public abstract class Collective {
                 .copy(toKind);
         ApplicationBasedCollective secondaryOperable
                 = secondary.toApplicationBasedCollective()
-                .copy(toKind)
-                .withOnlyUserAttributes(ImmutableMap.of());
+                .copy(toKind);
 
         primaryOperable = primaryOperable.copy(toKind);
         secondaryOperable = secondaryOperable.copy(toKind);
@@ -311,8 +314,7 @@ public abstract class Collective {
                 .copy(toKind);
         ApplicationBasedCollective secondaryOperable
                 = secondary.toApplicationBasedCollective()
-                .copy(toKind)
-                .withOnlyUserAttributes(ImmutableMap.of());
+                .copy(toKind);
 
         return primaryOperable.intersection(secondaryOperable);
     }
@@ -370,6 +372,11 @@ public abstract class Collective {
         }
 
         @Override
+        public ApplicationBasedCollective withMembers(Collection<Member> members) {
+            return super.withMembers(members);
+        }
+
+        @Override
         public ImmutableSet<Member> getMembers(){
             return super.getMembers();
         }
@@ -393,16 +400,9 @@ public abstract class Collective {
         }
 
         public ApplicationBasedCollective toApplicationBasedCollective(){
-            try {
-                return ApplicationBasedCollective
-                        .of(this.getContext(), this.getId(), this.getKindInstance(), this.getMembers())
-                        .withAttributes(getAttributes());
-            } catch (CollectiveCreationException e) {
-                throw new IllegalStateException(
-                        String.format(
-                                "Failed creation of an Application Based Collective from a Resident Collective: %s",
-                                toString()), e);
-            }
+            return ApplicationBasedCollective
+                    .of(this.getContext(), this.getId(), this.getKindInstance(), this.getMembers(), this.getAttributes());
+
         }
     }
 }
