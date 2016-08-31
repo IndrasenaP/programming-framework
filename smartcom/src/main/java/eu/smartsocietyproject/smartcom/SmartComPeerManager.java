@@ -16,6 +16,8 @@ import at.ac.tuwien.dsg.smartcom.model.DeliveryPolicy;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.IdentifierType;
 import at.ac.tuwien.dsg.smartcom.model.PeerInfo;
+import at.ac.tuwien.dsg.smartcom.model.PrivacyPolicy;
+import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import java.util.ArrayList;
@@ -31,14 +33,21 @@ public class SmartComPeerManager implements PeerAuthenticationCallback, PeerInfo
     
     @Override
     public boolean authenticate(Identifier peerId, String password) throws PeerAuthenticationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //todo-sv: figure out how to integrate properly with local and remote PM
+        return true;
     }
 
     @Override
     public PeerInfo getPeerInfo(Identifier id) throws NoSuchPeerException {
         //PeerInfo info = new PeerInfo
-        //this.peerManager.
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        DeliveryAddressesAttribute addresses = DeliveryAddressesAttribute
+                .createFromPeerIntermediary(this.peerManager
+                        .readPeerById(id.getId()));
+        
+        return new PeerInfo(id, 
+                DeliveryPolicy.Peer.AT_LEAST_ONE, 
+                ImmutableList.<PrivacyPolicy>of(), 
+                addresses.getChannels());
     }
 
     @Override
@@ -52,9 +61,7 @@ public class SmartComPeerManager implements PeerAuthenticationCallback, PeerInfo
         
         //todo-sv: which delivery policy to set?
         return new CollectiveInfo(
-                new Identifier(IdentifierType.COLLECTIVE, 
-                    coll.getId(), 
-                    null), 
+                collective,
                 peerIdentifiers, 
                 DeliveryPolicy.Collective.TO_ANY);
     }

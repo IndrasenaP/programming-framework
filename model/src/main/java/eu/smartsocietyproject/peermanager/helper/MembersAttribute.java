@@ -36,7 +36,6 @@ public class MembersAttribute extends EntityCore implements Attribute {
 //    }
 
     public List<Peer> getPeers() {
-        List<Peer> peers = new ArrayList<>();
         ImmutableList.Builder<Peer> builder = ImmutableList.builder();
         if (this.root.isArray()) {
             for (JsonNode node : root) {

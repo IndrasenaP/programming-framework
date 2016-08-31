@@ -2,10 +2,13 @@ package eu.smartsocietyproject.peermanager;
 
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import java.util.List;
 
 public interface PeerManager {
+    
+    PeerIntermediary readPeerById(String peerId);
 
     /**
      * This will persist the collective with the peer manager.
