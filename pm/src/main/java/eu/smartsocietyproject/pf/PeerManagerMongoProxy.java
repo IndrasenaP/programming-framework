@@ -80,7 +80,8 @@ public class PeerManagerMongoProxy implements PeerManager {
     @Override
     public void persistCollective(ApplicationBasedCollective collective) {
         CollectiveIntermediary ci = toCollectiveIntermediary(collective);
-        collectivesCollection.insertOne(Document.parse(jsonToString(ci.toJson())));
+        String json = jsonToString(ci.toJson());
+        collectivesCollection.insertOne(Document.parse(json));
     }
 
     /* TODO raise exception */
@@ -93,6 +94,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         return "";
     }
 
+    //todo-sv!attributes are not passed in!
     private CollectiveIntermediary toCollectiveIntermediary(Collective collective) {
         MembersAttribute.Builder builder = MembersAttribute.builder();
         for (Member member : collective.makeMembersVisible().getMembers()) {
