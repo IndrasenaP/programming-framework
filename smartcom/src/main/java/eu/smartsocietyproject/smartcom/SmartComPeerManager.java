@@ -18,7 +18,6 @@ import at.ac.tuwien.dsg.smartcom.model.IdentifierType;
 import at.ac.tuwien.dsg.smartcom.model.PeerInfo;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.pf.ResidentCollective;
 
 import java.util.ArrayList;
