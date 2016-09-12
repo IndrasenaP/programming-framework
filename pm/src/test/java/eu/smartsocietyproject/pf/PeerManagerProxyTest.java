@@ -7,7 +7,7 @@ package eu.smartsocietyproject.pf;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.pf.helper.JSONCollectiveIntermediary;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;

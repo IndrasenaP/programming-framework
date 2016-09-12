@@ -2,7 +2,7 @@ package eu.smartsocietyproject.pf;
 
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
+import eu.smartsocietyproject.pf.helper.JSONCollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 
 import java.util.List;

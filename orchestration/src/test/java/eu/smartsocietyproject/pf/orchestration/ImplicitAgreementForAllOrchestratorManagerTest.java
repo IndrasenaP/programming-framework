@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.pf.*;

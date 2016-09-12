@@ -1,11 +1,9 @@
 package eu.smartsocietyproject.peermanager;
 
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.ApplicationContext;
-import eu.smartsocietyproject.pf.CollectiveKind;
 import eu.smartsocietyproject.pf.ResidentCollective;
 
 import java.util.List;
@@ -17,7 +15,7 @@ public interface PeerManager {
      * This will persist the collective with the peer manager.
      * @param collective 
      */
-    void persistCollective(ApplicationBasedCollective collective);
+    void persistCollective(ApplicationBasedCollective collective) throws PeerManagerException;
  
     /**
      * This function will load existing collectives which fit the given collective 
@@ -25,7 +23,7 @@ public interface PeerManager {
      * @param query
      * @return 
      */
-    List<ResidentCollective> findCollectives(CollectiveQuery query);
+    List<ResidentCollective> findCollectives(CollectiveQuery query) throws PeerManagerException;
 
     /**
      * This function will load existing peers which fit the given peer query and
@@ -37,11 +35,12 @@ public interface PeerManager {
     ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, String kind) throws PeerManagerException;
 
     ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query) throws PeerManagerException;
-
+    
     /**
      * Reads a already persisted collective via the given id.
      * @param id
-     * @return 
+     * @return
+     * @throws PeerManagerException 
      */
     ResidentCollective readCollectiveById(String id) throws PeerManagerException;
 

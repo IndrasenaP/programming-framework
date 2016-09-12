@@ -10,12 +10,13 @@ import com.google.common.collect.ImmutableMap;
 import com.mongodb.client.MongoCollection;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
-import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
-import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
+import eu.smartsocietyproject.pf.helper.attributes.MongoMembersAttribute;
+import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
+import eu.smartsocietyproject.pf.helper.EntityHandler;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -115,7 +116,7 @@ public class PeerManagerMongoTest {
     }
 
     @Before
-    public void setUp() throws IOException, Collective.CollectiveCreationException {
+    public void setUp() throws IOException, Collective.CollectiveCreationException, PeerManagerException {
         runner = MongoRunner.withPort(6666);
         pm = PeerManagerMongoProxy.factory(runner.getMongoDb()).create(context);
         createPeers(pm);
@@ -127,7 +128,7 @@ public class PeerManagerMongoTest {
         runner.close();
     }
 
-    private void createCollectives(PeerManagerMongoProxy pm) throws Collective.CollectiveCreationException {
+    private void createCollectives(PeerManagerMongoProxy pm) throws Collective.CollectiveCreationException, PeerManagerException {
         pm.persistCollective(
                 addAttributesToCollective(
                     this.expColl1Key,
@@ -168,7 +169,7 @@ public class PeerManagerMongoTest {
     }
 
 
-    private void createPeers(PeerManagerMongoProxy pm) {
+    private void createPeers(PeerManagerMongoProxy pm) throws PeerManagerException {
         pm.persistPeer(getPeer(expectedMemberTim,
                 this.expAge27, this.expCommentBlub));
         pm.persistPeer(getPeer(expectedMemberTom,
@@ -177,8 +178,8 @@ public class PeerManagerMongoTest {
                 this.expAge29, this.expCommentBlab));
     }
 
-    private PeerIntermediary getPeer(String userName, int age, String comment) {
-        PeerIntermediary.Builder builder = PeerIntermediary.builder();
+    private PeerIntermediary getPeer(String userName, int age, String comment) throws PeerManagerException {
+        EntityHandler.Builder builder = EntityHandler.builder();
         builder.addAttribute("id", AttributeType.from(userName));
         builder.addAttribute(this.expPeerAge, AttributeType.from(age));
         builder.addAttribute(this.expPeerComment, AttributeType.from(comment));
@@ -220,8 +221,14 @@ public class PeerManagerMongoTest {
             .isIn(validMembersId);
     }
 
+    /**
+     * This test should not use the parsing logic we create. It tests if we 
+     * write correctly to the MongoDB.
+     * @throws IOException
+     * @throws PeerManagerException 
+     */
     @Test
-    public void testPersistCollective() throws IOException {
+    public void testPersistCollective() throws IOException, PeerManagerException {
         //load actual collective from DB
         MongoCollection<Document> collectivesCollection = pm.getMongoDb()
                 .getCollection(MongoConstants.collection);
@@ -230,14 +237,14 @@ public class PeerManagerMongoTest {
 
         Document actualCollective = collectivesCollection.find().first();
         assertEquals(this.expColl1Key, actualCollective.get(MongoConstants.id));
-
-        String actualMembersString = actualCollective
-                .get(MongoConstants.members, String.class);
-
-        List<Member> actualMembers =
-            MembersAttribute.createFromJson(actualMembersString).getMembers();
-
-        assertMembers(actualMembers);
+        
+        List<Document> actualMembers = actualCollective
+                .get(MongoConstants.members, ArrayList.class);
+        
+        actualMembers.stream()
+                .map(peer -> 
+                        assertThat(peer.getString(MongoConstants.id))
+                                .isIn(validMembersId));
 
         int expectedCount = 1 + 1 + 1 + 3;//mongoId, collId, members, 3 attributes
 
@@ -257,22 +264,17 @@ public class PeerManagerMongoTest {
     public void testReadCollective() throws IOException, PeerManagerException {
         ResidentCollective collective = pm.readCollectiveById(this.expColl1Key);
         assertMembers(collective.getMembers());
-
-        /* TODO readCollectiveById without kind returns a collective without attributes,
-           we should add a version with kind and then check for the right attributes */
-        assertThat(collective.getAttributes()).isEmpty();
-        /*
+        
         assertThat(collective.getAttribute(this.expAttCountry))
             .contains(AttributeType.from(this.expCountryA));
         assertThat(collective.getAttribute(this.expAttLanguage))
             .contains(AttributeType.from(this.expLangEnglish));
         assertThat(collective.getAttribute(this.expAttSince))
             .contains(AttributeType.from(this.expSince5));
-            */
     }
 
     @Test
-    public void testReadCollectiveByPeerQuery() throws IOException {
+    public void testReadCollectiveByPeerQuery() throws IOException, PeerManagerException {
         ApplicationBasedCollective res = pm
                 .createCollectiveFromQuery(PeerQuery
                         .create()
@@ -289,7 +291,7 @@ public class PeerManagerMongoTest {
     }
 
     @Test
-    public void testReadCollectiveByCollectiveQuery() throws IOException {
+    public void testReadCollectiveByCollectiveQuery() throws IOException, PeerManagerException {
         CollectiveQuery query =
             CollectiveQuery
                 .create()
@@ -308,7 +310,7 @@ public class PeerManagerMongoTest {
 
 
             assertThat(coll.getAttribute(this.expAttLanguage))
-                .isEqualTo(AttributeType.from(this.expLangEnglish));
+                .contains(AttributeType.from(this.expLangEnglish));
 
 
             Optional<Attribute> actualCountry = coll.getAttribute(this.expAttCountry);

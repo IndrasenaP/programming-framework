@@ -1,10 +1,10 @@
 package eu.smartsocietyproject.pf;
 
 import com.google.common.collect.ImmutableMap;
+import eu.smartsocietyproject.peermanager.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 
 import java.util.Collection;
 import java.util.Map;

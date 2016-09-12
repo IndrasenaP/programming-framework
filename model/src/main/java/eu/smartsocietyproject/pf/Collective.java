@@ -92,9 +92,8 @@ public abstract class Collective {
     
     public Optional<Attribute> getAttribute(String name) {
         Attribute attribute = attributes.get(name);
-        return attribute != null
-                ? Optional.of(attribute)
-                : Optional.empty();
+        boolean test = attribute != null;
+        return test ? Optional.of(attribute) : Optional.empty();
     }
 
     @Deprecated
