@@ -51,18 +51,18 @@ public class EntityHandler extends EntityCore {
      * @param name
      * @param type
      * @return
-     * @throws NullPointerException
+     * @throws PeerManagerException
      */
-    public BasicAttribute getAttribute(String name, AttributeType type) throws PeerManagerException {
+    @SuppressWarnings("unchecked")
+    public <T> BasicAttribute<T> getAttribute(String name, AttributeType type) throws PeerManagerException {
         Optional<Attribute> att = this.getAttribute(name);
 
         if (att.isPresent()
                 && att.get() instanceof BasicAttribute
                 && att.get().getType().equals(type)) {
-            return (BasicAttribute) att.get();
+            return (BasicAttribute<T>) att.get();
         }
 
-        //todo-sv: find better exception type
         throw new PeerManagerException(
                 String.format("Attribute %s was not present or of wrong type!", name));
     }
@@ -168,122 +168,4 @@ public class EntityHandler extends EntityCore {
             return new EntityHandler(node);
         }
     }
-
-    //todo-sv: remove
-    //WARNING: OLD CODE WILL SOON BE REMOVED
-    /**
-     * This will allow directly adding the {@link JsonNode} of an attribute to
-     * this object.
-     *
-     * This will replace the old value if any existed.
-     *
-     * @param name - the name of the attribute to add
-     * @param attribute - the attribute object
-     */
-    /**
-     * This will allow setting any attribute value.
-     *
-     * The attribute value will retrieved through the {@link Attribute#toJson()}
-     * function.
-     *
-     * This will replace the old value if any existed.
-     *
-     * @param name - the name of the attribute to add
-     * @param attribute - the attribute object
-     */
-//    protected void addAttributeValue(String name, Attribute attribute) {
-//        //todo-sv:add exception for error handling
-//        if(this.root.isObject()) {
-//            try {
-//                JsonNode node = mapper.readTree(attribute.toJson());
-//                ((ObjectNode)root).set(name, node);
-//            } catch (IOException ex) {
-//                Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//    }
-    /**
-     * This function allows you setting a certain attribute to this entity.
-     *
-     * Manipulating the ID of the entity is not possible by this function.
-     *
-     * This will replace the old value if any existed.
-     *
-     * @param name - the name of the attribute to add
-     * @param attribute - the attribute object
-     */
-//    public void addAttribute(String name, Attribute attribute) {
-//        if(this.keyId.equals(name)) {
-//           return; 
-//        }
-//        
-//        addAttributeValue(name, attribute);
-//    }
-    //    protected void setId(String id) {
-//        this.addAttributeValue(this.keyId, StringAttribute.create(id));
-//    }
-    //todo-sv: is direct access to the id in this general class really a good idea?
-    /**
-     * Returns the id of the represented object if existing.
-     *
-     * @return - id or empty string
-     */
-//    public String getId() {
-//        if(this.keyId.isEmpty()) {
-//            return "";
-//        }
-//        
-//        return this.getAttributeValue(keyId, StringAttribute.create()).getValue();
-//    }
-    /**
-     * Allows unrestricted access to the attributes in the JSON structure.
-     *
-     * @param <T> - type of the actual attribute passed in
-     * @param name - the name of the attribute to retrieve
-     * @param attribute - the attribute object into which to parse the attribute
-     * @return - returns the passed in attribute with data if any was found
-     */
-//    protected <T extends Attribute> T getAttributeValue(String name, T attribute) {
-//        try {
-//            attribute.parseJson(mapper
-//                    .writerWithDefaultPrettyPrinter()
-//                    .writeValueAsString(root.path(name)));
-//        } catch (JsonProcessingException ex) {
-//            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return attribute;
-//    }
-    /**
-     * Allows for directly setting the {@link JsonNode} into attributes that
-     * work with the same approach.
-     *
-     * @param <T> - type of the actual attribute passed in
-     * @param name - the name of the attribute to retrieve
-     * @param attribute - the attribute object into which to parse the attribute
-     * @return - returns the passed in attribute with data if any was found
-     */
-//    protected <T extends EntityCore> T getAttributeNode(String name, T attribute) {
-//        attribute.setNode(root.path(name));
-//        return attribute;
-//    }
-    /**
-     * Will return the requested attribute if it exists. You can not request the
-     * ID this way. The attribute object will be populated by using the
-     * {@link Attribute#parseJson(java.lang.String)} function.
-     *
-     * @param <T> - type of the actual attribute passed in
-     * @param name - the name of the attribute to retrieve
-     * @param attribute - the attribute object into which to parse the attribute
-     * @return - returns the passed in attribute with data if any was found
-     */
-//    public <T extends Attribute> T getAttribute(String name, T attribute) {
-//        if(this.keyId.equals(name)) {
-//            return attribute;
-//        }
-//        
-//        //todo-sv: why not allow access to the id here? it can not be manipulated
-//        //this way due to the string conversion?
-//        
-//        return this.getAttributeValue(name, attribute);
-//    }
 }

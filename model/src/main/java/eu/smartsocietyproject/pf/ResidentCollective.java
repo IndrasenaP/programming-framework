@@ -35,7 +35,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
     static ResidentCollective createFromIntermediary(
         ApplicationContext context,
         Optional<String> kind,
-        CollectiveIntermediary intermediary) {
+        CollectiveIntermediary intermediary) throws PeerManagerException {
             CollectiveKind collectiveKind =
                 kind.flatMap( k -> context.getKindRegistry().get(k))
                 .orElse(CollectiveKind.EMPTY);

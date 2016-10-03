@@ -18,5 +18,5 @@ import java.util.Map;
 public interface CollectiveIntermediary {
     String getId();
     Collection<Member> getMembers();
-    Map<String, Attribute> getAttributes(CollectiveKind kind);
+    Map<String, Attribute> getAttributes(CollectiveKind kind) throws PeerManagerException;
 }

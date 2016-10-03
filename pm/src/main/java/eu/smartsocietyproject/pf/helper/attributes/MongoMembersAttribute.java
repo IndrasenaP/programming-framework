@@ -8,14 +8,13 @@ package eu.smartsocietyproject.pf.helper.attributes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.pf.Member;
 import eu.smartsocietyproject.pf.AttributeType;
-import eu.smartsocietyproject.pf.BasicAttribute;
 import eu.smartsocietyproject.pf.helper.EntityCore;
 import eu.smartsocietyproject.pf.helper.EntityHandler;
+import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +26,7 @@ import java.util.List;
  */
 public class MongoMembersAttribute extends EntityCore implements MembersAttribute {
 
-    private static final String idFieldName = "id";
-    private static final String roleFieldName = "role";
+    
     private final ImmutableList<Member> members;
 
     protected MongoMembersAttribute(JsonNode node) throws PeerManagerException {
@@ -44,11 +42,8 @@ public class MongoMembersAttribute extends EntityCore implements MembersAttribut
         List<Member> members = new ArrayList<>();
         for (JsonNode node : ((ArrayNode) root)) {
             EntityHandler handler = EntityHandler.create(node);
-            BasicAttribute<String> id = handler
-                    .getAttribute(idFieldName, AttributeType.STRING);
-            BasicAttribute<String> role = handler
-                    .getAttribute(roleFieldName, AttributeType.STRING);
-            members.add(Member.of(id.getValue(), role.getValue()));
+            PeerIntermediary peer = PeerIntermediary.create(EntityHandler.create(node));
+            members.add(Member.of(peer.getPeerId(), peer.getRole()));
         }
 
         return ImmutableList.copyOf(members);
@@ -75,22 +70,16 @@ public class MongoMembersAttribute extends EntityCore implements MembersAttribut
             node = JsonNodeFactory.instance.arrayNode();
         }
 
-        public void addMember(String peer, String role) {
-            ObjectNode memberNode
-                    = mapper.createObjectNode()
-                    .put(idFieldName, peer)
-                    .put(roleFieldName, role);
-
-            node.add(memberNode);
+        public void addMember(PeerIntermediary member) {
+            node.add(member.toJson());
         }
-
-        //todo-sv: remove
-        public void addMember(String peer) {
-            addMember(peer, "");
-        }
-
+        
         public void addMember(Member member) {
-            addMember(member.getPeerId(), member.getRole());
+            try {
+                addMember(PeerIntermediary.of(member));
+            } catch (PeerManagerException ex) {
+                throw new IllegalStateException(ex);
+            }
         }
 
         public MongoMembersAttribute build() {

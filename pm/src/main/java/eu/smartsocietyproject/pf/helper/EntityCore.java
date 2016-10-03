@@ -5,7 +5,6 @@
  */
 package eu.smartsocietyproject.pf.helper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -31,8 +30,7 @@ public abstract class EntityCore {
     protected EntityCore(JsonNode root) {
         this.root = root;
     }
-    
-    //todo-sv: check this
+
     /**
      * Will convert the object stored in the underlying JSON structure 
      * into a properly formated JSON-String.

@@ -181,6 +181,7 @@ public class PeerManagerMongoTest {
     private PeerIntermediary getPeer(String userName, int age, String comment) throws PeerManagerException {
         EntityHandler.Builder builder = EntityHandler.builder();
         builder.addAttribute("id", AttributeType.from(userName));
+        builder.addAttribute("role", AttributeType.from("defaultRole"));
         builder.addAttribute(this.expPeerAge, AttributeType.from(age));
         builder.addAttribute(this.expPeerComment, AttributeType.from(comment));
         return PeerIntermediary.create(builder.build());

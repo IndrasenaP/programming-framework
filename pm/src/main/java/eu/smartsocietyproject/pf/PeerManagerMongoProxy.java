@@ -5,25 +5,15 @@
  */
 package eu.smartsocietyproject.pf;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.pf.helper.EntityCore;
@@ -36,14 +26,11 @@ import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
 import eu.smartsocietyproject.pf.helper.factory.AttributeFactory;
 import eu.smartsocietyproject.pf.helper.factory.MongoAttributeFactory;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -84,16 +71,15 @@ public class PeerManagerMongoProxy implements PeerManager {
         peersCollection.insertOne(Document.parse(jsonToString(peer.toJson())));
     }
     
-    //todo-sv think about where this really belongs
+    //todo-sv think about where this really belongs to
     //todo-sv think in generall if attribute should really work with JsonNode?
-    /* TODO raise exception */
+    //-> this restrains us from using other json frameworks
     protected static String jsonToString(JsonNode node) {
         try {
             return mapper.writeValueAsString(node);
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalStateException(ex);
         }
-        return "";
     }
 
     @Override
@@ -121,18 +107,13 @@ public class PeerManagerMongoProxy implements PeerManager {
 
     private Bson getAttributesMongoQuery(Query query) {
         List<Bson> filters = new ArrayList<>();
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
         for (QueryRule rule : query.getQueryRules()) {
-            //todo-sv think if there is way to make this simpler
-            //the actual issue is that Jackson parses a string node 
-            //to "\"value\"" but Mongo expects a "value" for the filter
-            //doing it by parsing the Jackson-JSON first into a 
-            //Document works however.
-            ObjectNode node = JsonNodeFactory.instance.objectNode();
             node.set(rule.getKey(), rule.getAttribute().toJson());
-            String value = jsonToString(node);
-            Document doc = Document.parse(value);
-            filters.add(Filters.eq(rule.getKey(), doc.get(rule.getKey())));
         }
+        String value = jsonToString(node);
+        Document doc = Document.parse(value);
+        filters.add(doc);
         return Filters.and(filters);
     }
 
@@ -142,16 +123,16 @@ public class PeerManagerMongoProxy implements PeerManager {
         FindIterable<Document> collectives = collectivesCollection
                 .find(getAttributesMongoQuery(query));
 
-        List<JSONCollectiveIntermediary> colls = new ArrayList<>();
+        List<ResidentCollective> colls = new ArrayList<>();
 
         for (Document c : collectives) {
-            colls.add(JSONCollectiveIntermediary.create(c.toJson(), 
-                    attributeFactory));
+            colls.add(ResidentCollective
+                    .createFromIntermediary(context, Optional.empty(), 
+                            JSONCollectiveIntermediary.create(c.toJson(), 
+                                            attributeFactory)));
         }
 
-        return colls.stream()
-                    .map(c -> ResidentCollective.createFromIntermediary(context, Optional.empty(), c))
-                    .collect(Collectors.toList());
+        return colls;
     }
 
     @Override
@@ -172,8 +153,7 @@ public class PeerManagerMongoProxy implements PeerManager {
 
         for (Document p : peers) {
             builder.addMember(PeerIntermediary
-                                  .createFromJson(p.toJson())
-                                  .getId());
+                                  .createFromJson(p.toJson()));
         }
         
         JSONCollectiveIntermediary.Builder collBuilder = 
@@ -198,7 +178,7 @@ public class PeerManagerMongoProxy implements PeerManager {
         JSONCollectiveIntermediary collectiveIntermediary = 
                 JSONCollectiveIntermediary.create(doc.toJson(), attributeFactory);
         
-        //todo-sv: fix this... kind is hard coded!!!
+        //todo-sv: kind is hardcoded... alternatives?
         return ResidentCollective
             .createFromIntermediary(context, Optional.empty(), collectiveIntermediary);
     }

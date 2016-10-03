@@ -2,6 +2,7 @@ package eu.smartsocietyproject.pf;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import eu.smartsocietyproject.peermanager.MemberIntermediary;
 
 public class Member {
     private String peerId;
@@ -47,5 +48,4 @@ public class Member {
                           .add("role", role)
                           .toString();
     }
-
 }
