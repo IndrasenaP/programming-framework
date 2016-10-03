@@ -20,27 +20,23 @@ import static eu.smartsocietyproject.pf.helper.EntityCore.mapper;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerIntermediary implements MemberIntermediary {
+public class PeerIntermediary extends EntityHandler implements MemberIntermediary {
     
     private static final String idFieldName = "id";
     private static final String roleFieldName = "role";
     private final BasicAttribute<String> id;
     private final BasicAttribute<String> role;
-    private EntityHandler entity;
+    //private EntityHandler entity;
     
     protected PeerIntermediary(EntityHandler handler) throws PeerManagerException {
-        this.entity = handler;
-        this.id = this.entity.getAttribute(idFieldName, AttributeType.STRING);
-        this.role = this.entity.getAttribute(roleFieldName, AttributeType.STRING);
+        super(handler.root);
+        this.id = this.getAttribute(idFieldName, AttributeType.STRING);
+        this.role = this.getAttribute(roleFieldName, AttributeType.STRING);
     }
     
     @Override
     public String getPeerId() {
         return this.id.getValue();
-    }
-    
-    public JsonNode toJson() {
-        return this.entity.toJson();
     }
     
     public static PeerIntermediary createFromJson(String json) throws PeerManagerException {

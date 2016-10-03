@@ -24,6 +24,7 @@ import eu.smartsocietyproject.pf.helper.JSONCollectiveIntermediary;
 import eu.smartsocietyproject.pf.helper.attributes.MongoMembersAttribute;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
+import eu.smartsocietyproject.pf.helper.InternalPeerManager;
 import eu.smartsocietyproject.pf.helper.factory.AttributeFactory;
 import eu.smartsocietyproject.pf.helper.factory.MongoAttributeFactory;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import org.bson.conversions.Bson;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerManagerMongoProxy implements PeerManager {
+public class PeerManagerMongoProxy implements InternalPeerManager {
     private static ObjectMapper mapper = new ObjectMapper();
     private final AttributeFactory attributeFactory = new MongoAttributeFactory();
     private ApplicationContext context;
@@ -67,8 +68,14 @@ public class PeerManagerMongoProxy implements PeerManager {
     }
 
 
+    @Override
     public void persistPeer(PeerIntermediary peer) {
         peersCollection.insertOne(Document.parse(jsonToString(peer.toJson())));
+    }
+    
+    @Override
+    public PeerIntermediary readPeerById(String peerId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     //todo-sv think about where this really belongs to
@@ -186,7 +193,6 @@ public class PeerManagerMongoProxy implements PeerManager {
     public static Factory factory(MongoDatabase db) {
         return new Factory(db);
     }
-
 
     public static class Factory implements PeerManager.Factory {
         private final MongoDatabase db;
