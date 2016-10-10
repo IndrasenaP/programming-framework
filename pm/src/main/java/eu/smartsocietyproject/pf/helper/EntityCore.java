@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.peermanager.helper;
+package eu.smartsocietyproject.pf.helper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -15,7 +14,9 @@ import java.util.logging.Logger;
 /**
  * This class is the base for every object which is represented by 
  * an arbitrary JSON.
- *
+ * It encapsulates the Root-{@link JsonNode} and the {@link ObjectMapper}.
+ * Deriving classes give the right meaning to the root node by knowing how
+ * to handle the arbitrary JSON.
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public abstract class EntityCore {
@@ -29,7 +30,7 @@ public abstract class EntityCore {
     protected EntityCore(JsonNode root) {
         this.root = root;
     }
-    
+
     /**
      * Will convert the object stored in the underlying JSON structure 
      * into a properly formated JSON-String.
@@ -51,29 +52,7 @@ public abstract class EntityCore {
             return mapper.readTree(json);
         } catch (IOException ex) {
             Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-           //not needed since adding is not possible anymore so empty entities are useless
-//            try {
-//                return mapper.readTree("{}");
-//            } catch (IOException ex1) {
-//                Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex1);
-//            }
         }
         return null;
     }
-    
-    /**
-     * Allows for setting the root node directly in case it exists already.
-     * 
-     * The node will only be set if {@link JsonNode#isMissingNode()} does not
-     * return true.
-     * 
-     * @param node - The {@link JsonNode}
-     */
-//    protected void setNode(JsonNode node) {
-//        if(node.isMissingNode()) {
-//            return;
-//        }
-//        
-//        this.root = node;
-//    }
 }

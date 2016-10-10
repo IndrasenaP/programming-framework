@@ -1,10 +1,10 @@
 package eu.smartsocietyproject.pf;
 
 import com.google.common.collect.ImmutableMap;
+import eu.smartsocietyproject.peermanager.CollectiveIntermediary;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
 
 import java.util.Collection;
 import java.util.Map;
@@ -35,7 +35,7 @@ public final class ResidentCollective extends Collective.WithVisibleMembers {
     static ResidentCollective createFromIntermediary(
         ApplicationContext context,
         Optional<String> kind,
-        CollectiveIntermediary intermediary) {
+        CollectiveIntermediary intermediary) throws PeerManagerException {
             CollectiveKind collectiveKind =
                 kind.flatMap( k -> context.getKindRegistry().get(k))
                 .orElse(CollectiveKind.EMPTY);

@@ -9,17 +9,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public abstract class Attribute {
-    //public void parseJson(String attributeValue);
-    private final AttributeType type;
+public interface Attribute {
 
-    protected Attribute(AttributeType type) {
-        this.type = type;
-    }
-
-    public AttributeType getType() {
-        return type;
-    }
+    public AttributeType getType();
 
     public abstract JsonNode toJson();
 

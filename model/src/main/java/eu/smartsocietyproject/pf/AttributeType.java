@@ -61,7 +61,7 @@ public enum AttributeType {
     private static final ObjectMapper mapper=new ObjectMapper();
 
     public Optional<Attribute> fromJson(final JsonNode node) {
-        if ( isValid(node) ) {
+        if ( !isValid(node) ) {
             return Optional.empty();
         }
         return Optional.of(getAttributeFromValidJson(node));
@@ -104,38 +104,38 @@ public enum AttributeType {
         };
     }
 
-    private abstract static class BasicAttribute<T> extends Attribute {
-        private T value;
-        protected BasicAttribute(AttributeType type, T value) {
-            super(type);
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            BasicAttribute that = (BasicAttribute) o;
-
-            return
-                Objects.equal(this.value, that.value) &&
-                Objects.equal(this.getType(), that.getType());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(getType(), value);
-        }
-
-
-        @Override
-        public String toString() {
-            return MoreObjects.toStringHelper(this)
-                              .add("value", value)
-                              .add("type", getType())
-                              .toString();
-        }
-    }
+//    private abstract static class BasicAttribute<T> extends Attribute {
+//        private T value;
+//        protected BasicAttribute(AttributeType type, T value) {
+//            super(type);
+//            this.value = value;
+//        }
+//
+//        @Override
+//        public boolean equals(Object o) {
+//            if (this == o) return true;
+//            if (o == null || getClass() != o.getClass()) return false;
+//
+//            BasicAttribute that = (BasicAttribute) o;
+//
+//            return
+//                Objects.equal(this.value, that.value) &&
+//                Objects.equal(this.getType(), that.getType());
+//        }
+//
+//        @Override
+//        public int hashCode() {
+//            return Objects.hashCode(getType(), value);
+//        }
+//
+//
+//        @Override
+//        public String toString() {
+//            return MoreObjects.toStringHelper(this)
+//                              .add("value", value)
+//                              .add("type", getType())
+//                              .toString();
+//        }
+//    }
 
 }

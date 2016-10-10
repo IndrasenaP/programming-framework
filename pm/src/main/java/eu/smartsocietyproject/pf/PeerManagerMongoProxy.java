@@ -8,36 +8,29 @@ package eu.smartsocietyproject.pf;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoClient;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
-import eu.smartsocietyproject.peermanager.helper.EntityCore;
+import eu.smartsocietyproject.pf.helper.EntityCore;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.peermanager.helper.PeerIntermediary;
-import eu.smartsocietyproject.peermanager.helper.CollectiveIntermediary;
-import eu.smartsocietyproject.peermanager.helper.MembersAttribute;
+import eu.smartsocietyproject.pf.helper.PeerIntermediary;
+import eu.smartsocietyproject.pf.helper.JSONCollectiveIntermediary;
+import eu.smartsocietyproject.pf.helper.attributes.MongoMembersAttribute;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.Query;
-import java.io.IOException;
+import eu.smartsocietyproject.pf.helper.factory.AttributeFactory;
+import eu.smartsocietyproject.pf.helper.factory.MongoAttributeFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -52,6 +45,7 @@ import org.bson.conversions.Bson;
  */
 public class PeerManagerMongoProxy implements PeerManager {
     private static ObjectMapper mapper = new ObjectMapper();
+    private final AttributeFactory attributeFactory = new MongoAttributeFactory();
     private ApplicationContext context;
     private MongoDatabase db;
     private MongoCollection<Document> collectivesCollection;
@@ -76,81 +70,98 @@ public class PeerManagerMongoProxy implements PeerManager {
     public void persistPeer(PeerIntermediary peer) {
         peersCollection.insertOne(Document.parse(jsonToString(peer.toJson())));
     }
+    
+    //todo-sv think about where this really belongs to
+    //todo-sv think in generall if attribute should really work with JsonNode?
+    //-> this restrains us from using other json frameworks
+    protected static String jsonToString(JsonNode node) {
+        try {
+            return mapper.writeValueAsString(node);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 
     @Override
-    public void persistCollective(ApplicationBasedCollective collective) {
-        CollectiveIntermediary ci = toCollectiveIntermediary(collective);
+    public void persistCollective(ApplicationBasedCollective collective) 
+            throws PeerManagerException {
+        JSONCollectiveIntermediary ci = toCollectiveIntermediary(collective);
         collectivesCollection.insertOne(Document.parse(jsonToString(ci.toJson())));
     }
 
-    /* TODO raise exception */
-    private String jsonToString(JsonNode node) {
-        try {
-            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
-    }
-
-    private CollectiveIntermediary toCollectiveIntermediary(Collective collective) {
-        MembersAttribute.Builder builder = MembersAttribute.builder();
+    private JSONCollectiveIntermediary toCollectiveIntermediary(Collective collective) throws PeerManagerException {
+        MongoMembersAttribute.Builder builder = MongoMembersAttribute.builder();
         for (Member member : collective.makeMembersVisible().getMembers()) {
             builder.addMember(member);
         }
-        return CollectiveIntermediary.create(collective.getId(), builder.build());
+        
+        JSONCollectiveIntermediary.Builder collInterBuilder = 
+                JSONCollectiveIntermediary.builder(builder.build());
+        
+        collective.getAttributes().entrySet().stream()
+                .forEach(entry -> collInterBuilder.addAttribute(entry.getKey(), 
+                        entry.getValue()));
+        
+        return collInterBuilder.build(collective.getId());
     }
 
     private Bson getAttributesMongoQuery(Query query) {
         List<Bson> filters = new ArrayList<>();
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
         for (QueryRule rule : query.getQueryRules()) {
-            filters.add(Filters.eq(rule.getKey(),
-                                   rule.getAttribute().toJson()));
+            node.set(rule.getKey(), rule.getAttribute().toJson());
         }
+        String value = jsonToString(node);
+        Document doc = Document.parse(value);
+        filters.add(doc);
         return Filters.and(filters);
     }
 
     @Override
-    public List<ResidentCollective> findCollectives(CollectiveQuery query) {
+    public List<ResidentCollective> findCollectives(CollectiveQuery query) 
+            throws PeerManagerException {
         FindIterable<Document> collectives = collectivesCollection
                 .find(getAttributesMongoQuery(query));
 
-        List<CollectiveIntermediary> colls = new ArrayList<>();
+        List<ResidentCollective> colls = new ArrayList<>();
 
         for (Document c : collectives) {
-            colls.add(CollectiveIntermediary.create(c.toJson()));
+            colls.add(ResidentCollective
+                    .createFromIntermediary(context, Optional.empty(), 
+                            JSONCollectiveIntermediary.create(c.toJson(), 
+                                            attributeFactory)));
         }
 
-        return colls.stream()
-                    .map(c -> ResidentCollective.createFromIntermediary(context, Optional.empty(), c))
-                    .collect(Collectors.toList());
+        return colls;
     }
 
     @Override
-    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query) {
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query) throws PeerManagerException {
         return createCollectiveFromQuery(query, Optional.empty());
     }
 
     @Override
-    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, String kind) {
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, String kind) throws PeerManagerException {
         return createCollectiveFromQuery(query, Optional.of(kind));
     }
 
-    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, Optional<String> kind) {
+    public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query, Optional<String> kind) throws PeerManagerException {
         FindIterable<Document> peers = peersCollection
             .find(getAttributesMongoQuery(query));
 
-        MembersAttribute.Builder builder = MembersAttribute.builder();
+        MongoMembersAttribute.Builder builder = MongoMembersAttribute.builder();
 
         for (Document p : peers) {
             builder.addMember(PeerIntermediary
-                                  .createFromJson(p.toJson())
-                                  .getId());
+                                  .createFromJson(p.toJson()));
         }
-        CollectiveIntermediary collectiveIntermediary = CollectiveIntermediary.create(builder.build());
+        
+        JSONCollectiveIntermediary.Builder collBuilder = 
+                JSONCollectiveIntermediary.builder(builder.build());
+        
         return
             ResidentCollective
-                .createFromIntermediary(context, kind, collectiveIntermediary)
+                .createFromIntermediary(context, kind, collBuilder.build())
                 .toApplicationBasedCollective();
     }
 
@@ -164,7 +175,10 @@ public class PeerManagerMongoProxy implements PeerManager {
             throw new PeerManagerException(
                 String.format("Collective not found: %s", id));
         }
-        CollectiveIntermediary collectiveIntermediary = CollectiveIntermediary.create(doc.toJson());
+        JSONCollectiveIntermediary collectiveIntermediary = 
+                JSONCollectiveIntermediary.create(doc.toJson(), attributeFactory);
+        
+        //todo-sv: kind is hardcoded... alternatives?
         return ResidentCollective
             .createFromIntermediary(context, Optional.empty(), collectiveIntermediary);
     }
