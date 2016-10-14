@@ -84,7 +84,7 @@ public class PeerManagerMongoTest {
             }
 
             @Override
-            PeerManager getPeerManager() {
+            public PeerManager getPeerManager() {
                 throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
             }
 

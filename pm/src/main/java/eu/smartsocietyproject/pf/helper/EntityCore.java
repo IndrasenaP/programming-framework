@@ -7,6 +7,7 @@ package eu.smartsocietyproject.pf.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,10 +23,6 @@ import java.util.logging.Logger;
 public abstract class EntityCore {
     protected static ObjectMapper mapper = new ObjectMapper();
     protected final JsonNode root;
-    
-    protected EntityCore(String json) {
-        this.root = EntityCore.parseJson(json);
-    }
     
     protected EntityCore(JsonNode root) {
         this.root = root;
@@ -47,12 +44,11 @@ public abstract class EntityCore {
      * 
      * @param json - a JSON-String
      */
-    protected static JsonNode parseJson(String json) {
+    protected static JsonNode parseJson(String json) throws PeerManagerException {
         try {
             return mapper.readTree(json);
         } catch (IOException ex) {
-            Logger.getLogger(EntityCore.class.getName()).log(Level.SEVERE, null, ex);
+            throw new PeerManagerException(ex);
         }
-        return null;
     }
 }

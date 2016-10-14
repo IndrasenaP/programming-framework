@@ -28,6 +28,7 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     private final BasicAttribute<String> role;
     //private EntityHandler entity;
     
+    //todo-sv: constructor throwing exceptions or not?
     protected PeerIntermediary(EntityHandler handler) throws PeerManagerException {
         super(handler.root);
         this.id = this.getAttribute(idFieldName, AttributeType.STRING);
@@ -39,7 +40,7 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
         return this.id.getValue();
     }
     
-    public static PeerIntermediary createFromJson(String json) throws PeerManagerException {
+    public static PeerIntermediary create(String json) throws PeerManagerException {
         return new PeerIntermediary(EntityHandler.create(json));
     }
     
@@ -58,5 +59,12 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     @Override
     public String getRole() {
         return this.role.getValue();
+    }
+    
+    public static Builder builder(String id, String role) {
+        Builder builder = EntityHandler.builder();
+        builder.addAttribute(idFieldName, AttributeType.from(id));
+        builder.addAttribute(roleFieldName, AttributeType.from(role));
+        return builder;
     }
 }

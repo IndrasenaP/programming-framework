@@ -74,8 +74,16 @@ public class PeerManagerMongoProxy implements InternalPeerManager {
     }
     
     @Override
-    public PeerIntermediary readPeerById(String peerId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public PeerIntermediary readPeerById(String peerId) throws PeerManagerException {
+        Document doc = peersCollection.find(Filters
+                .eq(MongoConstants.id, peerId)).first();
+        
+        if (doc == null) {
+            throw new PeerManagerException(
+                String.format("Collective not found: %s", peerId));
+        }
+        
+        return PeerIntermediary.create(doc.toJson());
     }
     
     //todo-sv think about where this really belongs to
@@ -160,7 +168,7 @@ public class PeerManagerMongoProxy implements InternalPeerManager {
 
         for (Document p : peers) {
             builder.addMember(PeerIntermediary
-                                  .createFromJson(p.toJson()));
+                                  .create(p.toJson()));
         }
         
         JSONCollectiveIntermediary.Builder collBuilder = 

@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
  */
 public class EntityHandler extends EntityCore {
 
-    protected EntityHandler(String json) {
-        super(json);
-    }
+//    protected EntityHandler(String json) throws PeerManagerException {
+//        super(json);
+//    }
 
     protected EntityHandler(JsonNode node) {
         super(node);
@@ -115,6 +115,10 @@ public class EntityHandler extends EntityCore {
                         .toMap(optEntry -> optEntry.get().getKey(),
                                 optEntry -> optEntry.get().getValue()));
     }
+    
+    public boolean hasAttribute(String name) {
+        return root.has(name);
+    }
 
     private <V> Map.Entry<String, V> createEntry(final String s, final V a) {
         return new Map.Entry<String, V>() {
@@ -136,8 +140,8 @@ public class EntityHandler extends EntityCore {
 
     }
 
-    public static EntityHandler create(String json) {
-        return new EntityHandler(json);
+    public static EntityHandler create(String json) throws PeerManagerException {
+        return create(EntityCore.parseJson(json));
     }
 
     public static EntityHandler create(JsonNode node) {

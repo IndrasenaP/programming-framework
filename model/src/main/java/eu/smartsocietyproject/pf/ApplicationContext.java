@@ -18,7 +18,7 @@ public abstract class ApplicationContext {
     /** Return the peer manager associated to the context
      * @return an instance of class implementing the {@link PeerManager} interface
      * */
-    abstract PeerManager getPeerManager();
+    public abstract PeerManager getPeerManager();
 
     /** Return the registry of Collective kinds with attribute schema description
      * @return the registry of Collective kinds of type {@link CollectiveKindRegistry}

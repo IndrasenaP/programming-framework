@@ -1,0 +1,108 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package eu.smartsocietyproject.smartcom;
+
+import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
+import at.ac.tuwien.dsg.smartcom.model.Identifier;
+import at.ac.tuwien.dsg.smartcom.model.PeerChannelAddress;
+import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.pf.ApplicationContext;
+import eu.smartsocietyproject.pf.Attribute;
+import eu.smartsocietyproject.pf.AttributeType;
+import eu.smartsocietyproject.pf.CBTBuilder;
+import eu.smartsocietyproject.pf.CollectiveKindRegistry;
+import eu.smartsocietyproject.pf.MongoRunner;
+import eu.smartsocietyproject.pf.PeerManagerMongoProxy;
+import eu.smartsocietyproject.pf.helper.EntityHandler;
+import eu.smartsocietyproject.pf.helper.PeerIntermediary;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+/**
+ *
+ * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
+ */
+public class SmartComServiceTest {
+    
+    private static final ApplicationContext context = new ApplicationContext() {
+        @Override
+        public UUID getId() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CollectiveKindRegistry getKindRegistry() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CBTBuilder registerBuilderForCBTType(String type, CBTBuilder builder) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public CBTBuilder getCBTBuilder(String type) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public PeerManager getPeerManager() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    };
+    
+    private MongoRunner runner;
+    private PeerManagerMongoProxy pm;
+    private SmartComService scs;
+    
+    public SmartComServiceTest() {
+    }
+    
+    @Before
+    public void setUp() throws Exception {
+        runner = MongoRunner.withPort(6666);
+        pm = PeerManagerMongoProxy.factory(runner.getMongoDb())
+                .create(context);
+        scs = new SmartComService(pm);
+        
+        PeerIntermediary.Builder peer = PeerIntermediary
+                .builder("sveti", "defaultRole");
+        PeerChannelAddress ad = new PeerChannelAddress(
+                Identifier.peer("sveti"),
+                Identifier.channelType("Email"), 
+                Arrays.asList("s.videnov@dsg.tuwien.ac.at"));
+        peer.addAttribute("deliveryAddress", 
+                PeerChannelAddressAdapter.convert(ad));
+        
+        pm.persistPeer(PeerIntermediary.create(peer.build()));
+    }
+    
+    @After
+    public void tearDown() {
+        try {
+            scs.shutdown();
+        } catch (Exception ex) {
+            Logger.getLogger(SmartComServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        runner.close();
+    }
+
+    @Test
+    public void testInit() throws Exception {
+        scs.init();
+    }
+
+    public void testShutdown() throws Exception {
+    }
+    
+}

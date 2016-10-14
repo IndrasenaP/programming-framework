@@ -6,6 +6,7 @@
 package eu.smartsocietyproject.pf.helper;
 
 import eu.smartsocietyproject.peermanager.PeerManager;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
 
 /**
  *
@@ -13,5 +14,5 @@ import eu.smartsocietyproject.peermanager.PeerManager;
  */
 public interface InternalPeerManager extends PeerManager {
     void persistPeer(PeerIntermediary peer);
-    PeerIntermediary readPeerById(String peerId);
+    PeerIntermediary readPeerById(String peerId) throws PeerManagerException;
 }
