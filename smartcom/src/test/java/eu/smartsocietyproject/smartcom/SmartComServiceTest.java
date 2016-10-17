@@ -5,9 +5,13 @@
  */
 package eu.smartsocietyproject.smartcom;
 
+import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
+import at.ac.tuwien.dsg.smartcom.model.Message;
 import at.ac.tuwien.dsg.smartcom.model.PeerChannelAddress;
+import at.ac.tuwien.dsg.smartcom.utils.MongoDBInstance;
+import com.mongodb.MongoClient;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.Attribute;
@@ -32,7 +36,7 @@ import static org.junit.Assert.*;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class SmartComServiceTest {
+public class SmartComServiceTest implements NotificationCallback {
     
     private static final ApplicationContext context = new ApplicationContext() {
         @Override
@@ -64,16 +68,19 @@ public class SmartComServiceTest {
     private MongoRunner runner;
     private PeerManagerMongoProxy pm;
     private SmartComService scs;
+	private boolean response;
     
     public SmartComServiceTest() {
     }
     
     @Before
     public void setUp() throws Exception {
+		this.response = false;
         runner = MongoRunner.withPort(6666);
         pm = PeerManagerMongoProxy.factory(runner.getMongoDb())
                 .create(context);
-        scs = new SmartComService(pm);
+		MongoClient client = new MongoClient("localhost", 6666);
+        scs = new SmartComService(pm, client);
         
         PeerIntermediary.Builder peer = PeerIntermediary
                 .builder("sveti", "defaultRole");
@@ -98,11 +105,24 @@ public class SmartComServiceTest {
     }
 
     @Test
-    public void testInit() throws Exception {
-        scs.init();
+    public void testSend() throws Exception {
+		Message.MessageBuilder builder
+				= new Message.MessageBuilder()
+						.setType("TASK")
+						.setSubtype("REQUEST")
+						.setReceiverId(Identifier.peer("sveti"))
+						.setSenderId(Identifier.component("SCSTest"))
+						.setConversationId("firstTest - " + UUID.randomUUID())
+						.setContent("Hello World!");
+        scs.send(builder.create());
+		while(!response) {
+			Thread.sleep(1000);
+		}
     }
 
-    public void testShutdown() throws Exception {
-    }
+	@Override
+	public void notify(Message message) {
+		this.response = true;
+	}
     
 }
