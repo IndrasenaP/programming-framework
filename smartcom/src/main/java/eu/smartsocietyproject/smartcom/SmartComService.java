@@ -54,7 +54,7 @@ public class SmartComService {
 	}
 	
 	public void registerNotificationCallback(NotificationCallback callback) throws CommunicationException {
-		
+		this.communication.registerNotificationCallback(callback);
 	}
 
 	public void shutdown() throws CommunicationException {

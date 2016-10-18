@@ -5,6 +5,7 @@
  */
 package eu.smartsocietyproject.smartcom;
 
+import at.ac.tuwien.dsg.smartcom.adapters.EmailInputAdapter;
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
@@ -81,6 +82,7 @@ public class SmartComServiceTest implements NotificationCallback {
                 .create(context);
 		MongoClient client = new MongoClient("localhost", 6666);
         scs = new SmartComService(pm, client);
+        scs.registerNotificationCallback(this);
         
         PeerIntermediary.Builder peer = PeerIntermediary
                 .builder("sveti", "defaultRole");
@@ -104,15 +106,17 @@ public class SmartComServiceTest implements NotificationCallback {
         runner.close();
     }
 
-    @Test
+    //@Test //this is a very simple manual test. It requieres user interaction!
     public void testSend() throws Exception {
+        String id = "firstTest - " + UUID.randomUUID();
+        
 		Message.MessageBuilder builder
 				= new Message.MessageBuilder()
 						.setType("TASK")
 						.setSubtype("REQUEST")
 						.setReceiverId(Identifier.peer("sveti"))
 						.setSenderId(Identifier.component("SCSTest"))
-						.setConversationId("firstTest - " + UUID.randomUUID())
+						.setConversationId(id)
 						.setContent("Hello World!");
         scs.send(builder.create());
 		while(!response) {

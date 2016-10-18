@@ -114,7 +114,7 @@ public class SmartComPeerManager implements PeerAuthenticationCallback, PeerInfo
         return new CollectiveInfo(
                 collective,
                 peerIdentifiers,
-                DeliveryPolicy.Collective.TO_ANY);
+                DeliveryPolicy.Collective.TO_ALL_MEMBERS);
     }
 
 }
