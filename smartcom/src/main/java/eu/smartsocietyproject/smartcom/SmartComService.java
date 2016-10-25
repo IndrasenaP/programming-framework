@@ -8,6 +8,7 @@ package eu.smartsocietyproject.smartcom;
 import at.ac.tuwien.dsg.smartcom.Communication;
 import at.ac.tuwien.dsg.smartcom.SmartCom;
 import at.ac.tuwien.dsg.smartcom.SmartComBuilder;
+import at.ac.tuwien.dsg.smartcom.adapter.InputPullAdapter;
 import at.ac.tuwien.dsg.smartcom.adapters.EmailInputAdapter;
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
@@ -18,6 +19,7 @@ import at.ac.tuwien.dsg.smartcom.utils.MongoDBInstance;
 import at.ac.tuwien.dsg.smartcom.utils.PropertiesLoader;
 import com.mongodb.MongoClient;
 import eu.smartsocietyproject.pf.helper.InternalPeerManager;
+import java.util.Properties;
 import javax.management.Notification;
 
 /**
@@ -40,16 +42,19 @@ public class SmartComService {
 				.create();
 		this.communication = smartCom.getCommunication();
 	}
+    
+    //todo-sv: discuss wit ogi how exactly to init this
+    public void addEmailPullAdapter(String conversationId, Properties props) {
+        this.communication.addPullAdapter(
+				new EmailInputAdapter(conversationId,
+                        props.getProperty("hostIncoming"),
+                        props.getProperty("username"),
+                        props.getProperty("password"),
+						Integer.valueOf(props.getProperty("portIncoming")), 
+						true, "test", "test", true), 1000);
+    }
 
 	public void send(Message msg) throws CommunicationException {
-		String id = msg.getConversationId();
-		this.communication.addPullAdapter(
-				new EmailInputAdapter(msg.getConversationId(),
-						PropertiesLoader.getProperty("EmailAdapter.properties", "hostIncoming"),
-                        PropertiesLoader.getProperty("EmailAdapter.properties", "username"),
-                        PropertiesLoader.getProperty("EmailAdapter.properties", "password"),
-						Integer.valueOf(PropertiesLoader.getProperty("EmailAdapter.properties", "portIncoming")), 
-						true, "test", "test", true), 1000);
 		this.communication.send(msg);
 	}
 	

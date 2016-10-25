@@ -12,6 +12,7 @@ import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
 import at.ac.tuwien.dsg.smartcom.model.PeerChannelAddress;
 import at.ac.tuwien.dsg.smartcom.utils.MongoDBInstance;
+import at.ac.tuwien.dsg.smartcom.utils.PropertiesLoader;
 import com.mongodb.MongoClient;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.pf.ApplicationContext;
@@ -23,8 +24,11 @@ import eu.smartsocietyproject.pf.MongoRunner;
 import eu.smartsocietyproject.pf.PeerManagerMongoProxy;
 import eu.smartsocietyproject.pf.helper.EntityHandler;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,6 +113,12 @@ public class SmartComServiceTest implements NotificationCallback {
     //@Test //this is a very simple manual test. It requieres user interaction!
     public void testSend() throws Exception {
         String id = "firstTest - " + UUID.randomUUID();
+        Properties props = new Properties();
+        props.load(this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("EmailAdapter.properties"));
+        
+        scs.addEmailPullAdapter(id, props);
         
 		Message.MessageBuilder builder
 				= new Message.MessageBuilder()
@@ -118,6 +128,7 @@ public class SmartComServiceTest implements NotificationCallback {
 						.setSenderId(Identifier.component("SCSTest"))
 						.setConversationId(id)
 						.setContent("Hello World!");
+        
         scs.send(builder.create());
 		while(!response) {
 			Thread.sleep(1000);
