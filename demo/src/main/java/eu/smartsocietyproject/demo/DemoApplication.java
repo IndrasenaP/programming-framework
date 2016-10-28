@@ -8,10 +8,16 @@ package eu.smartsocietyproject.demo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import eu.smartsocietyproject.pf.Application;
+import eu.smartsocietyproject.pf.ApplicationBasedCollective;
+import eu.smartsocietyproject.pf.ApplicationContext;
+import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.CollectiveKind;
 import eu.smartsocietyproject.pf.TaskDefinition;
 import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.pf.TaskRunner;
+import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
+import eu.smartsocietyproject.pf.cbthandlers.ProvisioningHandler;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -46,6 +52,5 @@ public class DemoApplication extends Application {
             return new DemoTaskRunner((DemoTaskRequest)request);
         }
         throw new UnsupportedOperationException("Not supported request type!");
-    }
-    
+    }    
 }

@@ -9,10 +9,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.smartsocietyproject.peermanager.MemberIntermediary;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
+import eu.smartsocietyproject.pf.Attribute;
 import eu.smartsocietyproject.pf.AttributeType;
 import eu.smartsocietyproject.pf.BasicAttribute;
 import eu.smartsocietyproject.pf.Member;
 import static eu.smartsocietyproject.pf.helper.EntityCore.mapper;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PeerIntermediary is a DTO class which allows the local PM proxy to 
@@ -24,6 +27,7 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     
     private static final String idFieldName = "id";
     private static final String roleFieldName = "role";
+    private static final String deliveryAddress = "deliveryAddress";
     private final BasicAttribute<String> id;
     private final BasicAttribute<String> role;
     //private EntityHandler entity;
@@ -62,9 +66,41 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     }
     
     public static Builder builder(String id, String role) {
-        Builder builder = EntityHandler.builder();
-        builder.addAttribute(idFieldName, AttributeType.from(id));
-        builder.addAttribute(roleFieldName, AttributeType.from(role));
-        return builder;
+        return new Builder(id, role);
+    }
+    
+    public static final class Builder extends EntityHandler.Builder {       
+        
+        public Builder(String id, String role) {
+            super();
+            super.addAttribute(idFieldName, AttributeType.from(id));
+            super.addAttribute(roleFieldName, AttributeType.from(role));
+        }
+        
+        public Builder addDeliveryAddress(Attribute address) {
+            return this.addAttribute(deliveryAddress, address);
+        }
+
+        @Override
+        public Builder addAttributeNode(String name, EntityCore attribute) {
+            super.addAttributeNode(name, attribute); //To change body of generated methods, choose Tools | Templates.
+            return this;
+        }
+
+        @Override
+        public Builder addAttribute(String name, Attribute attribute) {
+            super.addAttribute(name, attribute); //To change body of generated methods, choose Tools | Templates.
+            return this;
+        }
+        
+        @Override
+        public PeerIntermediary build() {
+            try {
+                return PeerIntermediary.create(super.build());
+            } catch (PeerManagerException ex) {
+                //this can not happen
+            }
+            return null;
+        }
     }
 }

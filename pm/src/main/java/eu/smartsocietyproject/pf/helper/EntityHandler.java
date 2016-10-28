@@ -148,11 +148,11 @@ public class EntityHandler extends EntityCore {
         return new EntityHandler(node);
     }
 
-    public static Builder builder() {
+    protected static Builder builder() {
         return new Builder();
     }
 
-    public static final class Builder {
+    public static class Builder {
 
         private ObjectNode node;
 
@@ -160,12 +160,14 @@ public class EntityHandler extends EntityCore {
             node = JsonNodeFactory.instance.objectNode();
         }
 
-        public void addAttribute(String name, Attribute attribute) {
+        public Builder addAttribute(String name, Attribute attribute) {
             node.set(name, attribute.toJson());
+            return this;
         }
 
-        public void addAttributeNode(String name, EntityCore attribute) {
+        public Builder addAttributeNode(String name, EntityCore attribute) {
             node.set(name, attribute.root);
+            return this;
         }
 
         public EntityHandler build() {

@@ -42,6 +42,8 @@ public class Runtime {
     public boolean startTask(TaskDefinition definition) {
         TaskRequest request = application.createTaskRequest(definition);
 
+        //todo-sv: why are there two different runners?
+        //executor executes and new TaskRunnerDescriptor executes...???
         TaskRunner runner = application.createTaskRunner(request);
         runnerDescriptors.put(definition.getId(), new TaskRunnerDescriptor(executor, definition, runner));
         executor.execute(runner);
@@ -62,6 +64,8 @@ public class Runtime {
         }
     }
 
+    //todo-sv: what is the exact purpose of this run? 
+    //just to keep the thread open?
     public void run() {
         while (true) {
             try {

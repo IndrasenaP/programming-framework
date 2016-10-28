@@ -89,13 +89,14 @@ public class SmartComServiceTest implements NotificationCallback {
         scs.registerNotificationCallback(this);
         
         PeerIntermediary.Builder peer = PeerIntermediary
-                .builder("sveti", "defaultRole");
-        PeerChannelAddress ad = new PeerChannelAddress(
-                Identifier.peer("sveti"),
-                Identifier.channelType("Email"), 
-                Arrays.asList("s.videnov@dsg.tuwien.ac.at"));
-        peer.addAttribute("deliveryAddress", 
-                PeerChannelAddressAdapter.convert(ad));
+                .builder("sveti", "defaultRole")
+                .addDeliveryAddress(PeerChannelAddressAdapter
+                    .convert(new PeerChannelAddress(
+                        Identifier.peer("sveti"),
+                        Identifier.channelType("Email"), 
+                        Arrays.asList("s.videnov@dsg.tuwien.ac.at"))
+                    )
+                );
         
         pm.persistPeer(PeerIntermediary.create(peer.build()));
     }
