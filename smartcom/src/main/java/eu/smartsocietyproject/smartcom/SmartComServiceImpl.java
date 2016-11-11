@@ -18,22 +18,25 @@ import at.ac.tuwien.dsg.smartcom.model.MessageLogLevel;
 import at.ac.tuwien.dsg.smartcom.utils.MongoDBInstance;
 import at.ac.tuwien.dsg.smartcom.utils.PropertiesLoader;
 import com.mongodb.MongoClient;
+import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.pf.helper.InternalPeerManager;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.management.Notification;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class SmartComService {
+public class SmartComServiceImpl implements SmartComService {
 
 	private final SmartComPeerManager peerManager;
 	private final SmartCom smartCom;
 	private final Communication communication;
 
-	//todo: consider passing in applicationContext and retrieving PM from CTX
-	public SmartComService(InternalPeerManager peerManager,
+	//todo-sv: consider passing in applicationContext and retrieving PM from CTX
+	public SmartComServiceImpl(InternalPeerManager peerManager,
 			MongoClient mongoClient) throws CommunicationException {
 		this.peerManager = new SmartComPeerManager(peerManager);
 		this.smartCom = new SmartComBuilder(this.peerManager, this.peerManager, this.peerManager)
@@ -53,16 +56,49 @@ public class SmartComService {
 						Integer.valueOf(props.getProperty("portIncoming")), 
 						true, "test", "test", true), 1000);
     }
+    
+    //todo-sv: only temporary until decided how default input response adapters
+    //will be set up by SM-Service automatically
+    public Communication getCommunication() {
+        return this.communication;
+    }
 
 	public void send(Message msg) throws CommunicationException {
 		this.communication.send(msg);
 	}
 	
-	public void registerNotificationCallback(NotificationCallback callback) throws CommunicationException {
-		this.communication.registerNotificationCallback(callback);
+	public Identifier registerNotificationCallback(NotificationCallback callback) throws CommunicationException {
+		return this.communication.registerNotificationCallback(callback);
 	}
+    
+    public void unregisterNotificationCallback(Identifier callback) throws CommunicationException {
+        this.communication.unregisterNotificationCallback(callback);
+    }
 
 	public void shutdown() throws CommunicationException {
 		this.smartCom.tearDownSmartCom();
 	}
+    
+    public static Factory factory(MongoClient client) {
+        return new Factory(client);
+    }
+    
+    public static class Factory implements SmartComService.Factory {
+        private MongoClient client;
+        
+        public Factory(MongoClient client) {
+            this.client = client;
+        }
+        
+        @Override
+        public SmartComService create(PeerManager pm) {
+            try {
+                //todo-sv: add error handling for cast
+                return new SmartComServiceImpl((InternalPeerManager)pm, client);
+            } catch (CommunicationException ex) {
+                //todo-sv: consider propagating the exception instead
+                throw new IllegalStateException(ex);
+            }
+        } 
+    }
 }

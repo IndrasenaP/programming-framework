@@ -10,13 +10,12 @@ import com.google.common.collect.ImmutableMap;
 import com.mongodb.client.MongoCollection;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
-import eu.smartsocietyproject.pf.helper.attributes.MongoMembersAttribute;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
-import eu.smartsocietyproject.pf.helper.EntityHandler;
+import eu.smartsocietyproject.smartcom.SmartComService;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -102,6 +101,11 @@ public class PeerManagerMongoTest {
             public CBTBuilder getCBTBuilder(String type) {
                 throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 29/08/16)
             }
+
+        @Override
+        public SmartComService getSmartCom() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
         };
 
     MongoRunner runner;

@@ -31,5 +31,6 @@ subprojects {
     }
     repositories {
         mavenCentral()
+        mavenLocal() //todo-sv: for the time being smartCom is not published anywhere
     }
 }

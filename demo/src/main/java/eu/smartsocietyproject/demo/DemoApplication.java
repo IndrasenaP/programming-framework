@@ -12,6 +12,7 @@ import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.CollectiveKind;
+import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskDefinition;
 import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.pf.TaskRunner;
@@ -25,6 +26,12 @@ import java.util.Set;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class DemoApplication extends Application {
+    
+    private SmartSocietyApplicationContext ctx;
+    
+    public DemoApplication(SmartSocietyApplicationContext ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public String getApplicationId() {
@@ -49,7 +56,7 @@ public class DemoApplication extends Application {
     @Override
     public TaskRunner createTaskRunner(TaskRequest request) {
         if(request instanceof DemoTaskRequest) {
-            return new DemoTaskRunner((DemoTaskRequest)request);
+            return new DemoTaskRunner((DemoTaskRequest)request, ctx);
         }
         throw new UnsupportedOperationException("Not supported request type!");
     }    

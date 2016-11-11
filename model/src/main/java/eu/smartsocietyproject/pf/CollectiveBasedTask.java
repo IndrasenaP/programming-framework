@@ -7,6 +7,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -684,31 +685,12 @@ public class CollectiveBasedTask implements Future<TaskResult> {
      */
     @Override
     public TaskResult get() throws InterruptedException, ExecutionException, CancellationException {
-        getMethodlock.lock();
-        if (isCancelled()) {
-            getMethodlock.unlock();
-            throw new CancellationException("Future.get() called on already cancelled CBT");
+        try {
+            return get(-1, null);
+        } catch (TimeoutException ex) {
+            //should never happen since it uses await()
+            throw new ExecutionException(ex);
         }
-        if (isDone()) {
-            getMethodlock.unlock();
-            return result;
-        }
-        // it might be waiting to start or started
-        getMethodCanReturn.await();
-
-        getMethodlock.unlock();
-
-        if (isCancelled()) {
-            throw new CancellationException("Future.get() called on already cancelled CBT");
-        }
-
-        if (finishedWithSuccess()){
-            return result;
-        }else{
-            //TODO: Throw ExecutionException
-            return null;
-        }
-
     }
 
     /**
@@ -727,7 +709,35 @@ public class CollectiveBasedTask implements Future<TaskResult> {
      */
     @Override
     public TaskResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return null;
+        getMethodlock.lock();
+        if (isCancelled()) {
+            getMethodlock.unlock();
+            throw new CancellationException("Future.get() called on already cancelled CBT");
+        }
+        if (isDone()) {
+            getMethodlock.unlock();
+            return result;
+        }
+        
+        // it might be waiting to start or started
+        if(timeout == -1) {
+            getMethodCanReturn.await();
+        } else {
+            getMethodCanReturn.await(timeout, unit);
+        }
+
+        getMethodlock.unlock();
+
+        if (isCancelled()) {
+            throw new CancellationException("Future.get() called on already cancelled CBT");
+        }
+
+        if (finishedWithSuccess()){
+            return result;
+        }else{
+            //TODO: Throw ExecutionException
+            return null;
+        }
     }
 
 

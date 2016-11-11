@@ -7,6 +7,7 @@ import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.CollectiveQuery;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.pf.*;
+import eu.smartsocietyproject.smartcom.SmartComService;
 import org.assertj.core.api.Condition;
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,9 +57,16 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
 
             }
         };
+    
+    SmartComService.Factory smartComFactory = new SmartComService.Factory() {
+        @Override
+        public SmartComService create(PeerManager pm) {
+            return new SmartComService() {
+            };
+        }
+    };
 
-
-    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManagerFactory);
+    SmartSocietyApplicationContext context = new SmartSocietyApplicationContext(kindRegistry, peerManagerFactory, smartComFactory);
 
     @Test
     public void testCompose() throws Exception {

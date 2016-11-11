@@ -68,11 +68,16 @@ public class SmartComServiceTest implements NotificationCallback {
         public PeerManager getPeerManager() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
+
+        @Override
+        public SmartComService getSmartCom() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     };
     
     private MongoRunner runner;
     private PeerManagerMongoProxy pm;
-    private SmartComService scs;
+    private SmartComServiceImpl scs;
 	private boolean response;
     
     public SmartComServiceTest() {
@@ -85,7 +90,7 @@ public class SmartComServiceTest implements NotificationCallback {
         pm = PeerManagerMongoProxy.factory(runner.getMongoDb())
                 .create(context);
 		MongoClient client = new MongoClient("localhost", 6666);
-        scs = new SmartComService(pm, client);
+        scs = new SmartComServiceImpl(pm, client);
         scs.registerNotificationCallback(this);
         
         PeerIntermediary.Builder peer = PeerIntermediary

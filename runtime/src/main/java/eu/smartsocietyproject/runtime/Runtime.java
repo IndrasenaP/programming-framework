@@ -131,7 +131,8 @@ public class Runtime {
         SmartSocietyApplicationContext context =
             new SmartSocietyApplicationContext(
                 createCollectiveKindRegistry(application),
-                components.getPeerManagerFactory());
+                components.getPeerManagerFactory(),
+                components.getSmartComServiceFactory());
 
         return new Runtime(context, application).init(config);
     }

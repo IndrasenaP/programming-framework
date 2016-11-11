@@ -6,6 +6,7 @@ import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import eu.smartsocietyproject.smartcom.SmartComService;
 
 /** The default implementation of the application context
  *
@@ -14,13 +15,16 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     private final UUID uuid=UUID.randomUUID();
     private final CollectiveKindRegistry kindRegistry;
     private final PeerManager peerManager;
+    private final SmartComService smartCom;
     private final ConcurrentHashMap<String, CBTBuilder> buildersByType = new ConcurrentHashMap<>();
 
-    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, PeerManager.Factory pmFactory) {
+    public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, 
+            PeerManager.Factory pmFactory, SmartComService.Factory smartCom) {
         Preconditions.checkNotNull(kindRegistry);
         Preconditions.checkNotNull(pmFactory);
         this.kindRegistry = kindRegistry;
         this.peerManager = pmFactory.create(this);
+        this.smartCom = smartCom.create(peerManager);
     }
 
     /** Retrieve the registry of Collective kinds with attribute schema description
@@ -73,6 +77,10 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     @Override
     public PeerManager getPeerManager() {
         return peerManager;
+    }
+    
+    public SmartComService getSmartCom() {
+        return smartCom;
     }
 
     @Override
