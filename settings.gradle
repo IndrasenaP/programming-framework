@@ -13,4 +13,7 @@ include 'services'
 findProject(':services')?.name = 'programming-framework-services'
 include 'demo'
 findProject(':demo')?.name = 'programming-framework-demo'
+include 'scenario4'
+findProject(':scenario4')?.name = 'programming-framework-scenario4'
+
 

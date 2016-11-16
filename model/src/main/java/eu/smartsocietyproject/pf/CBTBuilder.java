@@ -115,6 +115,15 @@ public class CBTBuilder {
         return new CBTBuilder(context, definition, rqst);
     }
 
+    /** Assign a request to the builder
+     *
+     *  @param collective the request to be assigned
+     *  @return a CBTBuilder with the assigned request
+     */
+    public CBTBuilder withInputCollective(Collective collective) {
+        return new CBTBuilder(context, definition.withCollectiveForProvisioning(collective), request);
+    }
+
     /** {@link CollectiveBasedTask} building method, prerequisites:
      *  <ul>
      *      <li>the definition must be valid</li>
@@ -131,5 +140,7 @@ public class CBTBuilder {
 
         return CollectiveBasedTask.create(context, request, definition);
     }
+
+
 
 }

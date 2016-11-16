@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.typesafe.config.Config;
+import eu.smartsocietyproject.TaskResponse;
 import eu.smartsocietyproject.pf.*;
 
 import java.io.IOException;
@@ -46,7 +47,6 @@ public class Runtime {
         //executor executes and new TaskRunnerDescriptor executes...???
         TaskRunner runner = application.createTaskRunner(request);
         runnerDescriptors.put(definition.getId(), new TaskRunnerDescriptor(executor, definition, runner));
-        executor.execute(runner);
         return true;
     }
 
@@ -82,7 +82,7 @@ public class Runtime {
         private final ExecutorService executor;
         private final TaskDefinition definition;
         private final TaskRunner runner;
-        private final Function<Runnable, TaskResult> taskSubmitter;
+        private final Function<Runnable, TaskResponse> taskSubmitter;
         private Future<?> runnerFuture=null;
 
         public TaskRunnerDescriptor(ExecutorService executor, TaskDefinition definition, TaskRunner runner) {
@@ -91,12 +91,14 @@ public class Runtime {
             this.runner = runner;
             runnerFuture = executor.submit(runner);
             taskSubmitter = r -> {
-                try {
-                    /* TODO: CHECK HOW TO SYNCHRONIZE THE TWO RUNNERS */
-                    executor.submit(runner).wait();
-                    return null; /*TODO CHECK WHAT SHOULD BE RETURNED */
-                } catch (InterruptedException e) {
-                    throw new RuntimeWrapperException("Error on runner runs", e);
+                Future<TaskResponse> f = executor.submit(runner);
+                while (true) {
+                    try {
+                        return f.get();
+                    } catch (ExecutionException | CancellationException e) {
+                        return TaskResponse.FAIL;
+                    } catch (InterruptedException e) {
+                    }
                 }
             };
         }

@@ -261,7 +261,7 @@ public final class ApplicationBasedCollective extends Collective {
 
 
     public static ApplicationBasedCollective createFromQuery(
-        SmartSocietyApplicationContext context,
+        ApplicationContext context,
         PeerQuery query) throws PeerManagerException {
         PeerManager peerManager = context.getPeerManager();
         return  peerManager.createCollectiveFromQuery(query);
