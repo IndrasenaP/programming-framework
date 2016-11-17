@@ -609,9 +609,12 @@ public class CollectiveBasedTask implements Future<TaskResult> {
 
                 canProceed.signal();
                 lock.unlock();
+                
+                //todo-sv: check with ogi. moved this up here so handler get canceld in case of force
+                cancelAllHandlers();
+                
                 return true;
             }
-            cancelAllHandlers();
         }
 
         wasCancelled = true; // to make sure subsequent calls to isDone() will return true
@@ -723,7 +726,11 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         if(timeout == -1) {
             getMethodCanReturn.await();
         } else {
-            getMethodCanReturn.await(timeout, unit);
+            if(!getMethodCanReturn.await(timeout, unit)) {
+                this.cancel(true);
+                //todo-sv: this strictly correct with Java Future
+                throw new TimeoutException("CBT timed out!");
+            }
         }
 
         getMethodlock.unlock();

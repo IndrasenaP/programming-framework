@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.demo.helper;
+package eu.smartsocietyproject.scenario1.helper;
 
 import eu.smartsocietyproject.pf.Member;
 import eu.smartsocietyproject.pf.Plan;

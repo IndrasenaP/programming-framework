@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.demo;
+package eu.smartsocietyproject.scenario1;
 
 import at.ac.tuwien.dsg.smartcom.adapters.RESTInputAdapter;
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;

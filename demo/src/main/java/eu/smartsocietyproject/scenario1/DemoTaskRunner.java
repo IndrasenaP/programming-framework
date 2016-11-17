@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.demo;
+package eu.smartsocietyproject.scenario1;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import eu.smartsocietyproject.demo.handler.RQACompositionHandler;
-import eu.smartsocietyproject.demo.handler.RQAExecutionHandler;
-import eu.smartsocietyproject.demo.handler.RQANegotiationHandler;
-import eu.smartsocietyproject.demo.handler.RQAProvisioningHandler;
+import eu.smartsocietyproject.TaskResponse;
+import eu.smartsocietyproject.scenario1.handler.RQACompositionHandler;
+import eu.smartsocietyproject.scenario1.handler.RQAExecutionHandler;
+import eu.smartsocietyproject.scenario1.handler.RQANegotiationHandler;
+import eu.smartsocietyproject.scenario1.handler.RQAProvisioningHandler;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
@@ -73,7 +74,7 @@ public class DemoTaskRunner implements TaskRunner {
             
             cbt.start();
             
-            TaskResult res = cbt.get(3, TimeUnit.MINUTES);
+            TaskResult res = cbt.get(1, TimeUnit.MINUTES);
             
             //todo-sv: send result to submiting user
             //todo-sv: there was a nullpointer here--> check execution handler
@@ -88,6 +89,11 @@ public class DemoTaskRunner implements TaskRunner {
         } catch (TimeoutException ex) {
             Logger.getLogger(DemoTaskRunner.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public TaskResponse call() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

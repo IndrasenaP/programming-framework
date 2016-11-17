@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.demo.handler;
+package eu.smartsocietyproject.scenario1.handler;
 
 import com.google.common.collect.ImmutableList;
-import eu.smartsocietyproject.demo.helper.RQAPlan;
+import eu.smartsocietyproject.scenario1.helper.RQAPlan;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
@@ -39,9 +39,15 @@ public class RQACompositionHandler implements CompositionHandler {
             ApplicationBasedCollective provisioned, 
             TaskRequest t) throws CBTLifecycleException {
         try {
+            //todo-sv: we should probably hide peermanager functions that return
+            //residentCollectives into the internal peermanager interface
+            //and provide initial queries that target resident collectives
+            //but return ABCs
             ResidentCollective rc = context.getPeerManager()
                     .readCollectiveById(provisioned.getId().toString());
             
+            //todo-sv: here we explicitly distinguish human and sw-peers but 
+            //we could send it also to the whole collective at once
             Member swPeer = rc.getMembers().stream()
                     .filter(member -> member.getRole().equals("SWPeerForSearch"))
                     .findFirst().get();

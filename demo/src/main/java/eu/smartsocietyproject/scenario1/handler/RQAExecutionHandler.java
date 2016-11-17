@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.demo.handler;
+package eu.smartsocietyproject.scenario1.handler;
 
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
-import eu.smartsocietyproject.demo.Demo;
-import eu.smartsocietyproject.demo.helper.RQAPlan;
-import eu.smartsocietyproject.demo.helper.RQATaskResult;
+import eu.smartsocietyproject.scenario1.Demo;
+import eu.smartsocietyproject.scenario1.helper.RQAPlan;
+import eu.smartsocietyproject.scenario1.helper.RQATaskResult;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
@@ -81,7 +81,10 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             throw new CBTLifecycleException(ex);
         }
     }
+    
+    //todo-sv: extend execution handler to be able to fetch current result
 
+    @Override
     public double resultQoR() {
         return result.QoR();
     }
