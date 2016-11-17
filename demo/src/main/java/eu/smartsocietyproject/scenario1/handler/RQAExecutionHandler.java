@@ -66,7 +66,9 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             sc.send(msg);
 
             try {
-                while (!result.isQoRGoodEnough()) {
+                //here we wait for an optimal solution
+                //in getResultIfGoodEnough we offer a result thats "ok"
+                while (result.QoR()<1) {
                     Thread.sleep(1000);
                 }
             } catch (InterruptedException ex) {
@@ -82,7 +84,14 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
         }
     }
     
-    //todo-sv: extend execution handler to be able to fetch current result
+    @Override
+    public TaskResult getResultIfQoRGoodEnough() {
+        if(this.result.isQoRGoodEnough()) {
+            return result;
+        }
+        
+        return null;
+    }
 
     @Override
     public double resultQoR() {
@@ -106,5 +115,4 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
         result.setHumanResult(message.getContent());
     }
-
 }

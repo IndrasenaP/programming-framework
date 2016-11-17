@@ -16,6 +16,11 @@ public interface ExecutionHandler{
 
     TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException;
     double resultQoR(); // returns [0-1]
+    /**
+     * Returns the TaskResult if it is good enough and otherwise null.
+     * @return 
+     */
+    TaskResult getResultIfQoRGoodEnough();
 
     // boolean isDone(); // returns if the execution is done
 

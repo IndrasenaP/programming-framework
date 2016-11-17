@@ -726,9 +726,19 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         if(timeout == -1) {
             getMethodCanReturn.await();
         } else {
-            if(!getMethodCanReturn.await(timeout, unit)) {
+            if (!getMethodCanReturn.await(timeout, unit)) {
+                //cancel running handlers if timed out
                 this.cancel(true);
-                //todo-sv: this strictly correct with Java Future
+                //check if we have allready obtained result thats "good enough"
+                if (definition.getExecutionHandler() != null) {
+                    result = definition.getExecutionHandler()
+                            .getResultIfQoRGoodEnough();
+                    if (result != null) {
+                        getMethodlock.unlock();
+                        return result;
+                    }
+                }
+                //otherwise throw timeout exception
                 throw new TimeoutException("CBT timed out!");
             }
         }

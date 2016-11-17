@@ -18,7 +18,7 @@ public class RQATaskResult extends TaskResult {
 
     @Override
     public boolean isQoRGoodEnough() {
-        if(qos < 1) {
+        if(qos < 0.5) {
             return false;
         }
         

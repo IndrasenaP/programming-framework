@@ -35,11 +35,11 @@ import java.util.logging.Logger;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class DemoTaskRunner implements TaskRunner {
-    
+
     private final DemoTaskRequest request;
     private final SmartSocietyApplicationContext ctx;
-    
-    public DemoTaskRunner(DemoTaskRequest request, 
+
+    public DemoTaskRunner(DemoTaskRequest request,
             SmartSocietyApplicationContext ctx) {
         this.request = request;
         this.ctx = ctx;
@@ -50,50 +50,37 @@ public class DemoTaskRunner implements TaskRunner {
         return null;
     }
 
-    public void run() {
-        try {
-            Collective nearbyPeers = ApplicationBasedCollective
-                    .createFromQuery(ctx,
-                            PeerQuery.create()
-                                    .withRule(QueryRule.create("restaurantQA")
-                                            .withValue(AttributeType.from("true"))
-                                            .withOperation(QueryOperation.equals)
-                                    )
-                    );
-            
-            TaskFlowDefinition tfd = TaskFlowDefinition
-                    .onDemandWithOpenCall(new RQAProvisioningHandler(), 
-                            new RQACompositionHandler(), 
-                            new RQANegotiationHandler(),
-                            new RQAExecutionHandler())
-                    .withCollectiveForProvisioning(nearbyPeers);
-            
-            CollectiveBasedTask cbt = ctx.registerBuilderForCBTType("rqa", 
-                    CBTBuilder.from(tfd)
-                    .withTaskRequest(request)).build();
-            
-            cbt.start();
-            
-            TaskResult res = cbt.get(1, TimeUnit.MINUTES);
-            
-            //todo-sv: send result to submiting user
-            //todo-sv: there was a nullpointer here--> check execution handler
-            //do some easier quality check for the beginning
-            System.out.println(res.getResult());
-        } catch (PeerManagerException ex) {
-            Logger.getLogger(DemoTaskRunner.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DemoTaskRunner.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(DemoTaskRunner.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TimeoutException ex) {
-            Logger.getLogger(DemoTaskRunner.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
     @Override
     public TaskResponse call() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Collective nearbyPeers = ApplicationBasedCollective
+                .createFromQuery(ctx,
+                        PeerQuery.create()
+                                .withRule(QueryRule.create("restaurantQA")
+                                        .withValue(AttributeType.from("true"))
+                                        .withOperation(QueryOperation.equals)
+                                )
+                );
+
+        TaskFlowDefinition tfd = TaskFlowDefinition
+                .onDemandWithOpenCall(new RQAProvisioningHandler(),
+                        new RQACompositionHandler(),
+                        new RQANegotiationHandler(),
+                        new RQAExecutionHandler())
+                .withCollectiveForProvisioning(nearbyPeers);
+
+        CollectiveBasedTask cbt = ctx.registerBuilderForCBTType("rqa",
+                CBTBuilder.from(tfd)
+                        .withTaskRequest(request)).build();
+
+        cbt.start();
+
+        TaskResult res = cbt.get(1, TimeUnit.MINUTES);
+
+        //todo-sv: send result to submiting user
+        //todo-sv: there was a nullpointer here--> check execution handler
+        //do some easier quality check for the beginning
+        System.out.println(res.getResult());
+        return null;
     }
-    
+
 }
