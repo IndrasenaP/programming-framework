@@ -8,11 +8,16 @@ import eu.smartsocietyproject.peermanager.query.Query;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
 import eu.smartsocietyproject.pf.*;
+import org.gitlab.api.GitlabAPI;
+import org.gitlab.api.models.GitlabProject;
 
+import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 public class S4TaskRunner implements TaskRunner {
+    static private final String GitlabUrl = "https://gitlab.com/";
     private final ApplicationContext context;
     private final S4TaskRequest request;
 
@@ -24,7 +29,7 @@ public class S4TaskRunner implements TaskRunner {
 
     @Override
     public JsonNode getStateDescription() {
-        throw new UnsupportedOperationException("TODO"); // -=TODO=- (tommaso, 15/11/16)
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override
@@ -37,12 +42,15 @@ public class S4TaskRunner implements TaskRunner {
 
             ApplicationBasedCollective devUniverse = ApplicationBasedCollective.createFromQuery(context, q);
 
+            GitlabAPI api = GitlabAPI.connect(GitlabUrl, request.getToken());
+            int projectId = createRepository(api, request);
+
             CollectiveBasedTask progTask =
                 context.getCBTBuilder(S4Application.DEVELOPERS_CBT_TYPE)
+                       .withProvisioningHandler(new GitLabRepositoryCreationProvisioningHandler(api, projectId))
                        .withTaskRequest(request)
                        .withInputCollective(devUniverse)
                        .build();
-
             progTask.start();
 
             Collective testTeam;
@@ -70,10 +78,39 @@ public class S4TaskRunner implements TaskRunner {
             while (true) {
                 return getCBTResult(testTask, 0.7);
             }
-        } catch (PeerManagerException e) {
+        } catch (PeerManagerException | GroupNotFoundException | IOException e) {
             return TaskResponse.FAIL;
         }
     }
+
+    private int createRepository(GitlabAPI api, S4TaskRequest request) throws IOException, GroupNotFoundException  {
+        Integer namespaceId = getNamespaceIdFromGroup(api, request.getGroup());
+        GitlabProject project =
+            api.createProject(request.getProjectName(),
+                              namespaceId,
+                              request.getDescription(),
+                              true,
+                              false,
+                              true,
+                              false,
+                              false,
+                              false,
+                              0,
+                              null);
+        return project.getId();
+    }
+
+
+    private Integer getNamespaceIdFromGroup(GitlabAPI api, Optional<String> group) throws GroupNotFoundException {
+        return group.map(g -> {
+            try {
+                return api.getGroup(g).getId();
+            } catch (IOException e) {
+                throw new GroupNotFoundException(g);
+            }
+        }).orElse(null);
+    }
+
 
     private TaskResponse getCBTResult(CollectiveBasedTask cbt, double satisfactionLevel) {
         while (true) {
@@ -84,6 +121,13 @@ public class S4TaskRunner implements TaskRunner {
             } catch (ExecutionException | CancellationException e) {
                 return TaskResponse.FAIL;
             }
+        }
+    }
+
+
+    private static class GroupNotFoundException extends RuntimeException {
+        public GroupNotFoundException(String group) {
+            super(String.format("Could not find group [%s].", group));
         }
     }
 }

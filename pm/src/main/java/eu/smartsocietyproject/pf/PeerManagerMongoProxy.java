@@ -44,7 +44,7 @@ import org.bson.conversions.Bson;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class PeerManagerMongoProxy implements InternalPeerManager {
+public class PeerManagerMongoProxy extends InternalPeerManager {
     private static ObjectMapper mapper = new ObjectMapper();
     private final AttributeFactory attributeFactory = new MongoAttributeFactory();
     private ApplicationContext context;
