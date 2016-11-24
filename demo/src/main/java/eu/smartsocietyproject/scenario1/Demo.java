@@ -11,25 +11,20 @@ import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
 import at.ac.tuwien.dsg.smartcom.model.PeerChannelAddress;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.MongoClient;
-import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.AttributeType;
-import eu.smartsocietyproject.pf.CBTBuilder;
 import eu.smartsocietyproject.pf.CollectiveKind;
 import eu.smartsocietyproject.pf.CollectiveKindRegistry;
 import eu.smartsocietyproject.pf.MongoRunner;
 import eu.smartsocietyproject.pf.PeerManagerMongoProxy;
 import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskDefinition;
-import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.helper.InternalPeerManager;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import eu.smartsocietyproject.runtime.Runtime;
 import eu.smartsocietyproject.smartcom.PeerChannelAddressAdapter;
-import eu.smartsocietyproject.smartcom.SmartComService;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
 import java.util.Arrays;
@@ -79,7 +74,7 @@ public class Demo implements NotificationCallback {
                         .convert(new PeerChannelAddress(
                                 Identifier.peer("google"),
                                 Identifier.channelType("REST"),
-                                Arrays.asList("localhost:8000/"))
+                                Arrays.asList("http://localhost:8000/"))
                         )
                 )
                 .addAttribute("restaurantQA", AttributeType.from("true"))
@@ -95,6 +90,7 @@ public class Demo implements NotificationCallback {
                         )
                 )
                 .addAttribute("restaurantQA", AttributeType.from("true"))
+                .addAttribute("username", AttributeType.from("sveti"))
                 .build());
 
         smartCom.registerNotificationCallback(new Demo());
@@ -114,8 +110,18 @@ public class Demo implements NotificationCallback {
 
     public void notify(Message message) {
         if (message.getConversationId().equals("RQA")) {
-            TaskDefinition task = new TaskDefinition(JsonNodeFactory.instance
-                    .textNode(message.getContent()));
+            //todo-sv:change from username to email search
+            String[] splited = message.getContent().split(";");
+            
+            if(splited.length < 2) {
+                return;
+            }
+            
+            ObjectNode rqa = JsonNodeFactory.instance.objectNode();
+            rqa.set("question", JsonNodeFactory.instance.textNode(splited[0].trim()));
+            rqa.set("user", JsonNodeFactory.instance.textNode(splited[1].trim()));
+            
+            TaskDefinition task = new TaskDefinition(rqa);
             Demo.runtime.startTask(task);
         }
     }

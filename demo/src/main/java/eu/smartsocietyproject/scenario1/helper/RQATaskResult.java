@@ -40,12 +40,18 @@ public class RQATaskResult extends TaskResult {
     }
     
     public void setGoogleResult(String googleRes) {
-        this.result += "Google:\r\n" + googleRes;
+        this.result += "Google:" 
+                + System.getProperty("line.separator") 
+                + googleRes
+                + System.getProperty("line.separator");
         this.qos += 0.5;
     }
     
     public void setHumanResult(String res) {
-        this.result += "Human opinion:\r\n" + res;
+        this.result += "Human opinion:" 
+                + System.getProperty("line.separator")
+                + res
+                + System.getProperty("line.separator");
         this.qos += 0.5;
     }
     

@@ -21,7 +21,7 @@ public class DemoTaskRequest extends TaskRequest {
     @Override
     public String getRequest() {
         //since we know that it is a string node
-        return getDefinition().getJson().asText();
+        return getDefinition().getJson().get("question").asText();
     }
     
 }
