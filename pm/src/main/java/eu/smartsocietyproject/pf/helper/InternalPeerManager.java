@@ -7,12 +7,19 @@ package eu.smartsocietyproject.pf.helper;
 
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
+import eu.smartsocietyproject.pf.Peer;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public interface InternalPeerManager extends PeerManager {
-    void persistPeer(PeerIntermediary peer);
-    PeerIntermediary readPeerById(String peerId) throws PeerManagerException;
+public abstract class InternalPeerManager implements PeerManager {
+    public abstract void persistPeer(PeerIntermediary peer);
+    public abstract PeerIntermediary readPeerById(String peerId) throws PeerManagerException;
+
+    @Override
+    public Peer retrievePeer(String peerId) throws PeerManagerException {
+        PeerIntermediary intermediary = readPeerById(peerId);
+        return new Peer(peerId, intermediary.toJson());
+    }
 }
