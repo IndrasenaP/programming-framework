@@ -53,6 +53,11 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
                            throws PeerManagerException {
                            throw new UnsupportedOperationException("Not Implemented");
                        }
+
+                   @Override
+                   public Peer retrievePeer(String peerId) throws PeerManagerException {
+                       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                   }
                    };
 
             }
