@@ -9,6 +9,11 @@ import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.smartsocietyproject.scenario1.Demo;
 import eu.smartsocietyproject.scenario1.helper.RQAPlan;
 import eu.smartsocietyproject.scenario1.helper.RQATaskResult;
@@ -32,6 +37,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
     private String conversationId = null;
     private RQAPlan plan;
     private RQATaskResult result = new RQATaskResult();
+    private ObjectMapper mapper = new ObjectMapper();
 
     public TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
         try {
@@ -53,14 +59,19 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             props.load(Demo.class.getClassLoader()
                     .getResourceAsStream("EmailAdapter.properties"));
             sc.addEmailPullAdapter(conversationId, props);
+            
+            ObjectNode content = JsonNodeFactory.instance.objectNode();
+            content.set("question", JsonNodeFactory.instance
+                    .textNode(plan.getRequest().getRequest()));
 
             Message msg = new Message.MessageBuilder()
-                    .setType("TASK")
-                    .setSubtype("REQUEST")
+                    .setType("ask")
+                    .setSubtype("question")
                     .setReceiverId(Identifier.collective(agreed.getCollective().getId()))
                     .setSenderId(Identifier.component("RQA"))
                     .setConversationId(conversationId)
-                    .setContent(plan.getRequest().getRequest())
+                    .setContent(mapper.writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(content))
                     .create();
 
             sc.send(msg);
@@ -108,7 +119,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             return;
         }
 
-        if (message.getSenderId().equals(plan.getGoogle().getPeerId())) {
+        if (message.getSenderId().getId().equals(plan.getGoogle().getPeerId())) {
             result.setGoogleResult(message.getContent());
             return;
         }

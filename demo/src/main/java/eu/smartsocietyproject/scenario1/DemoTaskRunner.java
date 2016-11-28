@@ -5,13 +5,14 @@
  */
 package eu.smartsocietyproject.scenario1;
 
+import at.ac.tuwien.dsg.smartcom.model.Identifier;
+import at.ac.tuwien.dsg.smartcom.model.Message;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.smartsocietyproject.TaskResponse;
 import eu.smartsocietyproject.scenario1.handler.RQACompositionHandler;
 import eu.smartsocietyproject.scenario1.handler.RQAExecutionHandler;
 import eu.smartsocietyproject.scenario1.handler.RQANegotiationHandler;
 import eu.smartsocietyproject.scenario1.handler.RQAProvisioningHandler;
-import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
@@ -24,11 +25,8 @@ import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.TaskRunner;
-import java.util.concurrent.ExecutionException;
+import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -76,11 +74,41 @@ public class DemoTaskRunner implements TaskRunner {
 
         TaskResult res = cbt.get(1, TimeUnit.MINUTES);
 
-        //todo-sv: send result to submiting user
-        //todo-sv: there was a nullpointer here--> check execution handler
-        //do some easier quality check for the beginning
-        System.out.println(res.getResult());
-        return null;
+        if(!res.isQoRGoodEnough()) {
+            return TaskResponse.FAIL;
+        }
+        
+        //todo-sv: just temp until smartCom allows sending msgs to peers by query or somethign like that
+        String user = request.getDefinition().getJson().get("user").asText();
+        ApplicationBasedCollective responseCollective = ApplicationBasedCollective
+                .createFromQuery(ctx,
+                        PeerQuery.create()
+                                .withRule(QueryRule.create("username")
+                                        .withValue(AttributeType.from(user))
+                                        .withOperation(QueryOperation.equals)
+                                )
+                );
+        ctx.getPeerManager().persistCollective(responseCollective);
+       
+        //todo-sv: this is madness we need an easier way to respond to certain peers
+        //todo-sv: is there a way to write directly mail as response without quering the DB?
+        Message respMsg = new Message.MessageBuilder()
+                .setType("rqa")
+                .setSubtype("answer")
+                .setContent(res.getResult())
+                .setSenderId(Identifier.component("RQA"))
+                .setConversationId("RQA")
+                .setReceiverId(Identifier.collective(responseCollective.getId()))
+                .create();
+        
+        try {
+        //todo-sv: fix interface and remove cast
+        ((SmartComServiceImpl) ctx.getSmartCom()).send(respMsg);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
+        return TaskResponse.OK;
     }
 
 }

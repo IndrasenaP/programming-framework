@@ -30,6 +30,7 @@ import eu.smartsocietyproject.pf.helper.factory.MongoAttributeFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -174,9 +175,9 @@ public class PeerManagerMongoProxy extends InternalPeerManager {
         JSONCollectiveIntermediary.Builder collBuilder = 
                 JSONCollectiveIntermediary.builder(builder.build());
         
-        return
-            ResidentCollective
-                .createFromIntermediary(context, kind, collBuilder.build())
+        return ResidentCollective
+                .createFromIntermediary(context, kind, collBuilder
+                        .build(UUID.randomUUID().toString()))
                 .toApplicationBasedCollective();
     }
 
