@@ -13,9 +13,10 @@ public abstract class Application {
     public abstract String getApplicationId();
 
     /** Use configuration for initializing application internals
+     * @param context Application context
      * @param config typesafe configuration
      */
-    public abstract void init(Config config);
+    public abstract void init(ApplicationContext context, Config config);
 
     /* Returns the collective kind that will be used by the application */
     public abstract Set<CollectiveKind> listCollectiveKinds();

@@ -62,7 +62,7 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     @Override
     public CBTBuilder getCBTBuilder(String type) {
         Preconditions.checkNotNull(type);
-        Preconditions.checkArgument(buildersByType.contains(type), "Unknown task type: %s", type);
+        Preconditions.checkArgument(buildersByType.containsKey(type), "Unknown task type: %s", type);
         return buildersByType.get(type);
     }
 

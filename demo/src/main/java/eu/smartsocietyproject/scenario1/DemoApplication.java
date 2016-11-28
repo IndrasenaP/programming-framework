@@ -39,7 +39,7 @@ public class DemoApplication extends Application {
     }
 
     @Override
-    public void init(Config config) {
+    public void init(ApplicationContext context, Config config) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

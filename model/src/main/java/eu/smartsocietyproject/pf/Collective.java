@@ -251,7 +251,7 @@ public abstract class Collective {
     public static ApplicationBasedCollective complement(Collective primary, Collective secondary) {
 
         try {
-            return complement(primary, secondary, Optional.empty());
+            return complement(primary, secondary, primary.getKind());
         } catch (CollectiveCreationException e) {
             throw new IllegalStateException("Set operation without toKind failed", e);
         }

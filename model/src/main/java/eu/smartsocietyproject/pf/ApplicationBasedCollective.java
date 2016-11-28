@@ -267,6 +267,14 @@ public final class ApplicationBasedCollective extends Collective {
         return  peerManager.createCollectiveFromQuery(query);
     }
 
+    public static ApplicationBasedCollective createFromQuery(
+        ApplicationContext context,
+        PeerQuery query,
+        String kind) throws PeerManagerException {
+        PeerManager peerManager = context.getPeerManager();
+        return  peerManager.createCollectiveFromQuery(query, kind);
+    }
+
 
 
     @Override

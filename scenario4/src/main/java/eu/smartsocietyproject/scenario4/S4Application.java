@@ -8,14 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public class S4Application extends eu.smartsocietyproject.pf.Application {
+    public final static String DEVELOPERS_KIND = "developers";
     public final static String DEVELOPERS_CBT_TYPE = "developers";
     public final static String TESTERS_CBT_TYPE = "testers";
-    private final ApplicationContext context;
+    private ApplicationContext context = null;
 
-    public S4Application(ApplicationContext context) {
-        this.context = context;
+    public S4Application() {
     }
-
 
     @Override
     public String getApplicationId() {
@@ -23,21 +22,22 @@ public class S4Application extends eu.smartsocietyproject.pf.Application {
     }
 
     @Override
-    public void init(Config config) {
-        
+    public void init(ApplicationContext context, Config config) {
+        this.context = context;
+
         context.registerBuilderForCBTType(DEVELOPERS_CBT_TYPE,
                                           CBTBuilder.empty().asOnDemand()
-
                                                     .withNegotiationHandler(new ImplicitAgreementByRatio(0.5)));
         context.registerBuilderForCBTType(TESTERS_CBT_TYPE,
                                           CBTBuilder.empty().asOnDemand()
+                                                    .withProvisioningHandler(new IdentityProvisioningHandler())
                                                     .withNegotiationHandler(new ImplicitAgreementByRatio()));
     }
 
     @Override
     public Set<CollectiveKind> listCollectiveKinds() {
         return ImmutableSet.of(
-            CollectiveKind.builder("developers").build()
+            CollectiveKind.builder(DEVELOPERS_KIND).build()
         );
     }
 

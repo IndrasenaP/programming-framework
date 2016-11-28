@@ -16,12 +16,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Optional;
 
-public class GitLabRepositoryCreationProvisioningHandler implements ProvisioningHandler {
+public class GitLabMembersAddingProvisioningHandler implements ProvisioningHandler {
     private final GitlabAPI api;
     private final int projectId;
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public GitLabRepositoryCreationProvisioningHandler(GitlabAPI api, int projectId) {
+    public GitLabMembersAddingProvisioningHandler(GitlabAPI api, int projectId) {
         this.api = api;
         this.projectId = projectId;
     }
@@ -41,6 +41,7 @@ public class GitLabRepositoryCreationProvisioningHandler implements Provisioning
                     continue;
                 }
                 int gitlabUser = node.asInt();
+                logger.info(String.format("Adding user %d to the repository", gitlabUser));
                 api.addProjectMember(projectId, gitlabUser, GitlabAccessLevel.Developer);
             } catch (PeerManagerException e) {
                 logger.error("Unable to retrieve peer %s", m.getPeerId(), e);

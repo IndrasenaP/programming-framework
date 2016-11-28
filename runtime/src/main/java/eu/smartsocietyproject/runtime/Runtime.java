@@ -36,7 +36,7 @@ public class Runtime {
     }
 
     public Runtime init(Config config) {
-        application.init(config);
+        application.init(context, config);
         return this;
     }
 
@@ -128,14 +128,20 @@ public class Runtime {
     }
 
     public static Runtime fromApplication(Config config, SmartSocietyComponents components) throws IOException, InstantiationException {
-        Class<? extends Application> applicationClass = getApplicationClass();
+        return fromApplication(config, components, getApplicationClass());
+    }
+
+    public static Runtime fromApplication(
+        Config config,
+        SmartSocietyComponents components,
+        Class<? extends Application> applicationClass) throws IOException, InstantiationException {
         Application application = instantiateApplication(applicationClass);
+        CollectiveKindRegistry registry = createCollectiveKindRegistry(application);
         SmartSocietyApplicationContext context =
             new SmartSocietyApplicationContext(
-                createCollectiveKindRegistry(application),
+                registry,
                 components.getPeerManagerFactory(),
                 components.getSmartComServiceFactory());
-
         return new Runtime(context, application).init(config);
     }
 

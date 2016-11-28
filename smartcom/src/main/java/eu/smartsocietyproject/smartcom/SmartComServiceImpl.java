@@ -91,7 +91,7 @@ public class SmartComServiceImpl implements SmartComService {
         }
         
         @Override
-        public SmartComService create(PeerManager pm) {
+        public SmartComServiceImpl create(PeerManager pm) {
             try {
                 //todo-sv: add error handling for cast
                 return new SmartComServiceImpl((InternalPeerManager)pm, client);
