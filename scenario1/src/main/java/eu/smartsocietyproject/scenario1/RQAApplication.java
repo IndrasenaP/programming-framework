@@ -26,11 +26,11 @@ import java.util.Set;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class DemoApplication extends Application {
+public class RQAApplication extends Application {
     
     private SmartSocietyApplicationContext ctx;
     
-    public DemoApplication(SmartSocietyApplicationContext ctx) {
+    public RQAApplication(SmartSocietyApplicationContext ctx) {
         this.ctx = ctx;
     }
 
@@ -52,15 +52,15 @@ public class DemoApplication extends Application {
     @Override
     public TaskRequest createTaskRequest(TaskDefinition definition) {
         if(definition instanceof RQATaskDefinition) {
-            return new DemoTaskRequest((RQATaskDefinition)definition);
+            return new RQATaskRequest((RQATaskDefinition)definition);
         }
         return null;
     }
 
     @Override
     public TaskRunner createTaskRunner(TaskRequest request) {
-        if(request instanceof DemoTaskRequest) {
-            return new DemoTaskRunner((DemoTaskRequest)request, ctx);
+        if(request instanceof RQATaskRequest) {
+            return new RQATaskRunner((RQATaskRequest)request, ctx);
         }
         throw new UnsupportedOperationException("Not supported request type!");
     }    

@@ -32,12 +32,12 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class DemoTaskRunner implements TaskRunner {
+public class RQATaskRunner implements TaskRunner {
 
-    private final DemoTaskRequest request;
+    private final RQATaskRequest request;
     private final SmartSocietyApplicationContext ctx;
 
-    public DemoTaskRunner(DemoTaskRequest request,
+    public RQATaskRunner(RQATaskRequest request,
             SmartSocietyApplicationContext ctx) {
         this.request = request;
         this.ctx = ctx;

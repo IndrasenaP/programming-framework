@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.smartsocietyproject.scenario1.Demo;
+import eu.smartsocietyproject.scenario1.Scenario1;
 import eu.smartsocietyproject.scenario1.helper.RQAPlan;
 import eu.smartsocietyproject.scenario1.helper.RQATaskResult;
 import eu.smartsocietyproject.pf.ApplicationContext;
@@ -56,7 +56,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             conversationId = plan.getRequest().getId().toString();
 
             Properties props = new Properties();
-            props.load(Demo.class.getClassLoader()
+            props.load(Scenario1.class.getClassLoader()
                     .getResourceAsStream("EmailAdapter.properties"));
             sc.addEmailPullAdapter(conversationId, props);
             

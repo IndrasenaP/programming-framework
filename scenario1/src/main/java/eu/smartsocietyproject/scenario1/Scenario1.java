@@ -35,7 +35,7 @@ import java.util.Properties;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class Demo implements NotificationCallback {
+public class Scenario1 implements NotificationCallback {
 
     private static Runtime runtime;
 
@@ -117,9 +117,9 @@ public class Demo implements NotificationCallback {
                 .addAttribute("restaurantQA", AttributeType.from("true"))
                 .build());
 
-        smartCom.registerNotificationCallback(new Demo());
+        smartCom.registerNotificationCallback(new Scenario1());
         Properties props = new Properties();
-        props.load(Demo.class.getClassLoader()
+        props.load(Scenario1.class.getClassLoader()
                 .getResourceAsStream("EmailAdapter.properties"));
         //todo-sv: for adapter discussion: for example, how will we find 
         //and start up this adapters? since they belong to the application
@@ -128,8 +128,8 @@ public class Demo implements NotificationCallback {
         smartCom.getCommunication()
                 .addPushAdapter(new RESTInputAdapter(9696, "searchResult"));
 
-        Demo.runtime = new Runtime(context, new DemoApplication(context));
-        Demo.runtime.run();
+        Scenario1.runtime = new Runtime(context, new RQAApplication(context));
+        Scenario1.runtime.run();
     }
 
     public void notify(Message message) {
@@ -137,7 +137,7 @@ public class Demo implements NotificationCallback {
             ObjectNode rqa = JsonNodeFactory.instance.objectNode();
             rqa.set("question", JsonNodeFactory.instance
                     .textNode(message.getContent().trim()));            
-            Demo.runtime.startTask(new RQATaskDefinition(rqa, message.getSenderId()));
+            Scenario1.runtime.startTask(new RQATaskDefinition(rqa, message.getSenderId()));
         }
     }
 

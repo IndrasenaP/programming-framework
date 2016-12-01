@@ -13,9 +13,9 @@ import eu.smartsocietyproject.scenario1.helper.RQATaskDefinition;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class DemoTaskRequest extends TaskRequest {
+public class RQATaskRequest extends TaskRequest {
 
-    public DemoTaskRequest(RQATaskDefinition definition) {
+    public RQATaskRequest(RQATaskDefinition definition) {
         super(definition, "GoogleRequestTask");
     }
 
