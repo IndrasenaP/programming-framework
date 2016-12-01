@@ -7,6 +7,7 @@ package eu.smartsocietyproject.scenario1;
 
 import eu.smartsocietyproject.pf.TaskDefinition;
 import eu.smartsocietyproject.pf.TaskRequest;
+import eu.smartsocietyproject.scenario1.helper.RQATaskDefinition;
 
 /**
  *
@@ -14,7 +15,7 @@ import eu.smartsocietyproject.pf.TaskRequest;
  */
 public class DemoTaskRequest extends TaskRequest {
 
-    public DemoTaskRequest(TaskDefinition definition) {
+    public DemoTaskRequest(RQATaskDefinition definition) {
         super(definition, "GoogleRequestTask");
     }
 
@@ -23,5 +24,12 @@ public class DemoTaskRequest extends TaskRequest {
         //since we know that it is a string node
         return getDefinition().getJson().get("question").asText();
     }
+
+    @Override
+    public RQATaskDefinition getDefinition() {
+        return (RQATaskDefinition)super.getDefinition();
+    }
+    
+    
     
 }

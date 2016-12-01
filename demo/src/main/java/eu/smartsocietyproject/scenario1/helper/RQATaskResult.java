@@ -15,10 +15,11 @@ public class RQATaskResult extends TaskResult {
     
     private String result = "";
     private double qos = 0;
+    private double qosStep = 0.25;
 
     @Override
     public boolean isQoRGoodEnough() {
-        if(qos < 0.5) {
+        if(qos < qosStep) {
             return false;
         }
         
@@ -43,16 +44,18 @@ public class RQATaskResult extends TaskResult {
         this.result += "Google:" 
                 + System.getProperty("line.separator") 
                 + googleRes
+                + System.getProperty("line.separator")
                 + System.getProperty("line.separator");
-        this.qos += 0.5;
+        this.qos += qosStep;
     }
     
     public void setHumanResult(String res) {
         this.result += "Human opinion:" 
                 + System.getProperty("line.separator")
                 + res
+                + System.getProperty("line.separator")
                 + System.getProperty("line.separator");
-        this.qos += 0.5;
+        this.qos += qosStep;
     }
     
 }

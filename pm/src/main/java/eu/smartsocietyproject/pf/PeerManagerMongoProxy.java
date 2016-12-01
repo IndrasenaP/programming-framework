@@ -150,6 +150,21 @@ public class PeerManagerMongoProxy extends InternalPeerManager {
 
         return colls;
     }
+    
+    @Override
+    public List<PeerIntermediary> findPeers(PeerQuery query) throws PeerManagerException {
+        FindIterable<Document> peerDocs = this.peersCollection
+                .find(getAttributesMongoQuery(query));
+        
+        List<PeerIntermediary> peers = new ArrayList<>();
+        
+        for(Document p: peerDocs) {
+            System.out.println(p.toJson());
+            peers.add(PeerIntermediary.create(p.toJson()));
+        }
+        
+        return peers;
+    }
 
     @Override
     public ApplicationBasedCollective createCollectiveFromQuery(PeerQuery query) throws PeerManagerException {

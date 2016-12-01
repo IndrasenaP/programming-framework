@@ -24,6 +24,7 @@ import eu.smartsocietyproject.pf.TaskDefinition;
 import eu.smartsocietyproject.pf.helper.InternalPeerManager;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import eu.smartsocietyproject.runtime.Runtime;
+import eu.smartsocietyproject.scenario1.helper.RQATaskDefinition;
 import eu.smartsocietyproject.smartcom.PeerChannelAddressAdapter;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
@@ -81,16 +82,39 @@ public class Demo implements NotificationCallback {
                 .build());
 
         pm.persistPeer(PeerIntermediary
-                .builder("expert", "HumanExpert")
+                .builder("sveti", "HumanExpert")
                 .addDeliveryAddress(PeerChannelAddressAdapter
                         .convert(new PeerChannelAddress(
-                                Identifier.peer("expert"),
+                                Identifier.peer("sveti"),
                                 Identifier.channelType("Email"),
-                                Arrays.asList("s.videnov@dsg.tuwien.ac.at"))
+                                Arrays.asList("svetoslav.videnov@infosys.tuwien.ac.at"))
                         )
                 )
                 .addAttribute("restaurantQA", AttributeType.from("true"))
-                .addAttribute("username", AttributeType.from("sveti"))
+                .build());
+        
+        pm.persistPeer(PeerIntermediary
+                .builder("sveto", "HumanExpert")
+                .addDeliveryAddress(PeerChannelAddressAdapter
+                        .convert(new PeerChannelAddress(
+                                Identifier.peer("sveto"),
+                                Identifier.channelType("Email"),
+                                Arrays.asList("videnov.svetoslav@gmail.com"))
+                        )
+                )
+                .addAttribute("restaurantQA", AttributeType.from("true"))
+                .build());
+        
+        pm.persistPeer(PeerIntermediary
+                .builder("vauvenal5", "HumanExpert")
+                .addDeliveryAddress(PeerChannelAddressAdapter
+                        .convert(new PeerChannelAddress(
+                                Identifier.peer("vauvenal5"),
+                                Identifier.channelType("Email"),
+                                Arrays.asList("vauvenal5@gmail.com"))
+                        )
+                )
+                .addAttribute("restaurantQA", AttributeType.from("true"))
                 .build());
 
         smartCom.registerNotificationCallback(new Demo());
@@ -109,20 +133,11 @@ public class Demo implements NotificationCallback {
     }
 
     public void notify(Message message) {
-        if (message.getConversationId().equals("RQA")) {
-            //todo-sv:change from username to email search
-            String[] splited = message.getContent().split(";");
-            
-            if(splited.length < 2) {
-                return;
-            }
-            
+        if (message.getConversationId().equals("RQA")) {            
             ObjectNode rqa = JsonNodeFactory.instance.objectNode();
-            rqa.set("question", JsonNodeFactory.instance.textNode(splited[0].trim()));
-            rqa.set("user", JsonNodeFactory.instance.textNode(splited[1].trim()));
-            
-            TaskDefinition task = new TaskDefinition(rqa);
-            Demo.runtime.startTask(task);
+            rqa.set("question", JsonNodeFactory.instance
+                    .textNode(message.getContent().trim()));            
+            Demo.runtime.startTask(new RQATaskDefinition(rqa, message.getSenderId()));
         }
     }
 

@@ -31,8 +31,9 @@ public class PeerChannelAddressAdapter {
     
     public static Attribute convert(PeerChannelAddress address) {
         try {
-            return AttributeType.from(ObjectMapperSingelton.getObjectMapper()
+            Attribute att = AttributeType.from(ObjectMapperSingelton.getObjectMapper()
                     .writerWithDefaultPrettyPrinter().writeValueAsString(address));
+            return att;
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException(ex);
         }

@@ -20,6 +20,7 @@ import at.ac.tuwien.dsg.smartcom.utils.PropertiesLoader;
 import com.mongodb.MongoClient;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.pf.helper.InternalPeerManager;
+import eu.smartsocietyproject.smartcom.adapter.EmailInputAdapterWithPeerSender;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,12 +50,13 @@ public class SmartComServiceImpl implements SmartComService {
     //todo-sv: discuss wit ogi how exactly to init this
     public void addEmailPullAdapter(String conversationId, Properties props) {
         this.communication.addPullAdapter(
-				new EmailInputAdapter(conversationId,
+				new EmailInputAdapterWithPeerSender(conversationId,
                         props.getProperty("hostIncoming"),
                         props.getProperty("username"),
                         props.getProperty("password"),
 						Integer.valueOf(props.getProperty("portIncoming")), 
-						true, "test", "test", true), 1000);
+						true, "test", "test", true, 
+                        peerManager.getPeerManager()), 1000);
     }
     
     //todo-sv: only temporary until decided how default input response adapters

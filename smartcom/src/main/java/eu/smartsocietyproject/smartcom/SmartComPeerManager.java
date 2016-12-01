@@ -116,5 +116,9 @@ public class SmartComPeerManager implements PeerAuthenticationCallback, PeerInfo
                 peerIdentifiers,
                 DeliveryPolicy.Collective.TO_ALL_MEMBERS);
     }
+    
+    public InternalPeerManager getPeerManager() {
+        return this.peerManager;
+    }
 
 }

@@ -72,23 +72,23 @@ public class DemoTaskRunner implements TaskRunner {
 
         cbt.start();
 
-        TaskResult res = cbt.get(1, TimeUnit.MINUTES);
+        TaskResult res = cbt.get(3, TimeUnit.MINUTES);
 
         if(!res.isQoRGoodEnough()) {
             return TaskResponse.FAIL;
         }
         
         //todo-sv: just temp until smartCom allows sending msgs to peers by query or somethign like that
-        String user = request.getDefinition().getJson().get("user").asText();
-        ApplicationBasedCollective responseCollective = ApplicationBasedCollective
-                .createFromQuery(ctx,
-                        PeerQuery.create()
-                                .withRule(QueryRule.create("username")
-                                        .withValue(AttributeType.from(user))
-                                        .withOperation(QueryOperation.equals)
-                                )
-                );
-        ctx.getPeerManager().persistCollective(responseCollective);
+//        String user = request.getDefinition().getJson().get("user").asText();
+//        ApplicationBasedCollective responseCollective = ApplicationBasedCollective
+//                .createFromQuery(ctx,
+//                        PeerQuery.create()
+//                                .withRule(QueryRule.create("username")
+//                                        .withValue(AttributeType.from(user))
+//                                        .withOperation(QueryOperation.equals)
+//                                )
+//                );
+//        ctx.getPeerManager().persistCollective(responseCollective);
        
         //todo-sv: this is madness we need an easier way to respond to certain peers
         //todo-sv: is there a way to write directly mail as response without quering the DB?
@@ -98,7 +98,8 @@ public class DemoTaskRunner implements TaskRunner {
                 .setContent(res.getResult())
                 .setSenderId(Identifier.component("RQA"))
                 .setConversationId("RQA")
-                .setReceiverId(Identifier.collective(responseCollective.getId()))
+                //.setReceiverId(Identifier.collective(responseCollective.getId()))
+                .setReceiverId(this.request.getDefinition().getSender())
                 .create();
         
         try {

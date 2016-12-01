@@ -18,6 +18,7 @@ import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.pf.TaskRunner;
 import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
 import eu.smartsocietyproject.pf.cbthandlers.ProvisioningHandler;
+import eu.smartsocietyproject.scenario1.helper.RQATaskDefinition;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,7 +51,10 @@ public class DemoApplication extends Application {
 
     @Override
     public TaskRequest createTaskRequest(TaskDefinition definition) {
-        return new DemoTaskRequest(definition);
+        if(definition instanceof RQATaskDefinition) {
+            return new DemoTaskRequest((RQATaskDefinition)definition);
+        }
+        return null;
     }
 
     @Override

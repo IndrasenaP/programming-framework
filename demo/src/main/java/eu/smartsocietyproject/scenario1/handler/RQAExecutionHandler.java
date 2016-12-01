@@ -79,7 +79,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             try {
                 //here we wait for an optimal solution
                 //in getResultIfGoodEnough we offer a result thats "ok"
-                while (result.QoR()<1) {
+                while (result.QoR()<0.75) {
                     Thread.sleep(1000);
                 }
             } catch (InterruptedException ex) {
