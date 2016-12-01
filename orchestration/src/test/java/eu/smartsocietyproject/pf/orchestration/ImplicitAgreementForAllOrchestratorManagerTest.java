@@ -32,6 +32,11 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
                        }
 
                        @Override
+                       public Peer retrievePeer(String peerId) throws PeerManagerException {
+                           throw new UnsupportedOperationException("Not Implemented");
+                       }
+
+                       @Override
                        public void persistCollective(ApplicationBasedCollective collective) {
                            throw new UnsupportedOperationException("Not Implemented");
                        }

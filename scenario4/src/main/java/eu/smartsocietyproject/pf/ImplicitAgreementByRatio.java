@@ -34,15 +34,16 @@ public class ImplicitAgreementByRatio implements NegotiationHandler {
         if (!ratio.isPresent()) {
             return negotiables.get(0);
         }
-
-        Set<Member> members = negotiables.get(0).getCollective().makeMembersVisible().getMembers();
+        Collective inputCollective = negotiables.get(0).getCollective();
+        String kind = inputCollective.getKind();
+        Set<Member> members = inputCollective.makeMembersVisible().getMembers();
         int returnedMembers = (int)(members.size()*ratio.get());
         List<Member> selectedMembers = members.stream().limit(returnedMembers).collect(Collectors.toList());
 
         try {
             return
                 CollectiveWithPlan.of(
-                    ApplicationBasedCollective.empty(context, UUID.randomUUID().toString(), "developers")
+                    ApplicationBasedCollective.empty(context, UUID.randomUUID().toString(), kind)
                                               .withMembers(selectedMembers),
                     negotiables.get(0).getPlan());
         } catch (Collective.CollectiveCreationException e) {

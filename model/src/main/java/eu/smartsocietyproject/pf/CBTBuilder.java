@@ -2,6 +2,7 @@ package eu.smartsocietyproject.pf;
 
 import com.google.common.base.Preconditions;
 import eu.smartsocietyproject.pf.cbthandlers.CompositionHandler;
+import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
 import eu.smartsocietyproject.pf.cbthandlers.NegotiationHandler;
 import eu.smartsocietyproject.pf.cbthandlers.ProvisioningHandler;
 
@@ -86,6 +87,15 @@ public class CBTBuilder {
     public CBTBuilder withProvisioningHandler(ProvisioningHandler handler) {
         Preconditions.checkNotNull(handler);
         return new CBTBuilder(context, definition.withProvisioningHandler(handler), request);
+    }
+
+    /** Changes provisioning handler in the definition
+     *
+     * @param handler provisioning handler
+     * @return a CBTBuilder with the definition changed accordingly */
+    public CBTBuilder withExecutionHandler(ExecutionHandler handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withExecutionHandler(handler), request);
     }
 
     /** Changes composition handler in the definition

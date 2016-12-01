@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf;
 
+import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.pf.cbthandlers.*;
 
 import java.util.*;
@@ -176,9 +177,13 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                 break;
 
             case NEGOTIATION:
+                List<CollectiveWithPlan> negotiables =
+                    this.isOpenCall()
+                    ? this.negotiables
+                    : ImmutableList.of(CollectiveWithPlan.of(this.provisioned, Plan.empty));
                 Callable<CollectiveWithPlan> negotiationCallable= () -> {
                     NegotiationHandler handler = definition.getNegotiationHandler();
-                    return handler.negotiate(context, this.negotiables);
+                    return handler.negotiate(context, negotiables);
                 };
                 this.negotiationFuture = executor.submit(negotiationCallable);
                 logger.debug("initialized negotiation handler.");
@@ -245,7 +250,7 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                             if (isOpenCall()) {
                                 state = CollectiveBasedTask.State.WAITING_FOR_COMPOSITION;
                             }else{
-                                state = CollectiveBasedTask.State.PROV_FAIL;
+                                state = CollectiveBasedTask.State.WAITING_FOR_NEGOTIATION;
                             }
                         }catch (Exception e){
                             state = CollectiveBasedTask.State.PROV_FAIL;
@@ -304,6 +309,7 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                                 //success
                                 state = CollectiveBasedTask.State.WAITING_FOR_EXECUTION;
                             }catch (ExecutionException e){
+                                logger.error("Error during negotiation", e);
                                 state = CollectiveBasedTask.State.NEG_FAIL;
                             }
                         }// end code for WAITING_FOR_NEGOTIATION;
