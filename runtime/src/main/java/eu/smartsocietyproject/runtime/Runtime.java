@@ -127,6 +127,10 @@ public class Runtime {
         }
     }
 
+    public ApplicationContext getContext() {
+        return context;
+    }
+
     public static Runtime fromApplication(Config config, SmartSocietyComponents components) throws IOException, InstantiationException {
         return fromApplication(config, components, getApplicationClass());
     }
