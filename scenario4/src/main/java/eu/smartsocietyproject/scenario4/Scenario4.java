@@ -43,12 +43,14 @@ public class Scenario4 implements NotificationCallback {
 
         SmartSocietyComponents components =
             new SmartSocietyComponents(
-                PeerManagerMongoProxy.factory(runner.getMongoDb()),
+                pmFactory,
                 new SmartComS4Factory(client, 9697)
             );
 
         logger.info("Creating Runtime");
         Scenario4.runtime = Runtime.fromApplication(ConfigFactory.empty(), components, S4Application.class);
+
+        pm = (InternalPeerManager)Scenario4.runtime.getContext().getPeerManager();
 
         logger.info("Starting Runtime");
         Scenario4.runtime.run();
