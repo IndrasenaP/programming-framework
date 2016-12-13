@@ -1,8 +1,3 @@
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
     compile project(':programming-framework-runtime')
     compile project(':programming-framework-pm')

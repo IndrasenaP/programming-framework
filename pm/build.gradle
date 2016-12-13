@@ -1,7 +1,3 @@
-repositories {
-    mavenLocal()
-}
-
 dependencies {
 	compile project(':programming-framework-model')
     compile 'org.springframework:spring-web:4.2.5.RELEASE'

@@ -1,7 +1,3 @@
-repositories {
-    mavenLocal()
-}
-
 dependencies {
     compile libraries.compileShared
     testCompile libraries.testShared

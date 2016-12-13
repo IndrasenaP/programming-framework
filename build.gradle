@@ -31,6 +31,14 @@ subprojects {
     }
     repositories {
         mavenCentral()
-        mavenLocal() //todo-sv: for the time being smartCom is not published anywhere
+        maven {
+            url "http://repo.infosys.tuwien.ac.at/artifactory/libs-snapshot/"
+        }
+        maven {
+            url "http://eaio.com/maven2"
+        }
+        maven {
+            url "https://github.com/slorber/gcm-server-repository/raw/master/releases/"
+        }
     }
 }
