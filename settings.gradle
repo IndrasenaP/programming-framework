@@ -13,6 +13,8 @@ include 'services'
 findProject(':services')?.name = 'programming-framework-services'
 include 'scenario1'
 findProject(':scenario1')?.name = 'programming-framework-scenario1'
+include 'scenario2'
+findProject(':scenario2')?.name = 'programming-framework-scenario2'
 include 'scenario4'
 findProject(':scenario4')?.name = 'programming-framework-scenario4'
 

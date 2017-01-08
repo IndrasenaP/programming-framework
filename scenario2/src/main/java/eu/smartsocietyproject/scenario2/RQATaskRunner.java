@@ -3,16 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.smartsocietyproject.scenario1;
+package eu.smartsocietyproject.scenario2;
 
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.smartsocietyproject.TaskResponse;
-import eu.smartsocietyproject.scenario1.handler.RQACompositionHandler;
-import eu.smartsocietyproject.scenario1.handler.RQAExecutionHandler;
-import eu.smartsocietyproject.scenario1.handler.RQANegotiationHandler;
-import eu.smartsocietyproject.scenario1.handler.RQAProvisioningHandler;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
@@ -25,6 +21,10 @@ import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.TaskRunner;
+import eu.smartsocietyproject.scenario2.handler.RQACompositionHandler;
+import eu.smartsocietyproject.scenario2.handler.RQAExecutionHandler;
+import eu.smartsocietyproject.scenario2.handler.RQANegotiationHandler;
+import eu.smartsocietyproject.scenario2.handler.RQAProvisioningHandler;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.util.concurrent.TimeUnit;
 

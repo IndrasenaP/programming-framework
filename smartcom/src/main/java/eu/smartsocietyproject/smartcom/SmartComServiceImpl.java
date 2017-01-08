@@ -66,6 +66,7 @@ public class SmartComServiceImpl implements SmartComService {
     }
 
 	public void send(Message msg) throws CommunicationException {
+        //todo: fix nullpointer?!
 		this.communication.send(msg);
 	}
 	

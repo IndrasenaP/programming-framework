@@ -14,6 +14,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.pf.helper.EntityCore;
@@ -101,8 +102,15 @@ public class PeerManagerMongoProxy extends InternalPeerManager {
     @Override
     public void persistCollective(ApplicationBasedCollective collective) 
             throws PeerManagerException {
+        //todo: maybe this can be merged with the other query code
         JSONCollectiveIntermediary ci = toCollectiveIntermediary(collective);
-        collectivesCollection.insertOne(Document.parse(jsonToString(ci.toJson())));
+        ObjectNode node = JsonNodeFactory.instance.objectNode();
+        node.set(MongoConstants.id, JsonNodeFactory.instance.textNode(ci.getId()));
+        
+        collectivesCollection.replaceOne(Document.parse(jsonToString(node)), 
+        Document.parse(jsonToString(ci.toJson())), 
+        (new UpdateOptions()).upsert(true));
+        //collectivesCollection.insertOne(Document.parse(jsonToString(ci.toJson())));
     }
 
     private JSONCollectiveIntermediary toCollectiveIntermediary(Collective collective) throws PeerManagerException {
