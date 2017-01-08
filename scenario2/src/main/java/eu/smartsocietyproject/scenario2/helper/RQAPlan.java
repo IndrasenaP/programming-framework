@@ -9,6 +9,7 @@ import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.Member;
 import eu.smartsocietyproject.pf.Plan;
 import eu.smartsocietyproject.pf.TaskRequest;
+import eu.smartsocietyproject.scenario2.RQATaskRequest;
 import java.util.Collection;
 
 /**
@@ -19,12 +20,12 @@ public class RQAPlan extends Plan {
     private Member google;
     private ApplicationBasedCollective humans;
     private Member orchestrator;
-    private TaskRequest request;
+    private RQATaskRequest request;
     
     public RQAPlan(Member google, 
             ApplicationBasedCollective humans, 
             Member orchestrator,
-            TaskRequest request) {
+            RQATaskRequest request) {
         this.google = google;
         this.humans = humans;
         this.orchestrator = orchestrator;
@@ -43,7 +44,7 @@ public class RQAPlan extends Plan {
         return orchestrator;
     }
 
-    public TaskRequest getRequest() {
+    public RQATaskRequest getRequest() {
         return request;
     }
 }

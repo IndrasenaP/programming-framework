@@ -24,6 +24,7 @@ import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
 import eu.smartsocietyproject.pf.cbthandlers.CompositionHandler;
+import eu.smartsocietyproject.scenario2.RQATaskRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -63,7 +64,7 @@ public class RQACompositionHandler implements CompositionHandler {
             ApplicationBasedCollective humansCollective = rc.withMembers(humans);
             context.getPeerManager().persistCollective(humansCollective);
             
-            RQAPlan plan = new RQAPlan(swPeer, humansCollective, orchestrator, t);
+            RQAPlan plan = new RQAPlan(swPeer, humansCollective, orchestrator, (RQATaskRequest)t);
             CollectiveWithPlan cwp = CollectiveWithPlan.of(provisioned, plan);
             return ImmutableList.of(cwp);
         } catch (PeerManagerException ex) {

@@ -8,6 +8,7 @@ package eu.smartsocietyproject.scenario2;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.smartsocietyproject.TaskResponse;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
@@ -65,6 +66,9 @@ public class RQATaskRunner implements TaskRunner {
                         new RQANegotiationHandler(),
                         new RQAExecutionHandler())
                 .withCollectiveForProvisioning(nearbyPeers);
+        
+        request.setCommunityTime(2);
+        request.setCommunityTimeUnit(TimeUnit.MINUTES);
 
         CollectiveBasedTask cbt = ctx.registerBuilderForCBTType("rqa",
                 CBTBuilder.from(tfd)

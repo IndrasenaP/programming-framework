@@ -7,12 +7,16 @@ package eu.smartsocietyproject.scenario2;
 
 import eu.smartsocietyproject.pf.TaskRequest;
 import eu.smartsocietyproject.scenario2.helper.RQATaskDefinition;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public class RQATaskRequest extends TaskRequest {
+    
+    private int communityTime;
+    private TimeUnit communityTimeUnit;
 
     public RQATaskRequest(RQATaskDefinition definition) {
         super(definition, "GoogleRequestTask");
@@ -28,7 +32,21 @@ public class RQATaskRequest extends TaskRequest {
     public RQATaskDefinition getDefinition() {
         return (RQATaskDefinition)super.getDefinition();
     }
-    
-    
+
+    public int getCommunityTime() {
+        return communityTime;
+    }
+
+    public void setCommunityTime(int communityTime) {
+        this.communityTime = communityTime;
+    }
+
+    public TimeUnit getCommunityTimeUnit() {
+        return communityTimeUnit;
+    }
+
+    public void setCommunityTimeUnit(TimeUnit communityTimeUnit) {
+        this.communityTimeUnit = communityTimeUnit;
+    }
     
 }

@@ -22,10 +22,12 @@ import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
 import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
+import eu.smartsocietyproject.scenario2.RQATaskRequest;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +43,8 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
     private RQATaskResult result = new RQATaskResult();
     private ObjectMapper mapper = new ObjectMapper();
     private String orchestrationId = "RQA-orchestrator";
-
+    private boolean communityTimedOut = false;
+    
     public TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
         try {
             //todo-sv: remove this cast
@@ -94,9 +97,15 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             sc.send(msg.create());
 
             try {
-                while (result.QoR() < 0.75) {
+                long milisToWait = TimeUnit.MILLISECONDS
+                        .convert(plan.getRequest().getCommunityTime(), 
+                                plan.getRequest().getCommunityTimeUnit());
+                
+                while (milisToWait > 0) {
                     Thread.sleep(1000);
+                    milisToWait -= 1000;
                 }
+                communityTimedOut = true;
 
                 msg.setType("rqa")
                         .setSubtype("orchestrate")
@@ -114,7 +123,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
                 return result;
             } catch (InterruptedException ex) {
                 //return in case result was allready processed at time of timeout
-                if(result.QoR() == -1) {
+                if(result.QoR() == -1 || result.QoR() >= 0.75) {
                     return result;
                 }
                 throw new CBTLifecycleException(ex);
@@ -155,7 +164,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             return;
         }
 
-        if (!conversationId.equals(message.getConversationId())) {
+        if (!conversationId.equals(message.getConversationId()) || communityTimedOut) {
             return;
         }
 
