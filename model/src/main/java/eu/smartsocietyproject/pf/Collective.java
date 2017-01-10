@@ -10,8 +10,12 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import eu.smartsocietyproject.incentiveserver.IncentiveServer;
+import eu.smartsocietyproject.incentiveserver.IncentiveServerException;
+import eu.smartsocietyproject.incentiveserver.IncentiveServerProxy;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -378,6 +382,16 @@ public abstract class Collective {
         @Override
         public ImmutableSet<Member> getMembers(){
             return super.getMembers();
+        }
+    }
+
+    public void incentivize(String incentiveType, Object incentiveSpecificParams, List<Long> times){
+        //TODO: Make sure to read the proper IS from the configuration. So far, we have only one.
+        IncentiveServer IS = new IncentiveServerProxy();
+        try{
+            IS.sendIncentive(this, incentiveType, incentiveSpecificParams, times);
+        }catch (IncentiveServerException ise){
+            //do nothing for the time being
         }
     }
 
