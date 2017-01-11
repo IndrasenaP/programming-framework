@@ -385,13 +385,13 @@ public abstract class Collective {
         }
     }
 
-    public void incentivize(String incentiveType, Object incentiveSpecificParams, List<Long> times){
+    public boolean incentivize(String incentiveType, Object incentiveSpecificParams, List<Long> times){
         //TODO: Make sure to read the proper IS from the configuration. So far, we have only one.
         IncentiveServer IS = new IncentiveServerProxy();
         try{
-            IS.sendIncentive(this, incentiveType, incentiveSpecificParams, times);
+            return IS.sendIncentive(this, incentiveType, incentiveSpecificParams, times);
         }catch (IncentiveServerException ise){
-            //do nothing for the time being
+            return false;
         }
     }
 
