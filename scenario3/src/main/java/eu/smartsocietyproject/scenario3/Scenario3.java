@@ -4,8 +4,11 @@ import at.ac.tuwien.dsg.smartcom.adapters.RESTInputAdapter;
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Message;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.MongoClient;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -17,6 +20,7 @@ import eu.smartsocietyproject.runtime.Runtime;
 import eu.smartsocietyproject.runtime.SmartSocietyComponents;
 import eu.smartsocietyproject.smartcom.SmartComService;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +51,9 @@ public class Scenario3 implements NotificationCallback {
             System.exit(-1);
         }
         PeerManager.Factory pmFactory
-            = new PeerManager.Factory() {
-            @Override
-            public PeerManager create(ApplicationContext context) {
+            = context -> {
                 throw new UnsupportedOperationException("TODO");
-            }
-        };
+            };
 
         MongoClient client = new MongoClient("localhost", 6666);
 
@@ -72,8 +73,8 @@ public class Scenario3 implements NotificationCallback {
     }
 
     public void notify(Message message) {
-        if (message.getConversationId().equals("Scenario3")) {
-            switch (message.getType()) {
+        if (message.getType().equals("Scenario3")) {
+            switch (message.getSubtype()) {
                 case "submit":
                     runS3Task(message);
                     break;
@@ -86,7 +87,11 @@ public class Scenario3 implements NotificationCallback {
 
     private void runS3Task(Message message) {
         try {
-            TaskDefinition task = new TaskDefinition(mapper.readTree(message.getContent()));
+            ObjectNode node = JsonNodeFactory.instance.objectNode();
+            node.put(S3TaskRequest.ConversationFieldName, message.getConversationId());
+            node.put(S3TaskRequest.PeerFieldName, message.getSenderId().getId());
+            node.set(S3TaskRequest.RequestFieldName, mapper.readTree(message.getContent()));
+            TaskDefinition task = new TaskDefinition(node);
             logger.info(String.format("Preparing to start task:  %s", task.getJson().toString()));
             Scenario3.runtime.startTask(task);
         } catch (IOException e) {

@@ -14,9 +14,12 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Runtime {
+    private Logger logger=Logger.getLogger(this.getClass().getName());
     private static ObjectMapper jsonMapper = new  ObjectMapper();
     private final ApplicationContext context;
     private final Application application;
@@ -40,11 +43,15 @@ public class Runtime {
         return this;
     }
 
-    public boolean startTask(TaskDefinition definition) {
-        TaskRequest request = application.createTaskRequest(definition);
+    public boolean startTask(TaskDefinition definition)  {
+        TaskRequest request = null;
+        try {
+            request = application.createTaskRequest(definition);
+        } catch (ApplicationException e) {
+            logger.log(Level.SEVERE, "Error creating the task request", e);
+            return false;
+        }
 
-        //todo-sv: why are there two different runners?
-        //executor executes and new TaskRunnerDescriptor executes...???
         TaskRunner runner = application.createTaskRunner(request);
         runnerDescriptors.put(definition.getId(), new TaskRunnerDescriptor(executor, definition, runner));
         return true;

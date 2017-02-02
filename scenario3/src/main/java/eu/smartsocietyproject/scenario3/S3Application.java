@@ -1,16 +1,17 @@
 package eu.smartsocietyproject.scenario3;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.typesafe.config.Config;
+import com.typesafe.config.*;
 import eu.smartsocietyproject.pf.*;
+import eu.smartsocietyproject.pf.cbthandlers.ContinuousOrchestrationHandler;
+import eu.smartsocietyproject.utils.RideSharingAPI;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class S3Application extends eu.smartsocietyproject.pf.Application {
-    public final static String RIDESHARING = "ridesharing";
-    public final static String DEVELOPERS_CBT_TYPE = "developers";
-    public final static String TESTERS_CBT_TYPE = "testers";
+    public final static String EMPTYCOLLECTIVE = "empty";
+    public final static String RIDESHARING_COLLECTIVE_KIND = "ridesharing";
     private ApplicationContext context = null;
 
     public S3Application() {
@@ -22,28 +23,36 @@ public class S3Application extends eu.smartsocietyproject.pf.Application {
     }
 
     @Override
-    public void init(ApplicationContext context, Config config) {
+    public void init(ApplicationContext context, Config configIn) {
+        Config config =
+        configIn.withFallback(
+            ConfigFactory.parseMap(ImmutableMap.of("orchestrator.polling", "60000"))
+        );
         this.context = context;
-
-        context.registerBuilderForCBTType(RIDESHARING,
-                                          CBTBuilder.empty()
-                                                    .withContinuousOrchestrationHandler(new ImplicitAgreementByRatio(0.5)));
-        context.registerBuilderForCBTType(TESTERS_CBT_TYPE,
-                                          CBTBuilder.empty().asOnDemand()
-                                                    .withProvisioningHandler(new IdentityProvisioningHandler())
-                                                    .withNegotiationHandler(new ImplicitAgreementByRatio()));
+        RideSharingAPI api = new RideSharingAPI(
+            config.getString("orchestrator.url"),
+            config.getString("orchestrator.secret"),
+            config.getString("orchestrator.key")
+        );
+        ContinuousOrchestrationHandler handler =
+            new RideSharingContinuousOrchestrationHandler(
+                api, config.getLong("orchestrator.polling")
+            );
+        context.registerBuilderForCBTType(
+            RIDESHARING_COLLECTIVE_KIND,
+            CBTBuilder.empty().withContinuousOrchestrationHandler(handler));
     }
 
     @Override
     public Set<CollectiveKind> listCollectiveKinds() {
         return ImmutableSet.of(
-            CollectiveKind.builder(DEVELOPERS_KIND).build()
+            CollectiveKind.builder(RIDESHARING_COLLECTIVE_KIND).build()
         );
     }
 
     @Override
-    public TaskRequest createTaskRequest(TaskDefinition definition) {
-        return new S3TaskRequest(definition, "codingTask", Optional.empty());
+    public TaskRequest createTaskRequest(TaskDefinition definition) throws ApplicationException {
+        return new S3TaskRequest(definition, "rideShare");
     }
 
     @Override

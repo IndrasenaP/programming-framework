@@ -12,9 +12,6 @@ public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
     @Override
     public List<CollectiveWithPlan> compose(ApplicationContext context,
         ApplicationBasedCollective provisioned, TaskRequest t) throws CBTLifecycleException {
-//        throw new UnsupportedOperationException("TODO"); // -=TODO=-
-//        OMInstance omi=new OMInstance();
-//        List<CollectiveWithPlan> collectiveWithPlanList = omi.getPlans(provisioned,t);
         List<CollectiveWithPlan> collectiveWithPlanList = new ArrayList<>();
         collectiveWithPlanList.add(CollectiveWithPlan.of(provisioned, new Plan()));
         return  collectiveWithPlanList;
@@ -22,7 +19,6 @@ public class ImplicitAgreementForAllOM implements OrchestratorManagerProxy {
 
     @Override
     public CollectiveWithPlan negotiate(ApplicationContext context, List<CollectiveWithPlan> negotiables) throws CBTLifecycleException {
-//        throw new UnsupportedOperationException("TODO"); // -=TODO=-
         return negotiables.get(0);
     }
 

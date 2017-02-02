@@ -27,14 +27,11 @@ public abstract class Application {
      * @param definition generic smart society task definition
      * @return domain specific task descriptor
      */
-    public abstract TaskRequest createTaskRequest(TaskDefinition definition);
+    public abstract TaskRequest createTaskRequest(TaskDefinition definition) throws ApplicationException;
 
     /** Returns the runner implementing the application task logic. It will be run in its own thread.
      * @param request the TaskRequest describing the task to be performed
      * @return the task runner implementing application logic
      */
     public abstract TaskRunner createTaskRunner(TaskRequest request);
-
-
-
 }

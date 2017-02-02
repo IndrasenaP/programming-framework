@@ -65,7 +65,8 @@ public class SmartComServiceImpl implements SmartComService {
         return this.communication;
     }
 
-	public void send(Message msg) throws CommunicationException {
+	@Override
+    public void send(Message msg) throws CommunicationException {
         //todo: fix nullpointer?!
 		this.communication.send(msg);
 	}
