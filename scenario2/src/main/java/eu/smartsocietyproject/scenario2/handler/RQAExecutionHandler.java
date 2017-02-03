@@ -27,8 +27,10 @@ import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,14 +40,19 @@ import java.util.logging.Logger;
  */
 public class RQAExecutionHandler implements ExecutionHandler, NotificationCallback {
 
-    private String conversationId = null;
     private RQAPlan plan;
-    private RQATaskResult result = new RQATaskResult();
+    private RQATaskResult result = null;
     private ObjectMapper mapper = new ObjectMapper();
-    private String orchestrationId = "RQA-orchestrator";
-    private boolean communityTimedOut = false;
+    private String orchestrationId = "RQA-orchestrator-";
+    
+    private Lock communityLock = new ReentrantLock();
+    private Condition communityCondition = communityLock.newCondition();
+    private Lock orchestrationLock = new ReentrantLock();
+    private Condition orchestrationCondition = orchestrationLock.newCondition();
     
     public TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
+        this.resetHandler();
+        
         try {
             //todo-sv: remove this cast
             SmartComServiceImpl sc = (SmartComServiceImpl) context.getSmartCom();
@@ -58,8 +65,11 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             }
 
             plan = (RQAPlan) agreed.getPlan();
+            communityLock.lock();
+            orchestrationLock.lock();
 
-            conversationId = plan.getRequest().getId().toString();
+            String conversationId = plan.getRequest().getId().toString();
+            this.orchestrationId += conversationId;
 
             Properties props = new Properties();
             props.load(Scenario2.class.getClassLoader()
@@ -95,17 +105,10 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
                             .writeValueAsString(content));
 
             sc.send(msg.create());
-
+            
             try {
-                long milisToWait = TimeUnit.MILLISECONDS
-                        .convert(plan.getRequest().getCommunityTime(), 
-                                plan.getRequest().getCommunityTimeUnit());
-                
-                while (milisToWait > 0) {
-                    Thread.sleep(1000);
-                    milisToWait -= 1000;
-                }
-                communityTimedOut = true;
+                communityCondition.await(plan.getRequest().getCommunityTime(), 
+                        plan.getRequest().getCommunityTimeUnit());
 
                 msg.setType("rqa")
                         .setSubtype("orchestrate")
@@ -114,10 +117,12 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
                         .setConversationId(orchestrationId)
                         .setReceiverId(Identifier.peer(plan.getOrchestrator().getPeerId()));
 
+                orchestrationLock.unlock();
                 sc.send(msg.create());
-
-                while (result.QoR() != -1) {
-                    Thread.sleep(1000);
+                
+                if(!orchestrationCondition.await(plan.getRequest().getOrchestratorTime(), 
+                        plan.getRequest().getOrchestratorUnit())) {
+                    throw new CBTLifecycleException("Orchestrator did not respond in time!");
                 }
 
                 return result;
@@ -138,6 +143,10 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             throw new CBTLifecycleException(e);
         }
     }
+    
+    private void resetHandler() {
+        this.result = new RQATaskResult();
+    }
 
     @Override
     public TaskResult getResultIfQoRGoodEnough() {
@@ -155,24 +164,30 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
     @Override
     public void notify(Message message) {
-        if (conversationId == null) {
-            return;
-        }
-
-        if (orchestrationId.equals(message.getConversationId())) {
+        if (orchestrationId.equals(message.getConversationId()) 
+                && orchestrationLock.tryLock()) {
             result.setOrchestratorsChoice(message.getContent());
+            orchestrationCondition.signal();
+            orchestrationLock.unlock();
             return;
         }
 
-        if (!conversationId.equals(message.getConversationId()) || communityTimedOut) {
+        //todo-sv: this breacks multithreading of messages
+        //-> use instead a semaphore maybe 100 responses are more then enough?
+        //-> for demo reasons we could even go with simply 2 and add a comment
+        if (!plan.getRequest().getId().toString()
+                .equals(message.getConversationId()) 
+                || !communityLock.tryLock()) {
             return;
         }
 
         if (message.getSenderId().getId().equals(plan.getGoogle().getPeerId())) {
             result.setGoogleResult(message.getContent());
+            communityLock.unlock();
             return;
         }
 
         result.setHumanResult(message.getContent());
+        communityLock.unlock();
     }
 }

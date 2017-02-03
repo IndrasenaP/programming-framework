@@ -3,6 +3,7 @@ package eu.smartsocietyproject.pf.cbthandlers;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
+import eu.smartsocietyproject.pf.adaptationPolicy.ExecutionAdaptationPolicy;
 
 import java.util.List;
 

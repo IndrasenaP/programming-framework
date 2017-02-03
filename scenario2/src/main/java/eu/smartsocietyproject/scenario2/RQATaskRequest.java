@@ -17,6 +17,8 @@ public class RQATaskRequest extends TaskRequest {
     
     private int communityTime;
     private TimeUnit communityTimeUnit;
+    private int orchestratorTime;
+    private TimeUnit orchestratorUnit;
 
     public RQATaskRequest(RQATaskDefinition definition) {
         super(definition, "GoogleRequestTask");
@@ -47,6 +49,22 @@ public class RQATaskRequest extends TaskRequest {
 
     public void setCommunityTimeUnit(TimeUnit communityTimeUnit) {
         this.communityTimeUnit = communityTimeUnit;
+    }
+
+    public int getOrchestratorTime() {
+        return orchestratorTime;
+    }
+
+    public void setOrchestratorTime(int orchestratorTime) {
+        this.orchestratorTime = orchestratorTime;
+    }
+
+    public TimeUnit getOrchestratorUnit() {
+        return orchestratorUnit;
+    }
+
+    public void setOrchestratorUnit(TimeUnit orchestratorUnit) {
+        this.orchestratorUnit = orchestratorUnit;
     }
     
 }

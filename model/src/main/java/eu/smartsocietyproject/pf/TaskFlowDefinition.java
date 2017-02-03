@@ -3,6 +3,12 @@ package eu.smartsocietyproject.pf;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import eu.smartsocietyproject.pf.adaptationPolicy.AbortPolicy;
+import eu.smartsocietyproject.pf.adaptationPolicy.AdaptationPolicies;
+import eu.smartsocietyproject.pf.adaptationPolicy.CompositionAdaptationPolicy;
+import eu.smartsocietyproject.pf.adaptationPolicy.ExecutionAdaptationPolicy;
+import eu.smartsocietyproject.pf.adaptationPolicy.NegotiationAdaptationPolicy;
+import eu.smartsocietyproject.pf.adaptationPolicy.ProvisioningAdaptationPolicy;
 import eu.smartsocietyproject.pf.cbthandlers.*;
 
 import java.util.EnumSet;
@@ -32,13 +38,20 @@ import java.util.Set;
  */
 public class TaskFlowDefinition {
     private final ImmutableSet<CollectiveBasedTask.LaborMode> laborMode;
+    
     private final ProvisioningHandler provisioningHandler;
     private final CompositionHandler compositionHandler;
     private final NegotiationHandler negotiationHandler;
     private final ExecutionHandler executionHandler;
+    
+    private final ProvisioningAdaptationPolicy provisioningAdaptationPolicy;
+    private final CompositionAdaptationPolicy compositionAdaptationPolicy;
+    private final NegotiationAdaptationPolicy negotiationAdaptationPolicy;
+    private final ExecutionAdaptationPolicy executionAdaptationPolicy;
+    
     private final ContinuousOrchestrationHandler continuousOrchestrationHandler;
     private final Collective collectiveforProvisioning;
-
+    
     private TaskFlowDefinition(
         Set<CollectiveBasedTask.LaborMode> laborMode,
         ProvisioningHandler provisioningHandler,
@@ -53,7 +66,36 @@ public class TaskFlowDefinition {
         this.negotiationHandler = negotiationHandler;
         this.executionHandler = executionHandler;
         this.continuousOrchestrationHandler = continuousOrchestrationHandler;
+        this.provisioningAdaptationPolicy = AdaptationPolicies.abort();
+        this.compositionAdaptationPolicy = AdaptationPolicies.abort();
+        this.negotiationAdaptationPolicy = AdaptationPolicies.abort();
+        this.executionAdaptationPolicy = AdaptationPolicies.abort();
         this.collectiveforProvisioning = collectiveforProvisioning;
+    }
+
+    private TaskFlowDefinition(
+        Set<CollectiveBasedTask.LaborMode> laborMode,
+        ProvisioningHandler provisioningHandler,
+        CompositionHandler compositionHandler,
+        NegotiationHandler negotiationHandler,
+        ContinuousOrchestrationHandler continuousOrchestrationHandler,
+        ExecutionHandler executionHandler,
+        ProvisioningAdaptationPolicy provisioningAdaptationPolicy,
+        CompositionAdaptationPolicy compositionAdaptationPolicy,
+        NegotiationAdaptationPolicy negotiationAdaptationPolicy,
+        ExecutionAdaptationPolicy executionAdaptationPolicy,
+        Collective collectiveforProvisioning) {
+        this.laborMode = ImmutableSet.copyOf(laborMode);
+        this.provisioningHandler = provisioningHandler;
+        this.compositionHandler = compositionHandler;
+        this.negotiationHandler = negotiationHandler;
+        this.executionHandler = executionHandler;
+        this.continuousOrchestrationHandler = continuousOrchestrationHandler;
+        this.collectiveforProvisioning = collectiveforProvisioning;
+        this.provisioningAdaptationPolicy = provisioningAdaptationPolicy;
+        this.compositionAdaptationPolicy = compositionAdaptationPolicy;
+        this.negotiationAdaptationPolicy = negotiationAdaptationPolicy;
+        this.executionAdaptationPolicy = executionAdaptationPolicy;
     }
 
     private TaskFlowDefinition() {
@@ -64,6 +106,10 @@ public class TaskFlowDefinition {
         continuousOrchestrationHandler = null;
         executionHandler = null;
         collectiveforProvisioning = null;
+        provisioningAdaptationPolicy = null;
+        compositionAdaptationPolicy = null;
+        negotiationAdaptationPolicy = null;
+        executionAdaptationPolicy = null;
     }
 
     /** Get the handler that will be used for provisioning in the CBT
@@ -104,6 +150,11 @@ public class TaskFlowDefinition {
     public ExecutionHandler getExecutionHandler() {
         Preconditions.checkState(executionHandler != null, "Execution Handler not defined");
         return executionHandler;
+    }
+    
+    public ExecutionAdaptationPolicy getExecutionAdaptationPolicy() {
+        Preconditions.checkState(executionAdaptationPolicy != null, "Execution Adaptation Policy not defined");
+        return executionAdaptationPolicy;
     }
 
     /* Get the handler used for negotiation.
@@ -226,6 +277,10 @@ public class TaskFlowDefinition {
                 compositionHandler,
                 negotiationHandler,
                 continuousOrchestrationHandler, executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collectiveforProvisioning);
     }
 
@@ -242,6 +297,10 @@ public class TaskFlowDefinition {
                 compositionHandler,
                 negotiationHandler,
                 continuousOrchestrationHandler, executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collectiveforProvisioning);
     }
 
@@ -258,6 +317,10 @@ public class TaskFlowDefinition {
                 handler,
                 negotiationHandler,
                 continuousOrchestrationHandler, executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collectiveforProvisioning);
     }
 
@@ -273,7 +336,12 @@ public class TaskFlowDefinition {
                 provisioningHandler,
                 compositionHandler,
                 handler,
-                continuousOrchestrationHandler, executionHandler,
+                continuousOrchestrationHandler, 
+                executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collectiveforProvisioning);
     }
 
@@ -291,6 +359,10 @@ public class TaskFlowDefinition {
                 negotiationHandler,
                 handler,
                 executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collectiveforProvisioning);
     }
 
@@ -308,6 +380,26 @@ public class TaskFlowDefinition {
                 negotiationHandler,
                 continuousOrchestrationHandler,
                 handler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
+                collectiveforProvisioning);
+    }
+    
+    public TaskFlowDefinition withExecutionAdaptationPolicy(ExecutionAdaptationPolicy policy) {
+        Preconditions.checkNotNull(policy);
+        return new TaskFlowDefinition(
+                laborMode, 
+                provisioningHandler, 
+                compositionHandler, 
+                negotiationHandler, 
+                continuousOrchestrationHandler, 
+                executionHandler, 
+                provisioningAdaptationPolicy, 
+                compositionAdaptationPolicy, 
+                negotiationAdaptationPolicy, 
+                policy, 
                 collectiveforProvisioning);
     }
 
@@ -325,6 +417,10 @@ public class TaskFlowDefinition {
                 negotiationHandler,
                 continuousOrchestrationHandler,
                 executionHandler,
+                provisioningAdaptationPolicy,
+                compositionAdaptationPolicy,
+                negotiationAdaptationPolicy,
+                executionAdaptationPolicy,
                 collective);
     }
 

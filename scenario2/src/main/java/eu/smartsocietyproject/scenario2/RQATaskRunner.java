@@ -22,6 +22,7 @@ import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.TaskRunner;
+import eu.smartsocietyproject.pf.adaptationPolicy.AdaptationPolicies;
 import eu.smartsocietyproject.scenario2.handler.RQACompositionHandler;
 import eu.smartsocietyproject.scenario2.handler.RQAExecutionHandler;
 import eu.smartsocietyproject.scenario2.handler.RQANegotiationHandler;
@@ -65,6 +66,7 @@ public class RQATaskRunner implements TaskRunner {
                         new RQACompositionHandler(),
                         new RQANegotiationHandler(),
                         new RQAExecutionHandler())
+                .withExecutionAdaptationPolicy(AdaptationPolicies.repeatExecution(2))
                 .withCollectiveForProvisioning(nearbyPeers);
         
         request.setCommunityTime(2);
