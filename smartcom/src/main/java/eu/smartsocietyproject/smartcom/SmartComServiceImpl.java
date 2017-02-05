@@ -69,11 +69,11 @@ public class SmartComServiceImpl implements SmartComService {
 		this.communication.send(msg);
 	}
 	
-	public Identifier registerNotificationCallback(NotificationCallback callback) throws CommunicationException {
+	public Identifier registerNotificationCallback(NotificationCallback callback) {
 		return this.communication.registerNotificationCallback(callback);
 	}
     
-    public void unregisterNotificationCallback(Identifier callback) throws CommunicationException {
+    public void unregisterNotificationCallback(Identifier callback) {
         this.communication.unregisterNotificationCallback(callback);
     }
 
