@@ -76,6 +76,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         this.uuid = UUID.randomUUID();
         this.laborMode = definition.getLaborMode();
         this.state = CollectiveBasedTask.State.INITIAL;
+        if (definition.getCollectiveforProvisioning().isPresent())
+            this.inputCollective = definition.getCollectiveforProvisioning().get();
         executor.execute(new CBTRunnable());
     }
 
@@ -898,6 +900,32 @@ public class CollectiveBasedTask implements Future<TaskResult> {
         return this.state == compareWith;
     }
 
+
+    public void incentivize(String incentiveType, Object incentiveSpecificParams){
+        ArrayList<Collective> collectivesToIncentivize = new ArrayList<>();
+        if (    isIn(CollectiveBasedTask.State.PROVISIONING) ||
+                isIn(CollectiveBasedTask.State.CONTINUOUS_ORCHESTRATION) ||
+                isWaitingForContinuousOrchestration() || isWaitingForProvisioning()) {
+            if (null != inputCollective) collectivesToIncentivize.add(inputCollective);
+        }else if (isIn(CollectiveBasedTask.State.COMPOSITION) || isWaitingForComposition()) {
+            collectivesToIncentivize.add(provisioned);
+        }else if (isIn(CollectiveBasedTask.State.NEGOTIATION) || isWaitingForNegotiation()) {
+            if ( !laborMode.contains(CollectiveBasedTask.LaborMode.OPEN_CALL) ){
+                collectivesToIncentivize.add(provisioned);
+            }else{
+                if (null != negotiables && negotiables.size() > 0)
+                for (CollectiveWithPlan cwp : negotiables){
+                    collectivesToIncentivize.add(cwp.getCollective());
+                }
+            }
+
+        }else {
+            collectivesToIncentivize.add(agreed.getCollective());
+        }
+
+        collectivesToIncentivize.stream().forEach(c -> c.incentivize(incentiveType, incentiveSpecificParams, null));
+
+    }
 
     public enum LaborMode {
         ON_DEMAND,

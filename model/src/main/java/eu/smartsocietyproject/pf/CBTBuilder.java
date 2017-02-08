@@ -1,10 +1,7 @@
 package eu.smartsocietyproject.pf;
 
 import com.google.common.base.Preconditions;
-import eu.smartsocietyproject.pf.cbthandlers.CompositionHandler;
-import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
-import eu.smartsocietyproject.pf.cbthandlers.NegotiationHandler;
-import eu.smartsocietyproject.pf.cbthandlers.ProvisioningHandler;
+import eu.smartsocietyproject.pf.cbthandlers.*;
 
 /**
  * This class provide the tool for creating a {@link CollectiveBasedTask}. It encapsulate a {@link TaskFlowDefinition}
@@ -114,6 +111,15 @@ public class CBTBuilder {
     public CBTBuilder withNegotiationHandler(NegotiationHandler handler) {
         Preconditions.checkNotNull(handler);
         return new CBTBuilder(context, definition.withNegotiationHandler(handler), request);
+    }
+
+    /** Changes negotiation handler in the definition
+     *
+     * @param handler continuous orchestration handler
+     * @return a CBTBuilder with the negotiation changed accordingly */
+    public CBTBuilder withContinuousOrchestrationHandler(ContinuousOrchestrationHandler handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withContinuousOrchestrationHandler(handler), request);
     }
 
     /** Assign a request to the builder
