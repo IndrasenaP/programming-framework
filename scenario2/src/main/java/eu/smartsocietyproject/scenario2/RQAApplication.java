@@ -54,7 +54,10 @@ public class RQAApplication extends Application {
     @Override
     public TaskRunner createTaskRunner(TaskRequest request) {
         if(request instanceof RQATaskRequest) {
-            return new RQATaskRunner((RQATaskRequest)request, ctx);
+            if(((RQATaskDefinition)request.getDefinition()).isVariantA()) {
+                return new RQATaskRunnerVariantA((RQATaskRequest)request, ctx);
+            }
+            return new RQATaskRunnerVariantB((RQATaskRequest)request, ctx);
         }
         throw new UnsupportedOperationException("Not supported request type!");
     }    

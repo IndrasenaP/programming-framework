@@ -10,6 +10,7 @@ import at.ac.tuwien.dsg.smartcom.model.Message;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.smartsocietyproject.TaskResponse;
+import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.peermanager.query.PeerQuery;
 import eu.smartsocietyproject.peermanager.query.QueryOperation;
 import eu.smartsocietyproject.peermanager.query.QueryRule;
@@ -34,10 +35,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
-public class RQATaskRunner implements TaskRunner {
+public abstract class RQATaskRunner implements TaskRunner {
 
-    private final RQATaskRequest request;
-    private final SmartSocietyApplicationContext ctx;
+    protected final RQATaskRequest request;
+    protected final SmartSocietyApplicationContext ctx;
 
     public RQATaskRunner(RQATaskRequest request,
             SmartSocietyApplicationContext ctx) {
@@ -46,13 +47,13 @@ public class RQATaskRunner implements TaskRunner {
     }
 
     //todo-sv: what is this for
+    @Override
     public JsonNode getStateDescription() {
         return null;
     }
-
-    @Override
-    public TaskResponse call() throws Exception {
-        Collective nearbyPeers = ApplicationBasedCollective
+    
+    protected Collective queryNearbyPeers() throws PeerManagerException {
+        return ApplicationBasedCollective
                 .createFromQuery(ctx,
                         PeerQuery.create()
                                 .withRule(QueryRule.create("restaurantQA")
@@ -60,30 +61,30 @@ public class RQATaskRunner implements TaskRunner {
                                         .withOperation(QueryOperation.equals)
                                 )
                 );
-
-        TaskFlowDefinition tfd = TaskFlowDefinition
+    }
+    
+    protected TaskFlowDefinition getDefaultTaskFlowDefinition(Collective peers) {
+        return TaskFlowDefinition
                 .onDemandWithOpenCall(new RQAProvisioningHandler(),
                         new RQACompositionHandler(),
                         new RQANegotiationHandler(),
                         new RQAExecutionHandler())
-                .withExecutionAdaptationPolicy(AdaptationPolicies.repeatExecution(2))
-                .withCollectiveForProvisioning(nearbyPeers);
-        
+                .withCollectiveForProvisioning(peers);
+    }
+    
+    protected void prepareRequest() {
         request.setCommunityTime(2);
         request.setCommunityTimeUnit(TimeUnit.MINUTES);
-
-        CollectiveBasedTask cbt = ctx.registerBuilderForCBTType("rqa",
-                CBTBuilder.from(tfd)
+        request.setOrchestratorTime(30);
+        request.setOrchestratorUnit(TimeUnit.SECONDS);
+    }
+    
+    protected CollectiveBasedTask createCBT(TaskFlowDefinition tfd) {
+        return ctx.registerBuilderForCBTType("rqa", CBTBuilder.from(tfd)
                         .withTaskRequest(request)).build();
-
-        cbt.start();
-
-        TaskResult res = cbt.get(3, TimeUnit.MINUTES);
-
-        if(!res.isQoRGoodEnough()) {
-            return TaskResponse.FAIL;
-        }
-       
+    }
+    
+    protected void sendResponse(TaskResult res) {
         Message respMsg = new Message.MessageBuilder()
                 .setType("rqa")
                 .setSubtype("answer")
@@ -99,8 +100,5 @@ public class RQATaskRunner implements TaskRunner {
         } catch(Exception e) {
             e.printStackTrace();
         }
-        
-        return TaskResponse.OK;
     }
-
 }

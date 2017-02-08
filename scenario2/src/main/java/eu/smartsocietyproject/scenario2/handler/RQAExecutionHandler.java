@@ -9,8 +9,6 @@ import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,19 +20,13 @@ import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
 import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
-import eu.smartsocietyproject.scenario2.RQATaskRequest;
-import eu.smartsocietyproject.scenario2.helper.ClosableIdentifier;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -45,15 +37,15 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
     private RQAPlan plan;
     private RQATaskResult result = null;
     private ObjectMapper mapper = new ObjectMapper();
-    private String orchestrationId = "RQA-orchestrator-";
+    private String orchestrationId;
 
-    private Lock communityLock = new ReentrantLock();
-    private Condition communityCondition = communityLock.newCondition();
-    private Lock orchestrationLock = new ReentrantLock();
-    private Condition orchestrationCondition = orchestrationLock.newCondition();
-    private Semaphore communityMaxSemaphore = new Semaphore(0);
+    private Lock communityLock;
+    private Condition communityCondition;
+    private Lock orchestrationLock;
+    private Condition orchestrationCondition;
+    private Semaphore communityMaxSemaphore;
 
-    public TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
+    public synchronized TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
 
         this.resetHandler();
         //todo-sv: remove this cast
@@ -158,6 +150,13 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
     }
 
     private void resetHandler() {
+        this.communityLock = new ReentrantLock();
+        this.communityCondition = communityLock.newCondition();
+        this.orchestrationLock = new ReentrantLock();
+        this.orchestrationCondition = orchestrationLock.newCondition();
+        this.communityMaxSemaphore = new Semaphore(0);
+        
+        this.orchestrationId = "RQA-orchestrator-";
         this.result = new RQATaskResult();
     }
 
@@ -190,24 +189,24 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             return;
         }
 
-        communityLock.lock();
-        try {
-            if (!communityMaxSemaphore.tryAcquire()) {
-                return;
-            }
-        } finally {
-            communityLock.unlock();
-        }
-
         if (message.getSenderId().getId().equals(plan.getGoogle().getPeerId())) {
             result.setGoogleResult(message.getContent());
             return;
         }
 
-        result.setHumanResult(message.getContent());
+        communityLock.lock();
+        try {
+            if (!communityMaxSemaphore.tryAcquire()) {
+                return;
+            }
+            
+            result.setHumanResult(message.getContent());
 
-        if (communityMaxSemaphore.availablePermits() == 0) {
-            communityCondition.signal();
+            if (communityMaxSemaphore.availablePermits() == 0) {
+                communityCondition.signal();
+            }
+        } finally {
+            communityLock.unlock();
         }
     }
 }
