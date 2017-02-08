@@ -37,6 +37,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
     private RQAPlan plan;
     private RQATaskResult result = null;
     private ObjectMapper mapper = new ObjectMapper();
+    private String conversationId;
     private String orchestrationId;
 
     private Lock communityLock;
@@ -51,6 +52,8 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
         //todo-sv: remove this cast
         SmartComServiceImpl sc = (SmartComServiceImpl) context.getSmartCom();
         Identifier callback = sc.registerNotificationCallback(this);
+        Identifier emailAdapter1 = null;
+        Identifier emailAdapter2 = null;
 
         try {
             //todo-sv: maybe registration of rest input adapter belongs also here
@@ -62,14 +65,15 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
             plan = (RQAPlan) agreed.getPlan();
 
-            String conversationId = plan.getRequest().getId().toString();
+            //this.conversationId = plan.getRequest().getId().toString();
+            this.conversationId = callback.getId();
             this.orchestrationId += conversationId;
 
             Properties props = new Properties();
             props.load(Scenario2.class.getClassLoader()
                     .getResourceAsStream("EmailAdapter.properties"));
-            sc.addEmailPullAdapter(conversationId, props);
-            sc.addEmailPullAdapter(orchestrationId, props);
+            emailAdapter1 = sc.addEmailPullAdapter(conversationId, props);
+            emailAdapter2 = sc.addEmailPullAdapter(orchestrationId, props);
 
             //send to human experts
             ObjectNode content = JsonNodeFactory.instance.objectNode();
@@ -131,21 +135,16 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             }
 
             return result;
-        } catch (InterruptedException ex) {
-            //return in case result was allready processed at time of timeout
-            if (result.QoR() == -1 || result.QoR() >= 0.75) {
-                return result;
-            }
+        } catch (InterruptedException | CommunicationException | IOException ex) {
             throw new CBTLifecycleException(ex);
-        } catch (CommunicationException | IOException ex) {
-            throw new CBTLifecycleException(ex);
-//        } catch (Throwable e) {
-//            //todo-sv: rmove this catch
-//			e.printStackTrace();
-//            throw new CBTLifecycleException(e);
         } finally {
             sc.unregisterNotificationCallback(callback);
-            //todo-sv: also unregister email pull adapter
+            if(emailAdapter1 != null) {
+                sc.unregisterNotificationCallback(emailAdapter1);
+            }
+            if(emailAdapter2 != null) {
+                sc.unregisterNotificationCallback(emailAdapter2);
+            }
         }
     }
 
@@ -184,8 +183,7 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             return;
         }
 
-        if (!plan.getRequest().getId().toString()
-                .equals(message.getConversationId())) {
+        if (!this.conversationId.equals(message.getConversationId())) {
             return;
         }
 

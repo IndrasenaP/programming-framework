@@ -44,7 +44,7 @@ import java.util.Properties;
 public class Scenario2 implements NotificationCallback {
 
     private static Runtime runtime;
-    private static final boolean variantA = false;
+    private static final boolean variantA = true;
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final boolean DEMO = true;
 

@@ -48,8 +48,8 @@ public class SmartComServiceImpl implements SmartComService {
 	}
     
     //todo-sv: discuss wit ogi how exactly to init this
-    public void addEmailPullAdapter(String conversationId, Properties props) {
-        this.communication.addPullAdapter(
+    public Identifier addEmailPullAdapter(String conversationId, Properties props) {
+        return this.communication.addPullAdapter(
 				new EmailInputAdapterWithPeerSender(conversationId,
                         props.getProperty("hostIncoming"),
                         props.getProperty("username"),
