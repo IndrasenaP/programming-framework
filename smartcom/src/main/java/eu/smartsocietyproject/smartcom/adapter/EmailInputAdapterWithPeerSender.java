@@ -22,13 +22,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
+import javax.mail.search.SearchTerm;
 import javax.mail.search.SubjectTerm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,7 +124,13 @@ public class EmailInputAdapterWithPeerSender implements InputPullAdapter {
         } finally {
             if (folder != null) {
                 try {
-                    MailUtils.close(folder);
+                    folder.close(true);
+                    folder.getStore().close();
+                    /**
+                     * todo-sv: this MailUtils from SmartCom put 
+                     * quite a lot of restrictions on the code
+                     * MailUtils.close(folder);
+                     **/
                 } catch (MessagingException e) {
                     e.printStackTrace();
                 }
