@@ -342,6 +342,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                                     finalStateQoS = 1.0; // will be read from TEM normally
                                 }catch (ExecutionException e){
                                     state = CollectiveBasedTask.State.EXEC_FAIL;
+                                    //todo-sv: talk to ogi about this lock
+                                    lock.lock();
                                 }
                             }// end code for WAITING_FOR_EXECUTION;
                             else

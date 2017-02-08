@@ -17,6 +17,6 @@ public abstract class AdaptationPolicies {
     }
     
     public static ExecutionAdaptationPolicy repeatExecution(int times) {
-        return new RepeatXTimesPolicy(times, CollectiveBasedTask.State.EXECUTION);
+        return new RepeatXTimesPolicy(times, CollectiveBasedTask.State.WAITING_FOR_EXECUTION);
     }
 }
