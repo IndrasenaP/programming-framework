@@ -1,5 +1,7 @@
 package eu.smartsocietyproject.pf.orchestration;
 
+import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
+import at.ac.tuwien.dsg.smartcom.model.Message;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.peermanager.PeerManager;
@@ -67,6 +69,10 @@ public class ImplicitAgreementForAllOrchestratorManagerTest {
         @Override
         public SmartComService create(PeerManager pm) {
             return new SmartComService() {
+                @Override
+                public void send(Message msg) throws CommunicationException {
+                    throw new UnsupportedOperationException("");
+                }
             };
         }
     };

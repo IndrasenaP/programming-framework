@@ -194,6 +194,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
             case EXECUTION:
                 Callable<TaskResult> executionCallable= () -> {
                     ExecutionHandler handler = definition.getExecutionHandler();
+                    //todo-sv: clone agreed so that repeat does not mess up things
+                    //maybe this is not necessary since collective in there is immmutable anyway
                     return handler.execute(context, this.agreed);
                 };
                 this.executionFuture = executor.submit(executionCallable);
@@ -342,6 +344,8 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                                     finalStateQoS = 1.0; // will be read from TEM normally
                                 }catch (ExecutionException e){
                                     state = CollectiveBasedTask.State.EXEC_FAIL;
+                                    //todo-sv: talk to ogi about this lock
+                                    lock.lock();
                                 }
                             }// end code for WAITING_FOR_EXECUTION;
                             else
@@ -394,9 +398,14 @@ public class CollectiveBasedTask implements Future<TaskResult> {
                                 }
                                 else
                                 if (state == CollectiveBasedTask.State.EXEC_FAIL){
-                                    logger.debug("Execution failed. Go to FINAL state");
-                                    state = CollectiveBasedTask.State.FINAL;
-                                    finalStateQoS = 0.0;
+                                    
+                                    logger.debug("Execution failed. Checking adaptation policy!");
+                                    state = definition.getExecutionAdaptationPolicy().adapt(executionFuture);
+                                    //todo-sv: finalStateQoS?
+                                    
+                                    //logger.debug("Execution failed. Go to FINAL state");
+                                    //state = CollectiveBasedTask.State.FINAL;
+                                    //finalStateQoS = 0.0;
                                 }
                                 else
                                 if (state == CollectiveBasedTask.State.ORCH_FAIL){

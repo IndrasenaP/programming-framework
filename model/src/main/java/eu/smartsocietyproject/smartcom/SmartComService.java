@@ -8,6 +8,7 @@ package eu.smartsocietyproject.smartcom;
 //import at.ac.tuwien.dsg.smartcom.model.Message;
 
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
+import at.ac.tuwien.dsg.smartcom.model.Message;
 import eu.smartsocietyproject.peermanager.PeerManager;
 
 
@@ -16,7 +17,9 @@ import eu.smartsocietyproject.peermanager.PeerManager;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public interface SmartComService {
-    
+
+    void send(Message msg) throws CommunicationException;
+
     //todo-sv: define interface
 //    void send(Message m);
     public interface Factory {

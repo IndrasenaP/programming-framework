@@ -1,9 +1,9 @@
+apply plugin: 'application'
+mainClassName = "eu.smartsocietyproject.scenario3.Scenario3"
+
 dependencies {
     compile project(':programming-framework-runtime')
     compile project(':programming-framework-pm')
     compile project(':programming-framework-smartcom')
     compile 'at.ac.tuwien.dsg:smartcom-impl:1.0-SNAPSHOT'
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile ('at.ac.tuwien.dsg:googlePeer:0.1-SNAPSHOT') 
-    compile ('com.icegreen:greenmail:1.5.1')
 }

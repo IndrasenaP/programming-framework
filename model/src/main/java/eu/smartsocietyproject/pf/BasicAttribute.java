@@ -32,10 +32,12 @@ public abstract class BasicAttribute<T> implements Attribute {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        //todo-sv discuss writing the Attribute classes instead of dynamically creating them
-        //Since we are always creating new BasicAttribute classes in
-        //AttributeType.from we can not simply compare the classes of two 
-        //attributes they will never be the same.
+        //todo-sv discuss writing real attribute classes instead of dynamically creating them
+        /**
+         * Since we are always creating new BasicAttribute classes in
+         * AttributeType.from we can not simply compare the classes of two 
+         * attributes they will never be the same.
+         **/
         if (o == null || !(o instanceof BasicAttribute)) return false;
 
         BasicAttribute that = (BasicAttribute) o;

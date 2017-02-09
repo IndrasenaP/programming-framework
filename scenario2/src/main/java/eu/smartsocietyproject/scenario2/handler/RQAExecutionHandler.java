@@ -9,8 +9,6 @@ import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.model.Message;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,15 +20,13 @@ import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.cbthandlers.CBTLifecycleException;
 import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
-import eu.smartsocietyproject.scenario2.RQATaskRequest;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -38,20 +34,30 @@ import java.util.logging.Logger;
  */
 public class RQAExecutionHandler implements ExecutionHandler, NotificationCallback {
 
-    private String conversationId = null;
     private RQAPlan plan;
-    private RQATaskResult result = new RQATaskResult();
+    private RQATaskResult result = null;
     private ObjectMapper mapper = new ObjectMapper();
-    private String orchestrationId = "RQA-orchestrator";
-    private boolean communityTimedOut = false;
-    
-    public TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
-        try {
-            //todo-sv: remove this cast
-            SmartComServiceImpl sc = (SmartComServiceImpl) context.getSmartCom();
+    private String conversationId;
+    private String orchestrationId;
 
+    private Lock communityLock;
+    private Condition communityCondition;
+    private Lock orchestrationLock;
+    private Condition orchestrationCondition;
+    private Semaphore communityMaxSemaphore;
+
+    public synchronized TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException {
+
+        this.resetHandler();
+        //todo-sv: remove this cast
+        SmartComServiceImpl sc = (SmartComServiceImpl) context.getSmartCom();
+        Identifier callback = sc.registerNotificationCallback(this);
+        Identifier emailAdapter1 = null;
+        Identifier emailAdapter2 = null;
+
+        try {
             //todo-sv: maybe registration of rest input adapter belongs also here
-            Identifier callback = sc.registerNotificationCallback(this);
+            //Identifier callback = sc.registerNotificationCallback(this);
 
             if (!(agreed.getPlan() instanceof RQAPlan)) {
                 throw new CBTLifecycleException("Wrong plan!");
@@ -59,13 +65,15 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
             plan = (RQAPlan) agreed.getPlan();
 
-            conversationId = plan.getRequest().getId().toString();
+            //this.conversationId = plan.getRequest().getId().toString();
+            this.conversationId = callback.getId();
+            this.orchestrationId += conversationId;
 
             Properties props = new Properties();
             props.load(Scenario2.class.getClassLoader()
                     .getResourceAsStream("EmailAdapter.properties"));
-            sc.addEmailPullAdapter(conversationId, props);
-            sc.addEmailPullAdapter(orchestrationId, props);
+            emailAdapter1 = sc.addEmailPullAdapter(conversationId, props);
+            emailAdapter2 = sc.addEmailPullAdapter(orchestrationId, props);
 
             //send to human experts
             ObjectNode content = JsonNodeFactory.instance.objectNode();
@@ -96,47 +104,59 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
             sc.send(msg.create());
 
+            communityLock.lock();
             try {
-                long milisToWait = TimeUnit.MILLISECONDS
-                        .convert(plan.getRequest().getCommunityTime(), 
-                                plan.getRequest().getCommunityTimeUnit());
-                
-                while (milisToWait > 0) {
-                    Thread.sleep(1000);
-                    milisToWait -= 1000;
+                //amount of community results we want for orchestrator
+                //for demo purposes only set to 2
+                communityMaxSemaphore.release(2);
+
+                if (!communityCondition.await(plan.getRequest().getCommunityTime(),
+                        plan.getRequest().getCommunityTimeUnit())) {
+                    communityMaxSemaphore.drainPermits();
                 }
-                communityTimedOut = true;
-
-                msg.setType("rqa")
-                        .setSubtype("orchestrate")
-                        .setContent(result.getResult())
-                        .setSenderId(Identifier.component("RQA"))
-                        .setConversationId(orchestrationId)
-                        .setReceiverId(Identifier.peer(plan.getOrchestrator().getPeerId()));
-
-                sc.send(msg.create());
-
-                while (result.QoR() != -1) {
-                    Thread.sleep(1000);
-                }
-
-                return result;
-            } catch (InterruptedException ex) {
-                //return in case result was allready processed at time of timeout
-                if(result.QoR() == -1 || result.QoR() >= 0.75) {
-                    return result;
-                }
-                throw new CBTLifecycleException(ex);
             } finally {
-                sc.unregisterNotificationCallback(callback);
-                //todo-sv: also unregister email pull adapter
+                communityLock.unlock();
             }
-        } catch (CommunicationException | IOException ex) {
+
+            msg.setType("rqa")
+                    .setSubtype("orchestrate")
+                    .setContent(result.getResult())
+                    .setSenderId(Identifier.component("RQA"))
+                    .setConversationId(orchestrationId)
+                    .setReceiverId(Identifier.peer(plan.getOrchestrator().getPeerId()));
+
+            sc.send(msg.create());
+
+            orchestrationLock.lock();
+
+            if (!orchestrationCondition.await(plan.getRequest().getOrchestratorTime(),
+                    plan.getRequest().getOrchestratorUnit())) {
+                throw new CBTLifecycleException("Orchestrator did not respond in time!");
+            }
+
+            return result;
+        } catch (InterruptedException | CommunicationException | IOException ex) {
             throw new CBTLifecycleException(ex);
-        } catch (Throwable e) {
-            e.printStackTrace();
-            throw new CBTLifecycleException(e);
+        } finally {
+            sc.unregisterNotificationCallback(callback);
+            if(emailAdapter1 != null) {
+                sc.unregisterNotificationCallback(emailAdapter1);
+            }
+            if(emailAdapter2 != null) {
+                sc.unregisterNotificationCallback(emailAdapter2);
+            }
         }
+    }
+
+    private void resetHandler() {
+        this.communityLock = new ReentrantLock();
+        this.communityCondition = communityLock.newCondition();
+        this.orchestrationLock = new ReentrantLock();
+        this.orchestrationCondition = orchestrationLock.newCondition();
+        this.communityMaxSemaphore = new Semaphore(0);
+        
+        this.orchestrationId = "RQA-orchestrator-";
+        this.result = new RQATaskResult();
     }
 
     @Override
@@ -155,16 +175,15 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
 
     @Override
     public void notify(Message message) {
-        if (conversationId == null) {
-            return;
-        }
-
-        if (orchestrationId.equals(message.getConversationId())) {
+        if (orchestrationId.equals(message.getConversationId())
+                && orchestrationLock.tryLock()) {
             result.setOrchestratorsChoice(message.getContent());
+            orchestrationCondition.signal();
+            orchestrationLock.unlock();
             return;
         }
 
-        if (!conversationId.equals(message.getConversationId()) || communityTimedOut) {
+        if (!this.conversationId.equals(message.getConversationId())) {
             return;
         }
 
@@ -173,6 +192,19 @@ public class RQAExecutionHandler implements ExecutionHandler, NotificationCallba
             return;
         }
 
-        result.setHumanResult(message.getContent());
+        communityLock.lock();
+        try {
+            if (!communityMaxSemaphore.tryAcquire()) {
+                return;
+            }
+            
+            result.setHumanResult(message.getContent());
+
+            if (communityMaxSemaphore.availablePermits() == 0) {
+                communityCondition.signal();
+            }
+        } finally {
+            communityLock.unlock();
+        }
     }
 }

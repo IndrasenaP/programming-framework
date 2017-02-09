@@ -16,13 +16,19 @@ import eu.smartsocietyproject.pf.TaskDefinition;
 public class RQATaskDefinition extends TaskDefinition {
     
     private final Identifier sender;
+    private final boolean variantA;
     
-    public RQATaskDefinition(JsonNode json, Identifier sender) {
+    public RQATaskDefinition(JsonNode json, Identifier sender, boolean variantA) {
         super(json);
         this.sender = sender;
+        this.variantA = variantA;
     }
 
     public Identifier getSender() {
         return sender;
+    }
+
+    public boolean isVariantA() {
+        return variantA;
     }
 }

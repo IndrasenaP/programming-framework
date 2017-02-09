@@ -48,8 +48,8 @@ public class SmartComServiceImpl implements SmartComService {
 	}
     
     //todo-sv: discuss wit ogi how exactly to init this
-    public void addEmailPullAdapter(String conversationId, Properties props) {
-        this.communication.addPullAdapter(
+    public Identifier addEmailPullAdapter(String conversationId, Properties props) {
+        return this.communication.addPullAdapter(
 				new EmailInputAdapterWithPeerSender(conversationId,
                         props.getProperty("hostIncoming"),
                         props.getProperty("username"),
@@ -65,16 +65,16 @@ public class SmartComServiceImpl implements SmartComService {
         return this.communication;
     }
 
-	public void send(Message msg) throws CommunicationException {
-        //todo: fix nullpointer?!
+	@Override
+    public void send(Message msg) throws CommunicationException {
 		this.communication.send(msg);
 	}
 	
-	public Identifier registerNotificationCallback(NotificationCallback callback) throws CommunicationException {
+	public Identifier registerNotificationCallback(NotificationCallback callback) {
 		return this.communication.registerNotificationCallback(callback);
 	}
     
-    public void unregisterNotificationCallback(Identifier callback) throws CommunicationException {
+    public void unregisterNotificationCallback(Identifier callback) {
         this.communication.unregisterNotificationCallback(callback);
     }
 

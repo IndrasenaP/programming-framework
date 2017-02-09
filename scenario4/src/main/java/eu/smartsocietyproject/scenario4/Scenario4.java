@@ -123,13 +123,8 @@ public class Scenario4 implements NotificationCallback {
         @Override
         public SmartComServiceImpl create(PeerManager pm) {
             SmartComServiceImpl sc = super.create(pm);
-            try {
-                sc.registerNotificationCallback(new Scenario4());
-                sc.getCommunication().addPushAdapter(new RESTInputAdapter(restAdapterPort, ""));
-            } catch (CommunicationException ex) {
-                //todo-sv: consider propagating the exception instead
-                throw new IllegalStateException(ex);
-            }
+            sc.registerNotificationCallback(new Scenario4());
+            sc.getCommunication().addPushAdapter(new RESTInputAdapter(restAdapterPort, ""));
             return sc;
         }
 
