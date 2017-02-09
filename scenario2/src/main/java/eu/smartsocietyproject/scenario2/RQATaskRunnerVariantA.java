@@ -5,6 +5,7 @@
  */
 package eu.smartsocietyproject.scenario2;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import eu.smartsocietyproject.TaskResponse;
 import eu.smartsocietyproject.pf.Collective;
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
@@ -12,6 +13,8 @@ import eu.smartsocietyproject.pf.SmartSocietyApplicationContext;
 import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.adaptationPolicy.AdaptationPolicies;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -43,7 +46,10 @@ public class RQATaskRunnerVariantA extends RQATaskRunner {
         try{
             res = cbt.get(30, TimeUnit.SECONDS);
         } catch (TimeoutException ex) {
-            //todo-sv: incetivise?
+            //incetivise: comentet out due to missing common peer manager
+            //List<Long> times = new ArrayList<>();
+            //times.add(new Long(2));
+            //nearbyPeers.incentivize("mony", null, times);
         }
         
         if(res == null) {
