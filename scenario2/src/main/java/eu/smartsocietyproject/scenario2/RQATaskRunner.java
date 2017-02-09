@@ -72,13 +72,6 @@ public abstract class RQATaskRunner implements TaskRunner {
                 .withCollectiveForProvisioning(peers);
     }
     
-    protected void prepareRequest() {
-        request.setCommunityTime(2);
-        request.setCommunityTimeUnit(TimeUnit.MINUTES);
-        request.setOrchestratorTime(30);
-        request.setOrchestratorUnit(TimeUnit.SECONDS);
-    }
-    
     protected CollectiveBasedTask createCBT(TaskFlowDefinition tfd) {
         return ctx.registerBuilderForCBTType("rqa", CBTBuilder.from(tfd)
                         .withTaskRequest(request)).build();

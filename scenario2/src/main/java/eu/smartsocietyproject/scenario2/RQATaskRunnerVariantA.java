@@ -31,7 +31,10 @@ public class RQATaskRunnerVariantA extends RQATaskRunner {
         
         TaskFlowDefinition tfd = this.getDefaultTaskFlowDefinition(nearbyPeers);
         
-        this.prepareRequest();
+        request.setCommunityTime(2);
+        request.setCommunityTimeUnit(TimeUnit.MINUTES);
+        request.setOrchestratorTime(2);
+        request.setOrchestratorUnit(TimeUnit.MINUTES);
         
         CollectiveBasedTask cbt = this.createCBT(tfd);
         cbt.start();

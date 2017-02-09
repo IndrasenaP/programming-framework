@@ -13,6 +13,7 @@ import eu.smartsocietyproject.pf.TaskFlowDefinition;
 import eu.smartsocietyproject.pf.TaskResult;
 import eu.smartsocietyproject.pf.adaptationPolicy.AdaptationPolicies;
 import eu.smartsocietyproject.scenario2.helper.RQATaskDefinition;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -32,7 +33,10 @@ public class RQATaskRunnerVariantB extends RQATaskRunner {
                 .withExecutionAdaptationPolicy(AdaptationPolicies
                         .repeatExecution(2));
         
-        this.prepareRequest();
+        request.setCommunityTime(2);
+        request.setCommunityTimeUnit(TimeUnit.MINUTES);
+        request.setOrchestratorTime(30);
+        request.setOrchestratorUnit(TimeUnit.SECONDS);
         
         CollectiveBasedTask cbt = this.createCBT(tfd);
         
