@@ -29,6 +29,7 @@ import eu.smartsocietyproject.runtime.Runtime;
 import eu.smartsocietyproject.scenario2.helper.GreenMailOutputAdapter;
 import eu.smartsocietyproject.scenario2.helper.GreenMail.RunMailServer;
 import eu.smartsocietyproject.scenario2.helper.JsonPeer;
+import eu.smartsocietyproject.scenario2.helper.PeerLoader;
 import eu.smartsocietyproject.scenario2.helper.RQATaskDefinition;
 import eu.smartsocietyproject.smartcom.PeerChannelAddressAdapter;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
@@ -45,7 +46,6 @@ public class Scenario2 implements NotificationCallback {
 
     private static Runtime runtime;
     private static final boolean variantA = true;
-    private static final ObjectMapper mapper = new ObjectMapper();
     private static final boolean DEMO = true;
 
     /**
@@ -84,27 +84,7 @@ public class Scenario2 implements NotificationCallback {
                     .registerOutputAdapter(GreenMailOutputAdapter.class);
         }
 
-        InternalPeerManager pm = (InternalPeerManager) context.getPeerManager();
-
-        List<JsonPeer> peers = mapper.readValue(Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream("Peers.json"),
-                mapper.getTypeFactory()
-                        .constructCollectionType(List.class, JsonPeer.class));
-
-        peers.stream().forEach(peer -> {
-            pm.persistPeer(PeerIntermediary
-                    .builder(peer.getName(), peer.getRole())
-                    .addDeliveryAddress(PeerChannelAddressAdapter
-                            .convert(new PeerChannelAddress(
-                                    Identifier.peer(peer.getName()),
-                                    Identifier.channelType(peer.getChannelType()),
-                                    Arrays.asList(peer.getChannel()))
-                            )
-                    )
-                    .addAttribute("restaurantQA", AttributeType.from("true"))
-                    .build());
-        });
+        PeerLoader.laodPeers(context);
 
         smartCom.registerNotificationCallback(new Scenario2());
         Properties props = new Properties();
