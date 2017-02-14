@@ -5,6 +5,8 @@
  */
 package eu.smartsocietyproject.scenario1;
 
+import at.ac.tuwien.dsg.GooglePeerFactory;
+import at.ac.tuwien.dsg.SoftwarePeer;
 import at.ac.tuwien.dsg.smartcom.adapters.RESTInputAdapter;
 import at.ac.tuwien.dsg.smartcom.callback.NotificationCallback;
 import at.ac.tuwien.dsg.smartcom.exception.CommunicationException;
@@ -25,6 +27,9 @@ import eu.smartsocietyproject.pf.helper.InternalPeerManager;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
 import eu.smartsocietyproject.runtime.Runtime;
 import eu.smartsocietyproject.scenario1.helper.RQATaskDefinition;
+import eu.smartsocietyproject.scenario2.helper.GreenMail.RunMailServer;
+import eu.smartsocietyproject.scenario2.helper.GreenMailOutputAdapter;
+import eu.smartsocietyproject.scenario2.helper.PeerLoader;
 import eu.smartsocietyproject.smartcom.PeerChannelAddressAdapter;
 import eu.smartsocietyproject.smartcom.SmartComServiceImpl;
 import java.io.IOException;
@@ -38,13 +43,24 @@ import java.util.Properties;
 public class Scenario1 implements NotificationCallback {
 
     private static Runtime runtime;
+    private static final boolean DEMO = true;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException, CommunicationException {
+        
+        if (DEMO) {
+            RunMailServer.start();
+        }
+        
         CollectiveKindRegistry kindRegistry = CollectiveKindRegistry
                 .builder().register(CollectiveKind.EMPTY).build();
+        
+        SoftwarePeer googlePeer = GooglePeerFactory.startPeer(Thread
+                .currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("GooglePeer.properties"));
 
         MongoRunner runner = MongoRunner.withPort(6666);
         PeerManagerMongoProxy.Factory pmFactory
@@ -58,8 +74,13 @@ public class Scenario1 implements NotificationCallback {
                         new SmartComServiceImpl.Factory(client));
 
         SmartComServiceImpl smartCom = (SmartComServiceImpl) context.getSmartCom();
-
-        InternalPeerManager pm = (InternalPeerManager) context.getPeerManager();
+        
+        if (DEMO) {
+            smartCom.getCommunication()
+                    .removeOutputAdapter(Identifier.adapter("Email"));
+            smartCom.getCommunication()
+                    .registerOutputAdapter(GreenMailOutputAdapter.class);
+        }
 
         //todo-sv: if the platform is responsible for setting up and handling
         //smartcom correctly how does the platform know what input adapters
@@ -69,53 +90,8 @@ public class Scenario1 implements NotificationCallback {
         //but this adapter itself does not have a peer to which it belongs
         //how can we make the smartcom service know on whoch channels
         //to expect responses?
-        pm.persistPeer(PeerIntermediary
-                .builder("google", "SWPeerForSearch")
-                .addDeliveryAddress(PeerChannelAddressAdapter
-                        .convert(new PeerChannelAddress(
-                                Identifier.peer("google"),
-                                Identifier.channelType("REST"),
-                                Arrays.asList("http://localhost:8000/"))
-                        )
-                )
-                .addAttribute("restaurantQA", AttributeType.from("true"))
-                .build());
-
-        pm.persistPeer(PeerIntermediary
-                .builder("sveti", "HumanExpert")
-                .addDeliveryAddress(PeerChannelAddressAdapter
-                        .convert(new PeerChannelAddress(
-                                Identifier.peer("sveti"),
-                                Identifier.channelType("Email"),
-                                Arrays.asList("svetoslav.videnov@infosys.tuwien.ac.at"))
-                        )
-                )
-                .addAttribute("restaurantQA", AttributeType.from("true"))
-                .build());
         
-        pm.persistPeer(PeerIntermediary
-                .builder("sveto", "HumanExpert")
-                .addDeliveryAddress(PeerChannelAddressAdapter
-                        .convert(new PeerChannelAddress(
-                                Identifier.peer("sveto"),
-                                Identifier.channelType("Email"),
-                                Arrays.asList("videnov.svetoslav@gmail.com"))
-                        )
-                )
-                .addAttribute("restaurantQA", AttributeType.from("true"))
-                .build());
-        
-        pm.persistPeer(PeerIntermediary
-                .builder("vauvenal5", "HumanExpert")
-                .addDeliveryAddress(PeerChannelAddressAdapter
-                        .convert(new PeerChannelAddress(
-                                Identifier.peer("vauvenal5"),
-                                Identifier.channelType("Email"),
-                                Arrays.asList("vauvenal5@gmail.com"))
-                        )
-                )
-                .addAttribute("restaurantQA", AttributeType.from("true"))
-                .build());
+        PeerLoader.laodPeers(context);
 
         smartCom.registerNotificationCallback(new Scenario1());
         Properties props = new Properties();
