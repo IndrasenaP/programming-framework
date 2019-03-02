@@ -21,9 +21,7 @@ public class Main {
             Runtime runtime =
                 Runtime.fromApplication(config, components);
             runtime.run();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
+        } catch (IOException | InstantiationException e) {
             e.printStackTrace();
         }
     }

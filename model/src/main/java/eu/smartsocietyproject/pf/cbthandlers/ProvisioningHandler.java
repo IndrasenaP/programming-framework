@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf.cbthandlers;
 
+import akka.actor.Actor;
 import eu.smartsocietyproject.pf.ApplicationBasedCollective;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.Collective;

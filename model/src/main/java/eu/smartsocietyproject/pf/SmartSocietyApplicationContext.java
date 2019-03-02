@@ -6,6 +6,7 @@ import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import eu.smartsocietyproject.smartcom.SmartComService;
 
 /** The default implementation of the application context

@@ -24,4 +24,5 @@ public class SmartSocietyComponents {
     public SmartComService.Factory getSmartComServiceFactory() {
         return scsFactory;
     }
+
 }

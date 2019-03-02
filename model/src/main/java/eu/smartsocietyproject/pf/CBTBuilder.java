@@ -1,7 +1,11 @@
 package eu.smartsocietyproject.pf;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.pf.cbthandlers.*;
+import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.ApplicationContext;
+import eu.smartsocietyproject.pf.enummerations.*;
 
 /**
  * This class provide the tool for creating a {@link CollectiveBasedTask}. It encapsulate a {@link TaskFlowDefinition}
@@ -62,14 +66,14 @@ public class CBTBuilder {
         return new CBTBuilder(null, definition, null);
     }
 
-    /** Add {@link CollectiveBasedTask.LaborMode#ON_DEMAND} to the definition's labor mode
+    /** Add {@link LaborMode#ON_DEMAND} to the definition's labor mode
      *
      * @return a CBTBuilder with the definition changed accordingly */
     public CBTBuilder asOnDemand() {
         return new CBTBuilder(context, definition.asOnDemand(), request);
     }
 
-    /** Add {@link CollectiveBasedTask.LaborMode#OPEN_CALL} to the definition's labor mode
+    /** Add {@link LaborMode#OPEN_CALL} to the definition's labor mode
      *
      *
      * @return a CBTBuilder with the definition changed accordingly */
@@ -79,38 +83,38 @@ public class CBTBuilder {
 
     /** Changes provisioning handler in the definition
      *
-     * @param handler provisioning handler
+     * @param handlers provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withProvisioningHandler(ProvisioningHandler handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withProvisioningHandler(handler), request);
+    public CBTBuilder withProvisioningHandlers(ImmutableList<ProvisioningHandler> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withProvisioningHandler(handlers), request);
     }
 
     /** Changes provisioning handler in the definition
      *
-     * @param handler provisioning handler
+     * @param handlers provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withExecutionHandler(ExecutionHandler handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withExecutionHandler(handler), request);
+    public CBTBuilder withExecutionHandler(ImmutableList<ExecutionHandler> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withExecutionHandler(handlers), request);
     }
 
     /** Changes composition handler in the definition
      *
-     * @param handler composition handler
+     * @param handlers composition handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withCompositionHandler(CompositionHandler handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withCompositionHandler(handler), request);
+    public CBTBuilder withCompositionHandler(ImmutableList<CompositionHandler> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withCompositionHandler(handlers), request);
     }
 
     /** Changes negotiation handler in the definition
      *
-     * @param handler negotiation handler
+     * @param handlers negotiation handler
      * @return a CBTBuilder with the negotiation changed accordingly */
-    public CBTBuilder withNegotiationHandler(NegotiationHandler handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withNegotiationHandler(handler), request);
+    public CBTBuilder withNegotiationHandler(ImmutableList<NegotiationHandler> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withNegotiationHandler(handlers), request);
     }
 
     /** Changes negotiation handler in the definition

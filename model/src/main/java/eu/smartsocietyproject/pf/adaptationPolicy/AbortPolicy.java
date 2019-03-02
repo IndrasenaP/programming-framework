@@ -6,6 +6,8 @@
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.enummerations.State;
+
 import java.util.concurrent.Future;
 
 /**
@@ -17,8 +19,8 @@ public class AbortPolicy implements ExecutionAdaptationPolicy,
         CompositionAdaptationPolicy {
 
     @Override
-    public CollectiveBasedTask.State adapt(Future currentFuture) {
-        return CollectiveBasedTask.State.FINAL;
+    public State adapt(Future currentFuture) {
+        return State.FINAL;
     }
     
 }

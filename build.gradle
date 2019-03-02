@@ -18,9 +18,14 @@ subprojects {
     group 'smartsociety'
     version '1.0-SNAPSHOT'
 
+    apply plugin: 'maven-publish'
     apply plugin: 'java'
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allJava
+    }
 
     compileJava {
         options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
@@ -30,8 +35,23 @@ subprojects {
     compileTestJava {
         options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
     }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+
+                artifact sourceJar {
+                    classifier "sources"
+                }
+            }
+        }
+    }
+
     repositories {
+        mavenLocal()
         mavenCentral()
+
         maven {
             url "http://repo.infosys.tuwien.ac.at/artifactory/libs-snapshot/"
         }
@@ -41,5 +61,8 @@ subprojects {
         maven {
             url "https://github.com/slorber/gcm-server-repository/raw/master/releases/"
         }
+
     }
+
 }
+

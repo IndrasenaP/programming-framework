@@ -356,7 +356,7 @@ public abstract class Collective {
 
     public abstract ApplicationBasedCollective toApplicationBasedCollective();
     
-    abstract Collective.WithVisibleMembers makeMembersVisible();
+    protected abstract Collective.WithVisibleMembers makeMembersVisible();
        
     public static abstract class WithVisibleMembers extends Collective {
 

@@ -3,6 +3,7 @@ package eu.smartsocietyproject.pf;
 import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
+
 import eu.smartsocietyproject.smartcom.SmartComService;
 
 /* Facade that allows the developer of a smartsociety application to interact to with the framework. In general we
@@ -45,4 +46,5 @@ public abstract class ApplicationContext {
      * @exception IllegalArgumentException when no builder has been registered for the given type
      * */
     public abstract CBTBuilder getCBTBuilder(String type);
+
 }

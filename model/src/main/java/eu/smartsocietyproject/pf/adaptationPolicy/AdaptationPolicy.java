@@ -5,7 +5,8 @@
  */
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
-import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.enummerations.State;
+
 import java.util.concurrent.Future;
 
 /**
@@ -13,5 +14,5 @@ import java.util.concurrent.Future;
  * @author Svetoslav Videnov <s.videnov@dsg.tuwien.ac.at>
  */
 public interface AdaptationPolicy {
-    public CollectiveBasedTask.State adapt(Future currentFuture);
+    public State adapt(Future currentFuture);
 }

@@ -6,6 +6,7 @@
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.enummerations.State;
 
 /**
  *
@@ -17,6 +18,6 @@ public abstract class AdaptationPolicies {
     }
     
     public static ExecutionAdaptationPolicy repeatExecution(int times) {
-        return new RepeatXTimesPolicy(times, CollectiveBasedTask.State.WAITING_FOR_EXECUTION);
+        return new RepeatXTimesPolicy(times, State.WAITING_FOR_EXECUTION);
     }
 }

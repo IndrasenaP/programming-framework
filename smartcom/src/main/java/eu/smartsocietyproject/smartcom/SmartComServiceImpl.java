@@ -94,10 +94,10 @@ public class SmartComServiceImpl implements SmartComService {
         }
         
         @Override
-        public SmartComServiceImpl create(PeerManager pm) {
+        public SmartComServiceImpl create(PeerManager... pm) {
             try {
                 //todo-sv: add error handling for cast
-                return new SmartComServiceImpl((InternalPeerManager)pm, client);
+                return new SmartComServiceImpl((InternalPeerManager)pm[0], client);
             } catch (CommunicationException ex) {
                 //todo-sv: consider propagating the exception instead
                 throw new IllegalStateException(ex);

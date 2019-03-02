@@ -6,6 +6,8 @@
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.enummerations.State;
+
 import java.util.concurrent.Future;
 
 /**
@@ -15,17 +17,17 @@ import java.util.concurrent.Future;
 public class RepeatXTimesPolicy implements ExecutionAdaptationPolicy {
     
     private int times;
-    private CollectiveBasedTask.State state;
+    private State state;
     
-    public RepeatXTimesPolicy(int x, CollectiveBasedTask.State state) {
+    public RepeatXTimesPolicy(int x, State state) {
         this.times = x;
         this.state = state;
     }
 
     @Override
-    public CollectiveBasedTask.State adapt(Future currentFuture) {
+    public State adapt(Future currentFuture) {
         if(times<=0) {
-            return CollectiveBasedTask.State.FINAL;
+            return State.FINAL;
         }
         
         this.times -= 1;
