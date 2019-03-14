@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class TaskDefinition {
     private final UUID id=UUID.randomUUID();
-    private final JsonNode json;
+        private final JsonNode json;
 
     public TaskDefinition(JsonNode json) {
         Preconditions.checkNotNull(json);

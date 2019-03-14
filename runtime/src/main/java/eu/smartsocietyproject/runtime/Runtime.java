@@ -1,12 +1,14 @@
 package eu.smartsocietyproject.runtime;
 
+import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
+import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.ClassPath;
 import com.typesafe.config.Config;
-import eu.smartsocietyproject.TaskResponse;
+import eu.smartsocietyproject.Task;
 import eu.smartsocietyproject.pf.*;
 
 import java.io.IOException;
@@ -18,18 +20,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class Runtime {
+public class Runtime extends AbstractActor {
     private Logger logger=Logger.getLogger(this.getClass().getName());
-    private static ObjectMapper jsonMapper = new  ObjectMapper();
     private final ApplicationContext context;
     private final Application application;
-    private final ConcurrentHashMap<UUID, TaskRunnerDescriptor> runnerDescriptors = new ConcurrentHashMap<>();
-    private final ExecutorService executor = new ThreadPoolExecutor( //can return both Executor and ExecutorService
-     30,// the number of threads to keep active in the pool, even if they are idle
-     1000,// the maximum number of threads to allow in the pool. After that, the tasks are queued
-     1L, TimeUnit.HOURS,// when the number of threads is greater than the core, this is the maximum time that excess idle threads will wait for new tasks before terminating.
-     new LinkedBlockingQueue<Runnable>()
-    );
+    private final ConcurrentHashMap<UUID, TaskRunner> runnerDescriptors = new ConcurrentHashMap<>();
+    private ActorRef parent;
+
+    public static Props props(ApplicationContext context, Application application){
+        return Props.create(Runtime.class, () -> new Runtime(context, application));
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        this.parent = getContext().getParent();
+    }
 
     public Runtime(ApplicationContext context, Application application) {
         Preconditions.checkNotNull(context);
@@ -53,7 +58,8 @@ public class Runtime {
         }
 
         TaskRunner runner = application.createTaskRunner(request);
-        runnerDescriptors.put(definition.getId(), new TaskRunnerDescriptor(executor, definition, runner));
+        runner.self().tell(Task.START, getSelf());
+        runnerDescriptors.put(definition.getId(), runner);
         return true;
     }
 
@@ -61,81 +67,25 @@ public class Runtime {
         return
             Optional
                 .ofNullable(runnerDescriptors.get(taskId))
-            .map(d->d.getStateDescription());
+            .map(TaskRunner::getStateDescription);
     }
 
     void cancel(UUID taskId) {
-        TaskRunnerDescriptor descriptor = runnerDescriptors.get(taskId);
-        if ( descriptor != null ) {
-            descriptor.cancel();
-        }
+        TaskRunner descriptor = runnerDescriptors.get(taskId);
+        if ( descriptor != null )
+            descriptor.self().tell(Task.STOP, getSelf());
     }
 
-    //todo-sv: what is the exact purpose of this run? 
-    //just to keep the thread open?
-    public void run() {
-        while (true) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-        runnerDescriptors.values().forEach(r->r.cancel());
-    }
-
-    private static class TaskRunnerDescriptor {
-        private final long creationTimestamp = java.time.Instant.now().toEpochMilli();
-        private final ExecutorService executor;
-        private final TaskDefinition definition;
-        private final TaskRunner runner;
-        private final Function<Runnable, TaskResponse> taskSubmitter;
-        private Future<?> runnerFuture=null;
-
-        public TaskRunnerDescriptor(ExecutorService executor, TaskDefinition definition, TaskRunner runner) {
-            this.executor = executor;
-            this.definition = definition;
-            this.runner = runner;
-            runnerFuture = executor.submit(runner);
-            taskSubmitter = r -> {
-                Future<TaskResponse> f = executor.submit(runner);
-                while (true) {
-                    try {
-                        return f.get();
-                    } catch (ExecutionException | CancellationException e) {
-                        return TaskResponse.FAIL;
-                    } catch (InterruptedException e) {
-                    }
-                }
-            };
-        }
-
-        public void cancel() {
-            runnerFuture.cancel(true);
-        }
-
-
-        public TaskDefinition getDefinition() {
-            return definition;
-        }
-
-        public TaskRunner getRunner() {
-            return runner;
-        }
-
-        public long getCreationTimestamp() {
-            return creationTimestamp;
-        }
-
-        public JsonNode getStateDescription() {
-            ObjectNode node = jsonMapper.createObjectNode();
-            node.set("applicationState", runner.getStateDescription());
-            return node;
-        }
-    }
-
-    public ApplicationContext getContext() {
+    public ApplicationContext getApplicationContext() {
         return context;
+    }
+
+    @Override
+    public Receive createReceive() {
+        return receiveBuilder()
+                .match(TaskDefinition.class,
+                        this::startTask)
+                .build();
     }
 
     public static Runtime fromApplication(Config config, SmartSocietyComponents components) throws IOException, InstantiationException {

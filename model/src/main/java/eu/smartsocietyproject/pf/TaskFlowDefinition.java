@@ -1,25 +1,13 @@
 package eu.smartsocietyproject.pf;
 
+import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import eu.smartsocietyproject.pf.adaptationPolicy.AbortPolicy;
-import eu.smartsocietyproject.pf.adaptationPolicy.AdaptationPolicies;
-import eu.smartsocietyproject.pf.adaptationPolicy.CompositionAdaptationPolicy;
-import eu.smartsocietyproject.pf.adaptationPolicy.ExecutionAdaptationPolicy;
-import eu.smartsocietyproject.pf.adaptationPolicy.NegotiationAdaptationPolicy;
-import eu.smartsocietyproject.pf.adaptationPolicy.ProvisioningAdaptationPolicy;
 import eu.smartsocietyproject.pf.cbthandlers.*;
-import eu.smartsocietyproject.pf.CollectiveBasedTask;
 import eu.smartsocietyproject.pf.enummerations.LaborMode;
-import eu.smartsocietyproject.pf.cbthandlers.CompositionHandler;
-import eu.smartsocietyproject.pf.cbthandlers.ExecutionHandler;
-import eu.smartsocietyproject.pf.cbthandlers.ContinuousOrchestrationHandler;
-import eu.smartsocietyproject.pf.CBTBuilder;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,9 +22,9 @@ import java.util.Set;
  *
  * The use of the static factory methods:
  * <ul>
- * <li>{@link #onDemandWithOpenCall(ImmutableList, ImmutableList, ImmutableList, ImmutableList)};</li>
- * <li>{@link #onDemandWithoutOpenCall(ImmutableList, ImmutableList, ImmutableList)}</li>
- * <li>{@link #usingContinuousOrchestration(ContinuousOrchestrationHandler, ImmutableList)}</li>
+ * <li>{@link #onDemandWithOpenCall(ProvisioningHandler, CompositionHandler, NegotiationHandler, ExecutionHandler)};</li>
+ * <li>{@link #onDemandWithoutOpenCall(ProvisioningHandler, NegotiationHandler, ExecutionHandler)}</li>
+ * <li>{@link #usingContinuousOrchestration(ContinuousOrchestrationHandler, ExecutionHandler)}</li>
  * </ul>
  *
  * makes it easier to create valid task flow definitions.
@@ -46,78 +34,38 @@ import java.util.Set;
  */
 public class TaskFlowDefinition {
     private final ImmutableSet<LaborMode> laborMode;
-    
-    private final ImmutableList<ProvisioningHandler> provisioningHandlers;
-    private final ImmutableList<CompositionHandler> compositionHandlers;
-    private final ImmutableList<NegotiationHandler> negotiationHandlers;
-    private final ImmutableList<ExecutionHandler> executionHandlers;
-    
-    private final ProvisioningAdaptationPolicy provisioningAdaptationPolicy;
-    private final CompositionAdaptationPolicy compositionAdaptationPolicy;
-    private final NegotiationAdaptationPolicy negotiationAdaptationPolicy;
-    private final ExecutionAdaptationPolicy executionAdaptationPolicy;
-    
+    private final ActorRef provisioningHandler;
+    private final ActorRef compositionHandler;
+    private final ActorRef negotiationHandler;
+    private final ActorRef executionHandler;
     private final ContinuousOrchestrationHandler continuousOrchestrationHandler;
-    private final Collective collectiveforProvisioning;
-    
-    private TaskFlowDefinition(
-        Set<LaborMode> laborMode,
-        ImmutableList<ProvisioningHandler> provisioningHandlers,
-        ImmutableList<CompositionHandler> compositionHandlers,
-        ImmutableList<NegotiationHandler> negotiationHandlers,
-        ContinuousOrchestrationHandler continuousOrchestrationHandler,
-        ImmutableList<ExecutionHandler> executionHandlers,
-        Collective collectiveforProvisioning) {
-        this.laborMode = ImmutableSet.copyOf(laborMode);
-        this.provisioningHandlers = ImmutableList.copyOf(provisioningHandlers);
-        this.compositionHandlers = ImmutableList.copyOf(compositionHandlers);
-        this.negotiationHandlers = ImmutableList.copyOf(negotiationHandlers);
-        this.executionHandlers = ImmutableList.copyOf(executionHandlers);
-        this.continuousOrchestrationHandler = continuousOrchestrationHandler;
-        this.provisioningAdaptationPolicy = AdaptationPolicies.abort();
-        this.compositionAdaptationPolicy = AdaptationPolicies.abort();
-        this.negotiationAdaptationPolicy = AdaptationPolicies.abort();
-        this.executionAdaptationPolicy = AdaptationPolicies.abort();
-        this.collectiveforProvisioning = collectiveforProvisioning;
-    }
+    private final Collective collectiveForProvisioning;
 
     private TaskFlowDefinition(
-        Set<LaborMode> laborMode,
-        ImmutableList<ProvisioningHandler> provisioningHandlers,
-        ImmutableList<CompositionHandler> compositionHandlers,
-        ImmutableList<NegotiationHandler> negotiationHandlers,
-        ContinuousOrchestrationHandler continuousOrchestrationHandler,
-        ImmutableList<ExecutionHandler> executionHandlers,
-        ProvisioningAdaptationPolicy provisioningAdaptationPolicy,
-        CompositionAdaptationPolicy compositionAdaptationPolicy,
-        NegotiationAdaptationPolicy negotiationAdaptationPolicy,
-        ExecutionAdaptationPolicy executionAdaptationPolicy,
-        Collective collectiveforProvisioning) {
+            Set<LaborMode> laborMode,
+            ActorRef provisioningHandler,
+            ActorRef compositionHandler,
+            ActorRef negotiationHandler,
+            ContinuousOrchestrationHandler continuousOrchestrationHandler,
+            ActorRef executionHandler,
+            Collective collectiveForProvisioning) {
         this.laborMode = ImmutableSet.copyOf(laborMode);
-        this.provisioningHandlers = ImmutableList.copyOf(provisioningHandlers);
-        this.compositionHandlers = ImmutableList.copyOf(compositionHandlers);
-        this.negotiationHandlers = ImmutableList.copyOf(negotiationHandlers);
-        this.executionHandlers = ImmutableList.copyOf(executionHandlers);
+        this.provisioningHandler = provisioningHandler;
+        this.compositionHandler = compositionHandler;
+        this.negotiationHandler = negotiationHandler;
+        this.executionHandler = executionHandler;
         this.continuousOrchestrationHandler = continuousOrchestrationHandler;
-        this.collectiveforProvisioning = collectiveforProvisioning;
-        this.provisioningAdaptationPolicy = provisioningAdaptationPolicy;
-        this.compositionAdaptationPolicy = compositionAdaptationPolicy;
-        this.negotiationAdaptationPolicy = negotiationAdaptationPolicy;
-        this.executionAdaptationPolicy = executionAdaptationPolicy;
+        this.collectiveForProvisioning = collectiveForProvisioning;
     }
 
     private TaskFlowDefinition() {
         laborMode = ImmutableSet.copyOf(EnumSet.noneOf(LaborMode.class));
-        provisioningHandlers = null;
-        compositionHandlers = null;
-        negotiationHandlers = null;
+        provisioningHandler = null;
+        compositionHandler = null;
+        negotiationHandler = null;
         continuousOrchestrationHandler = null;
-        executionHandlers = null;
-        collectiveforProvisioning = null;
-        provisioningAdaptationPolicy = null;
-        compositionAdaptationPolicy = null;
-        negotiationAdaptationPolicy = null;
-        executionAdaptationPolicy = null;
+        executionHandler = null;
+        collectiveForProvisioning = null;
     }
 
     /** Get the handler that will be used for provisioning in the CBT
@@ -125,9 +73,9 @@ public class TaskFlowDefinition {
      *
      * @exception IllegalStateException if provisioning handler has not been previously set
      */
-    public ImmutableList<ProvisioningHandler> getProvisioningHandlers() {
-        Preconditions.checkState(provisioningHandlers!=null, "Provisioning Handler not defined");
-        return provisioningHandlers;
+    public ActorRef getProvisioningHandler() {
+        Preconditions.checkState(provisioningHandler!=null, "Provisioning Handler not defined");
+        return provisioningHandler;
     }
 
     /* Get the handler used for composition.
@@ -135,63 +83,58 @@ public class TaskFlowDefinition {
      *
      * @exception IllegalStateException if composition handler has not been previously set
      * */
-    public ImmutableList<CompositionHandler> getCompositionHandlers() {
-        Preconditions.checkState(compositionHandlers != null, "Composition Handler not defined");
-        return compositionHandlers;
+    public ActorRef getCompositionHandler() {
+        Preconditions.checkState(compositionHandler != null, "Composition Handler not defined");
+        return compositionHandler;
     }
 
     /* Get the handler used for negotiation.
-    * @return handler for negotiation
-    *
-    * @exception IllegalStateException if negotiation handler has not been previously set
-    * */
-    public ImmutableList<NegotiationHandler> getNegotiationHandlers() {
-        Preconditions.checkState(negotiationHandlers != null, "Negotiation Handler not defined");
-        return negotiationHandlers;
+     * @return handler for negotiation
+     *
+     * @exception IllegalStateException if negotiation handler has not been previously set
+     * */
+    public ActorRef getNegotiationHandler() {
+        Preconditions.checkState(negotiationHandler != null, "Negotiation Handler not defined");
+        return negotiationHandler;
     }
 
     /* Get the handler used for execution.
-    * @return handler for execution
-    *
-        * @exception IllegalStateException if execution handler has not been previously set
-    * */
-    public ImmutableList<ExecutionHandler> getExecutionHandlers() {
-        Preconditions.checkState(executionHandlers != null, "Execution Handler not defined");
-        return executionHandlers;
-    }
-    
-    public ExecutionAdaptationPolicy getExecutionAdaptationPolicy() {
-        Preconditions.checkState(executionAdaptationPolicy != null, "Execution Adaptation Policy not defined");
-        return executionAdaptationPolicy;
+     * @return handler for execution
+     *
+     * @exception IllegalStateException if execution handler has not been previously set
+     * */
+    public ActorRef getExecutionHandler() {
+        Preconditions.checkState(executionHandler != null, "Execution Handler not defined");
+        return executionHandler;
     }
 
     /* Get the handler used for negotiation.
-    * @return handler for negotiation
-    *
-    * @exception IllegalStateException if negotiation handler has not been previously set
-    * */
+     * @return handler for negotiation
+     *
+     * @exception IllegalStateException if negotiation handler has not been previously set
+     * */
     public ContinuousOrchestrationHandler getContinuousOrchestrationHandler() {
         Preconditions.checkState(continuousOrchestrationHandler != null,
-                                 "Continuous Orchestration Handler not defined");
+                "Continuous Orchestration Handler not defined");
         return continuousOrchestrationHandler;
     }
 
     /* Get the labor mode that will be used in the CBT.
-    * @return an Set of LaborMode
-    *
-    * @exception IllegalStateException if negotiation handler has not been previously set
-    * */
+     * @return an Set of LaborMode
+     *
+     * @exception IllegalStateException if negotiation handler has not been previously set
+     * */
     public ImmutableSet<LaborMode> getLaborMode() {
         return laborMode;
     }
 
     /* Get the optional Collective that might be used for the provisioning
-        * @return an Set of LaborMode
-        *
-        * @exception IllegalStateException if negotiation handler has not been previously set
-        * */
-    public Optional<Collective> getCollectiveforProvisioning() {
-        return Optional.ofNullable(collectiveforProvisioning);
+     * @return an Set of LaborMode
+     *
+     * @exception IllegalStateException if negotiation handler has not been previously set
+     * */
+    public Optional<Collective> getCollectiveForProvisioning() {
+        return Optional.ofNullable(collectiveForProvisioning);
     }
 
     /** Create the flow definition for a task that requires continuous orchestration
@@ -200,58 +143,58 @@ public class TaskFlowDefinition {
      * @return a TaskFlowDefinition with labor mode: {@link LaborMode#OPEN_CALL}
      */
     public static TaskFlowDefinition usingContinuousOrchestration(
-        ContinuousOrchestrationHandler continuousOrchestrationHandler,
-        ImmutableList<ExecutionHandler> executionHandlers) {
+            ContinuousOrchestrationHandler continuousOrchestrationHandler,
+            ActorRef executionHandler) {
         Preconditions.checkNotNull(continuousOrchestrationHandler);
         EnumSet<LaborMode> laborMode = EnumSet.of(LaborMode.OPEN_CALL);
         return new TaskFlowDefinition(laborMode, null, null, null, continuousOrchestrationHandler,
-                                      executionHandlers,
-                                      null);
+                executionHandler,
+                null);
     }
 
     /** Create the flow definition for an on demand task with explicit composition
      *
-     * @param provisioningHandlers the handler used for provisioning
-     * @param compositionHandlers the handler used for composition
-     * @param negotiationHandlers the negotiation used for negotiation
+     * @param provisioningHandler the handler used for provisioning
+     * @param compositionHandler the handler used for composition
+     * @param negotiationHandler the negotiation used for negotiation
      * @return a TaskFlowDefinition with labor mode:  {@link LaborMode#OPEN_CALL},  {@link LaborMode#ON_DEMAND}
      */
     public static TaskFlowDefinition onDemandWithOpenCall(
-        ImmutableList<ProvisioningHandler> provisioningHandlers,
-        ImmutableList<CompositionHandler> compositionHandlers,
-        ImmutableList<NegotiationHandler> negotiationHandlers,
-        ImmutableList<ExecutionHandler> executionHandlers
+            ActorRef provisioningHandler,
+            ActorRef compositionHandler,
+            ActorRef negotiationHandler,
+            ActorRef executionHandler
     ) {
-        Preconditions.checkNotNull(provisioningHandlers);
-        Preconditions.checkNotNull(compositionHandlers);
-        Preconditions.checkNotNull(negotiationHandlers);
-        Preconditions.checkNotNull(executionHandlers);
+        Preconditions.checkNotNull(provisioningHandler);
+        Preconditions.checkNotNull(compositionHandler);
+        Preconditions.checkNotNull(negotiationHandler);
+        Preconditions.checkNotNull(executionHandler);
 
         EnumSet<LaborMode> laborMode =
-            EnumSet.of(LaborMode.ON_DEMAND, LaborMode.OPEN_CALL);
-        return new TaskFlowDefinition(laborMode, provisioningHandlers, compositionHandlers, negotiationHandlers,
-                                      null, executionHandlers,
-                                      null);
+                EnumSet.of(LaborMode.ON_DEMAND, LaborMode.OPEN_CALL);
+        return new TaskFlowDefinition(laborMode, provisioningHandler, compositionHandler, negotiationHandler,
+                null, executionHandler,
+                null);
     }
 
     /** Create the flow definition for an on demand task where no composition is allowed
      *
-     * @param provisioningHandlers the handler used for provisioning
-     * @param negotiationHandlers the negotiation used for negotiation
+     * @param provisioningHandler the handler used for provisioning
+     * @param negotiationHandler the negotiation used for negotiation
      * @return a TaskFlowDefinition with labor mode: {@link LaborMode#ON_DEMAND}
      */
     public static TaskFlowDefinition onDemandWithoutOpenCall(
-        ImmutableList<ProvisioningHandler> provisioningHandlers,
-        ImmutableList<NegotiationHandler> negotiationHandlers,
-        ImmutableList<ExecutionHandler> executionHandlers
+            ActorRef provisioningHandler,
+            ActorRef negotiationHandler,
+            ActorRef executionHandler
     ) {
-        Preconditions.checkNotNull(provisioningHandlers);
-        Preconditions.checkNotNull(negotiationHandlers);
-        Preconditions.checkNotNull(executionHandlers);
+        Preconditions.checkNotNull(provisioningHandler);
+        Preconditions.checkNotNull(negotiationHandler);
+        Preconditions.checkNotNull(executionHandler);
 
         EnumSet<LaborMode> laborMode = EnumSet.of(LaborMode.ON_DEMAND);
-        return new TaskFlowDefinition(laborMode, provisioningHandlers, null, negotiationHandlers, null, executionHandlers,
-                                      null);
+        return new TaskFlowDefinition(laborMode, provisioningHandler, null, negotiationHandler, null, executionHandler,
+                null);
     }
 
     /** Create an empty task flow definition. Note that such definition will not be valid for any CBT
@@ -279,78 +222,61 @@ public class TaskFlowDefinition {
         Set<LaborMode> ocSet = EnumSet.of(lm);
 
         return
-            new TaskFlowDefinition(
-                Sets.union(laborMode, ocSet),
-                provisioningHandlers,
-                compositionHandlers,
-                negotiationHandlers,
-                continuousOrchestrationHandler, executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        Sets.union(laborMode, ocSet),
+                        provisioningHandler,
+                        compositionHandler,
+                        negotiationHandler,
+                        continuousOrchestrationHandler, executionHandler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with a new provisioning handler
      *
      * @param handler
      * @return an updated TaskFlowDefinition */
-    public TaskFlowDefinition withProvisioningHandler(ImmutableList<ProvisioningHandler> handler) {
+    public TaskFlowDefinition withProvisioningHandler(ActorRef handler) {
         Preconditions.checkNotNull(handler);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                handler,
-                compositionHandlers,
-                negotiationHandlers,
-                continuousOrchestrationHandler, executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        laborMode,
+                        handler,
+                        compositionHandler,
+                        negotiationHandler,
+                        continuousOrchestrationHandler, executionHandler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with a new composition handler
      *
      * @param handler
      * @return an updated TaskFlowDefinition */
-    public TaskFlowDefinition withCompositionHandler(ImmutableList<CompositionHandler> handler) {
+    public TaskFlowDefinition withCompositionHandler(ActorRef handler) {
         Preconditions.checkNotNull(handler);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                provisioningHandlers,
-                handler,
-                negotiationHandlers,
-                continuousOrchestrationHandler, executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        laborMode,
+                        provisioningHandler,
+                        handler,
+                        negotiationHandler,
+                        continuousOrchestrationHandler, executionHandler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with a new negotiation handler
      *
      * @param handler
      * @return an updated TaskFlowDefinition */
-    public TaskFlowDefinition withNegotiationHandler(ImmutableList<NegotiationHandler> handler) {
+    public TaskFlowDefinition withNegotiationHandler(ActorRef handler) {
         Preconditions.checkNotNull(handler);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                provisioningHandlers,
-                compositionHandlers,
-                handler,
-                continuousOrchestrationHandler, 
-                executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        laborMode,
+                        provisioningHandler,
+                        compositionHandler,
+                        handler,
+                        continuousOrchestrationHandler, executionHandler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with a new continuous orchestration handler
@@ -360,55 +286,31 @@ public class TaskFlowDefinition {
     public TaskFlowDefinition withContinuousOrchestrationHandler(ContinuousOrchestrationHandler handler) {
         Preconditions.checkNotNull(handler);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                provisioningHandlers,
-                compositionHandlers,
-                negotiationHandlers,
-                handler,
-                executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        laborMode,
+                        provisioningHandler,
+                        compositionHandler,
+                        negotiationHandler,
+                        handler,
+                        executionHandler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with a new execution handler
      *
      * @param handler
      * @return an updated TaskFlowDefinition */
-    public TaskFlowDefinition withExecutionHandler(ImmutableList<ExecutionHandler> handler) {
+    public TaskFlowDefinition withExecutionHandler(ActorRef handler) {
         Preconditions.checkNotNull(handler);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                provisioningHandlers,
-                compositionHandlers,
-                negotiationHandlers,
-                continuousOrchestrationHandler,
-                handler,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collectiveforProvisioning);
-    }
-    
-    public TaskFlowDefinition withExecutionAdaptationPolicy(ExecutionAdaptationPolicy policy) {
-        Preconditions.checkNotNull(policy);
-        return new TaskFlowDefinition(
-                laborMode, 
-                provisioningHandlers,
-                compositionHandlers,
-                negotiationHandlers,
-                continuousOrchestrationHandler, 
-                executionHandlers,
-                provisioningAdaptationPolicy, 
-                compositionAdaptationPolicy, 
-                negotiationAdaptationPolicy, 
-                policy, 
-                collectiveforProvisioning);
+                new TaskFlowDefinition(
+                        laborMode,
+                        provisioningHandler,
+                        compositionHandler,
+                        negotiationHandler,
+                        continuousOrchestrationHandler,
+                        handler,
+                        collectiveForProvisioning);
     }
 
     /** Creates a new instance with the provided collective for Provisioning
@@ -418,36 +320,32 @@ public class TaskFlowDefinition {
     public TaskFlowDefinition withCollectiveForProvisioning(Collective collective) {
         Preconditions.checkNotNull(collective);
         return
-            new TaskFlowDefinition(
-                laborMode,
-                provisioningHandlers,
-                compositionHandlers,
-                negotiationHandlers,
-                continuousOrchestrationHandler,
-                executionHandlers,
-                provisioningAdaptationPolicy,
-                compositionAdaptationPolicy,
-                negotiationAdaptationPolicy,
-                executionAdaptationPolicy,
-                collective);
+                new TaskFlowDefinition(
+                        laborMode,
+                        provisioningHandler,
+                        compositionHandler,
+                        negotiationHandler,
+                        continuousOrchestrationHandler,
+                        executionHandler,
+                        collective);
     }
 
     /** Checks whether an instance is valid for being used in the construction of a
-     * {@link CollectiveBasedTask#}
+     * {@link eu.smartsocietyproject.pf.CollectiveBasedTask}
      *
      * @return true if the instance is valid, false otherwise */
     public boolean isValid() {
         if ( laborMode == null ) return false;
 
         if ( laborMode.contains(LaborMode.ON_DEMAND) ) {
-            if ( provisioningHandlers == null || negotiationHandlers == null)
+            if ( provisioningHandler == null || negotiationHandler == null)
                 return false;
         } else {
             return continuousOrchestrationHandler != null;
         }
 
         if ( laborMode.contains(LaborMode.OPEN_CALL) ) {
-            return compositionHandlers != null;
+            return compositionHandler != null;
         }
 
         return true;

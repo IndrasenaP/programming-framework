@@ -20,7 +20,6 @@ public class Main {
                             getSmartComServiceFactory(getMongoClientInstance(config)));
             Runtime runtime =
                 Runtime.fromApplication(config, components);
-            runtime.run();
         } catch (IOException | InstantiationException e) {
             e.printStackTrace();
         }

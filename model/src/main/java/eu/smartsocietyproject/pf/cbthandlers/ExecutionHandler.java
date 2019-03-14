@@ -1,5 +1,7 @@
 package eu.smartsocietyproject.pf.cbthandlers;
 
+import akka.actor.AbstractActor;
+import akka.actor.Actor;
 import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.CollectiveWithPlan;
 import eu.smartsocietyproject.pf.TaskResult;
@@ -7,22 +9,8 @@ import eu.smartsocietyproject.pf.adaptationPolicy.ExecutionAdaptationPolicy;
 
 import java.util.List;
 
-public interface ExecutionHandler{
+public interface ExecutionHandler extends Actor {
 
-    /* TODO:
-     * This is just an approximate API. Depending on ow we will actually want to implement
-     * obataining of results (blocking, callback, polling) we might change the API
-     *
-     * */
-
-    TaskResult execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException;
-    double resultQoR(); // returns [0-1]
-    /**
-     * Returns the TaskResult if it is good enough and otherwise null.
-     * @return 
-     */
-    TaskResult getResultIfQoRGoodEnough();
-
-    // boolean isDone(); // returns if the execution is done
+    void execute(ApplicationContext context, CollectiveWithPlan agreed) throws CBTLifecycleException;
 
 }

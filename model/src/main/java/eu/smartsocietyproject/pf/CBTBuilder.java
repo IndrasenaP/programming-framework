@@ -1,5 +1,6 @@
 package eu.smartsocietyproject.pf;
 
+import akka.actor.ActorRef;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.smartsocietyproject.pf.cbthandlers.*;
@@ -83,38 +84,38 @@ public class CBTBuilder {
 
     /** Changes provisioning handler in the definition
      *
-     * @param handlers provisioning handler
+     * @param handler provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withProvisioningHandlers(ImmutableList<ProvisioningHandler> handlers) {
-        Preconditions.checkNotNull(handlers);
-        return new CBTBuilder(context, definition.withProvisioningHandler(handlers), request);
+    public CBTBuilder withProvisioningHandlers(ActorRef handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withProvisioningHandler(handler), request);
     }
 
     /** Changes provisioning handler in the definition
      *
-     * @param handlers provisioning handler
+     * @param handler provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withExecutionHandler(ImmutableList<ExecutionHandler> handlers) {
-        Preconditions.checkNotNull(handlers);
-        return new CBTBuilder(context, definition.withExecutionHandler(handlers), request);
+    public CBTBuilder withExecutionHandler(ActorRef handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withExecutionHandler(handler), request);
     }
 
     /** Changes composition handler in the definition
      *
-     * @param handlers composition handler
+     * @param handler composition handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withCompositionHandler(ImmutableList<CompositionHandler> handlers) {
-        Preconditions.checkNotNull(handlers);
-        return new CBTBuilder(context, definition.withCompositionHandler(handlers), request);
+    public CBTBuilder withCompositionHandler(ActorRef handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withCompositionHandler(handler), request);
     }
 
     /** Changes negotiation handler in the definition
      *
-     * @param handlers negotiation handler
+     * @param handler negotiation handler
      * @return a CBTBuilder with the negotiation changed accordingly */
-    public CBTBuilder withNegotiationHandler(ImmutableList<NegotiationHandler> handlers) {
-        Preconditions.checkNotNull(handlers);
-        return new CBTBuilder(context, definition.withNegotiationHandler(handlers), request);
+    public CBTBuilder withNegotiationHandler(ActorRef handler) {
+        Preconditions.checkNotNull(handler);
+        return new CBTBuilder(context, definition.withNegotiationHandler(handler), request);
     }
 
     /** Changes negotiation handler in the definition

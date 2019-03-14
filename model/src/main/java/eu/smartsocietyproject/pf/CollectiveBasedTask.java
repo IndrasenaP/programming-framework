@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+import akka.actor.ActorRef;
+import akka.actor.Props;
 import eu.smartsocietyproject.pf.enummerations.LaborMode;
 import eu.smartsocietyproject.pf.enummerations.State;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ public class CollectiveBasedTask extends AbstractActor {
     private final TaskFlowDefinition definition;
     private Logger logger = LoggerFactory.getLogger(CollectiveBasedTask.class);
     private Set<LaborMode> laborMode;
+    private ActorRef parent;
 
     // transition flag constants
     private static final int DO_PROVISIONING    = 1;
@@ -54,6 +57,16 @@ public class CollectiveBasedTask extends AbstractActor {
         definition=null;
     }
 
+    public static Props props(ApplicationContext context, TaskRequest request,
+                              TaskFlowDefinition definition) {
+        return Props.create(CollectiveBasedTask.class, () -> new CollectiveBasedTask(context, request, definition));
+    }
+
+    @Override
+    public void preStart() throws Exception {
+        this.parent = getContext().getParent();
+    }
+
     private CollectiveBasedTask(
         ApplicationContext context,
         TaskRequest request,
@@ -63,8 +76,8 @@ public class CollectiveBasedTask extends AbstractActor {
         this.definition = definition;
         this.uuid = UUID.randomUUID();
         this.state = State.INITIAL;
-        if (definition.getCollectiveforProvisioning().isPresent())
-            this.inputCollective = definition.getCollectiveforProvisioning().get();
+        if (definition.getCollectiveForProvisioning().isPresent())
+            this.inputCollective = definition.getCollectiveForProvisioning().get();
     }
 
     public static CollectiveBasedTask create(
@@ -280,13 +293,13 @@ public class CollectiveBasedTask extends AbstractActor {
     }
 
     private boolean wasStarted = false;
-    public void start(){
+
+    private void start(){
         logger.debug("start() invoked");
 
-        if (!wasStarted) {
-            logger.debug("CBT was stopped until now.");
-            wasStarted = true;
-        }
+        final ActorRef cbtRunner = getContext().getSystem().actorOf(CBTRunner.props(context, request, definition));
+
+        cbtRunner.tell(State.START, getSelf());
     }
     /**
      * Returns {@code true} if this task was cancelled before it completed
@@ -562,7 +575,15 @@ public class CollectiveBasedTask extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return null;
+        return receiveBuilder()
+                .match(State.class, s -> {
+                    switch (s) {
+                        case START:
+                            start();
+                            break;
+                    }
+                })
+                .build();
     }
 }
 
