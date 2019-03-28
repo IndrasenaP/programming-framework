@@ -5,6 +5,7 @@
  */
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
+import akka.actor.ActorRef;
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
 import eu.smartsocietyproject.pf.enummerations.State;
 
@@ -25,7 +26,7 @@ public class RepeatXTimesPolicy implements ExecutionAdaptationPolicy {
     }
 
     @Override
-    public State adapt(Future currentFuture) {
+    public State adapt(ActorRef actorRef) {
         if(times<=0) {
             return State.FINAL;
         }

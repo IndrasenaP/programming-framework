@@ -79,7 +79,7 @@ public abstract class Collective {
         return members;
     }
 
-    ApplicationBasedCollective withMembers(Collection<Member> members) {
+    public ApplicationBasedCollective withMembers(Collection<Member> members) {
         return ApplicationBasedCollective.of(getContext(), getId(), getKindInstance(), members, getAttributes());
     }
 

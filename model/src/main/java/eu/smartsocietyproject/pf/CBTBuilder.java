@@ -1,12 +1,12 @@
 package eu.smartsocietyproject.pf;
 
-import akka.actor.ActorRef;
+import akka.actor.Props;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import eu.smartsocietyproject.pf.cbthandlers.*;
-import eu.smartsocietyproject.pf.CollectiveBasedTask;
-import eu.smartsocietyproject.pf.ApplicationContext;
 import eu.smartsocietyproject.pf.enummerations.*;
+import eu.smartsocietyproject.pf.CollectiveBasedTask;
+import eu.smartsocietyproject.pf.TaskFlowDefinition;
+
+import java.util.List;
 
 /**
  * This class provide the tool for creating a {@link CollectiveBasedTask}. It encapsulate a {@link TaskFlowDefinition}
@@ -84,47 +84,56 @@ public class CBTBuilder {
 
     /** Changes provisioning handler in the definition
      *
-     * @param handler provisioning handler
+     * @param handlers provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withProvisioningHandlers(ActorRef handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withProvisioningHandler(handler), request);
+    public CBTBuilder withProvisioningHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withProvisioningHandlers(handlers), request);
     }
 
     /** Changes provisioning handler in the definition
      *
-     * @param handler provisioning handler
+     * @param handlers provisioning handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withExecutionHandler(ActorRef handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withExecutionHandler(handler), request);
+    public CBTBuilder withExecutionHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withExecutionHandlers(handlers), request);
     }
 
     /** Changes composition handler in the definition
      *
-     * @param handler composition handler
+     * @param handlers composition handler
      * @return a CBTBuilder with the definition changed accordingly */
-    public CBTBuilder withCompositionHandler(ActorRef handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withCompositionHandler(handler), request);
+    public CBTBuilder withCompositionHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withCompositionHandlers(handlers), request);
     }
 
     /** Changes negotiation handler in the definition
      *
-     * @param handler negotiation handler
+     * @param handlers negotiation handler
      * @return a CBTBuilder with the negotiation changed accordingly */
-    public CBTBuilder withNegotiationHandler(ActorRef handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withNegotiationHandler(handler), request);
+    public CBTBuilder withNegotiationHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withNegotiationHandlers(handlers), request);
     }
 
     /** Changes negotiation handler in the definition
      *
-     * @param handler continuous orchestration handler
+     * @param handlers continuous orchestration handlers
      * @return a CBTBuilder with the negotiation changed accordingly */
-    public CBTBuilder withContinuousOrchestrationHandler(ContinuousOrchestrationHandler handler) {
-        Preconditions.checkNotNull(handler);
-        return new CBTBuilder(context, definition.withContinuousOrchestrationHandler(handler), request);
+    public CBTBuilder withContinuousOrchestrationHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withContinuousOrchestrationHandlers(handlers), request);
+    }
+
+    /** Changes quality assurance handlers in the definition
+     *
+     * @param handlers quality assurance handlers
+     * @return a CBTBuilder with the negotiation changed accordingly */
+    public CBTBuilder withQualityAssuranceHandlers(List<Props> handlers) {
+        Preconditions.checkNotNull(handlers);
+        return new CBTBuilder(context, definition.withQualityAssuranceHandlers(handlers), request);
     }
 
     /** Assign a request to the builder

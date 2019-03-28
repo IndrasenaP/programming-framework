@@ -5,6 +5,7 @@
  */
 package eu.smartsocietyproject.pf.adaptationPolicy;
 
+import akka.actor.ActorRef;
 import eu.smartsocietyproject.pf.CollectiveBasedTask;
 import eu.smartsocietyproject.pf.enummerations.State;
 
@@ -16,10 +17,10 @@ import java.util.concurrent.Future;
  */
 public class AbortPolicy implements ExecutionAdaptationPolicy, 
         ProvisioningAdaptationPolicy, NegotiationAdaptationPolicy, 
-        CompositionAdaptationPolicy {
+        CompositionAdaptationPolicy, QualityAssuranceAdaptionPolicy {
 
     @Override
-    public State adapt(Future currentFuture) {
+    public State adapt(ActorRef actorRef) {
         return State.FINAL;
     }
     

@@ -3,11 +3,13 @@ package eu.smartsocietyproject.pf;
 import akka.actor.AbstractActor;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
+import com.google.common.collect.ImmutableList;
+import eu.smartsocietyproject.DTO.*;
 import eu.smartsocietyproject.pf.enummerations.LaborMode;
 import eu.smartsocietyproject.pf.enummerations.State;
 import org.slf4j.Logger;
@@ -22,41 +24,34 @@ public class CollectiveBasedTask extends AbstractActor {
     private Logger logger = LoggerFactory.getLogger(CollectiveBasedTask.class);
     private Set<LaborMode> laborMode;
     private ActorRef parent;
-
-    // transition flag constants
-    private static final int DO_PROVISIONING    = 1;
-    private static final int DO_COMPOSITION     = 2;
-    private static final int DO_NEGOTIATION     = 4;
-    private static final int DO_EXECUTION       = 8;
-    private static final int DO_CONTINUOUS_ORCHESTRATION = 16;
-
-
-    private volatile State state;
+    private ApplicationBasedCollective provisioningABC;
+    private ImmutableList<CollectiveWithPlan> negotiables;
+    private CollectiveWithPlan agreed;
+    private State state;
+    private Collective inputCollective;
+    private LinkedList<Props> provisionHandlers;
+    private Props provisionHandler;
+    private LinkedList<Props> negotiationHandlers;
+    private Props negotiationHandler;
+    private LinkedList<Props> compositionHandlers;
+    private Props compositionHandler;
+    private LinkedList<Props> executionHandlers;
+    private Props executionHandler;
+    private LinkedList<Props> continuousOrchestrationHandlers;
+    private Props continuousOrchestrationHandler;
+    private LinkedList<Props> qualityAssuranceHandlers;
+    private Props qualityAssuranceHandler;
+    private TaskResult result;
+    private boolean wasStarted;
+    private boolean wasCancelled;
+    private boolean wasInterrupted;
+    private boolean wasExecutionException;
+    private boolean done;
     private double finalStateQoS = 0.0;
-    public final UUID uuid;
-
-
-    // variable storing transition flags for various states. Initialized to TRUE for every transition.
-    private int transition_flags =  DO_PROVISIONING |
-                                    DO_COMPOSITION |
-                                    DO_NEGOTIATION |
-                                    DO_EXECUTION |
-                                    DO_CONTINUOUS_ORCHESTRATION;
-
-    /**
-     * TODO:
-     * Remove and update tests.
-     */
-    @Deprecated
-    public CollectiveBasedTask() {
-        this.uuid = UUID.randomUUID();
-        this.laborMode = EnumSet.of(LaborMode.ON_DEMAND);
-        this.state = State.INITIAL;
-        context=null;
-        request=null;
-        definition=null;
-    }
-
+    private final UUID uuid;
+    private NegotiationHandlerDTO negotiationHandlerDTO;
+    private ExecutionHandlerDTO executionHandlerDTO;
+    private QualityAssuranceHandlerDTO qualityAssuranceHandlerDTO;
     public static Props props(ApplicationContext context, TaskRequest request,
                               TaskFlowDefinition definition) {
         return Props.create(CollectiveBasedTask.class, () -> new CollectiveBasedTask(context, request, definition));
@@ -67,146 +62,33 @@ public class CollectiveBasedTask extends AbstractActor {
         this.parent = getContext().getParent();
     }
 
+    /**
+     * The constructor to the CollectiveBasedTask that is also going to
+     * spawn five children actors (Provision, Composition, Negotiation and Execution)
+     *
+     * @param context
+     * @param request
+     * @param definition
+     */
     private CollectiveBasedTask(
-        ApplicationContext context,
-        TaskRequest request,
-        TaskFlowDefinition definition) {
+            ApplicationContext context,
+            TaskRequest request,
+            TaskFlowDefinition definition) {
+
         this.context = context;
         this.request = request;
         this.definition = definition;
         this.uuid = UUID.randomUUID();
         this.state = State.INITIAL;
+
         if (definition.getCollectiveForProvisioning().isPresent())
             this.inputCollective = definition.getCollectiveForProvisioning().get();
     }
 
     public static CollectiveBasedTask create(
-        ApplicationContext context, TaskRequest request,
-        TaskFlowDefinition definition) {
+            ApplicationContext context, TaskRequest request,
+            TaskFlowDefinition definition) {
         return new CollectiveBasedTask(context, request, definition);
-    }
-
-    private volatile boolean wasCancelled = false;
-    private volatile boolean wasInterrupted = false;
-    private volatile boolean wasExecutionException = false;
-
-    /**
-     * Sets the state to FINAL, and notifies remote services to stop (if CBT relies on any), e.g., Orch. Mgr.
-     * If overriding, the minimum the method must do is set the state to FINAL.
-     */
-    private void finalizeCBTandCleanUp(){
-        this.state = State.FINAL;
-        //TODO kill children processes (CBTRunner and QAService)
-    }
-
-    private Collective inputCollective = null;
-    private ApplicationBasedCollective provisioned = null;
-    private CollectiveWithPlan agreed = null;
-    private List<CollectiveWithPlan> negotiables = null;
-
-    private TaskResult result;
-
-
-    private State getCurrentState() {
-         return this.state;
-    }
-
-    private boolean isWaitingFor(State thisState){
-        return this.getCurrentState() == thisState;
-    }
-
-    private boolean isWaitingForExecution() {
-        return isWaitingFor(State.WAITING_FOR_EXECUTION);
-    }
-    private boolean isWaitingForComposition() {
-        return isWaitingFor(State.WAITING_FOR_COMPOSITION);
-    }
-    private boolean isWaitingForNegotiation() {
-        return isWaitingFor(State.WAITING_FOR_NEGOTIATION);
-    }
-    private boolean isWaitingForProvisioning() {
-        return isWaitingFor(State.WAITING_FOR_PROVISIONING);
-    }
-    private boolean isWaitingForContinuousOrchestration() {
-        return isWaitingFor(State.WAITING_FOR_CONTINUOUS_ORCHESTRATION);
-    }
-
-    private boolean isWaitingForStart() {
-        return !wasStarted;
-    } // waiting in the initial state to enter any main State.
-
-    /* Getters and setters for transition flags*/
-    private boolean getDoProvision(){
-        return (DO_PROVISIONING & this.transition_flags) > 0;
-    }
-
-    private boolean getDoCompose(){
-        return (DO_COMPOSITION & this.transition_flags) > 0;
-    }
-
-    private boolean getDoNegotiate(){
-        return (DO_NEGOTIATION & this.transition_flags) > 0;
-    }
-
-    private boolean getDoExecute(){
-        return (DO_EXECUTION & this.transition_flags) > 0;
-    }
-    private boolean getDoContinuousOrchestration(){
-        return (DO_CONTINUOUS_ORCHESTRATION & this.transition_flags) > 0;
-    }
-
-
-
-    public final void setDoProvision(boolean newValue){
-        if (newValue) {
-            this.transition_flags |= DO_PROVISIONING;
-        }else{
-            this.transition_flags &= ~DO_PROVISIONING;
-        }
-    }
-
-    public final void setDoCompose(boolean newValue){
-        if (newValue) {
-            this.transition_flags |= DO_COMPOSITION;
-        }else{
-            this.transition_flags &= ~DO_COMPOSITION;
-        }
-    }
-
-    public final void setDoNegotiate(boolean newValue){
-        if (newValue) {
-            this.transition_flags |= DO_NEGOTIATION;
-        }else{
-            this.transition_flags &= ~DO_NEGOTIATION;
-        }
-    }
-
-    public final void setDoExecute(boolean newValue){
-        if (newValue) {
-            this.transition_flags |= DO_EXECUTION;
-        }else{
-            this.transition_flags &= ~DO_EXECUTION;
-        }
-    }
-
-    public final void setDoContinuousOrchestration(boolean newValue){
-        if (newValue) {
-            this.transition_flags |= DO_CONTINUOUS_ORCHESTRATION;
-        }else{
-            this.transition_flags &= ~DO_CONTINUOUS_ORCHESTRATION;
-        }
-    }
-
-    public final void setAllTransitionsTo(boolean tf){
-        this.transition_flags =     DO_PROVISIONING |
-                                    DO_COMPOSITION |
-                                    DO_NEGOTIATION |
-                                    DO_EXECUTION |
-                                    DO_CONTINUOUS_ORCHESTRATION;
-    }
-
-    public boolean finishedWithSuccess(){
-        return finalStateQoS >= 0.5;
     }
 
     /**
@@ -219,237 +101,161 @@ public class CollectiveBasedTask extends AbstractActor {
      * whether the thread executing this task should be interrupted in
      * an attempt to stop the task.
      * <p>
-     * <p>After this method returns, subsequent calls to {@link #isDone} will
-     * always return {@code true}.  Subsequent calls to {@link #isCancelled}
-     * will always return {@code true} if this method returned {@code true}.
-     *
-     * @param mayInterruptIfRunning {@code true} if the thread executing this
-     *                              task should be interrupted; otherwise, in-progress tasks are allowed
-     *                              to complete
-     * @return {@code false} if the task could not be cancelled,
-     * typically because it has already completed normally;
-     * {@code true} otherwise
      */
+    private void cancel() {
 
-    public boolean cancel(boolean mayInterruptIfRunning) {
+        getContext().children().foreach(v1 -> {
+            v1.tell(PoisonPill.getInstance(), getSelf());
+            return v1;
+        });
 
-        //TODO send message to child CBTRunner to cancel
-
-        /*
-        if (getCurrentState() == State.FINAL) return false; // already completed
-        if (wasCancelled) return false; // already been cancelled
-
-        lock.lock();
-        if (isWaitingForStart()){
-            boolean do_return = false;
-
-            if (isWaitingForStart()) { //check again
-                do_return = true;
-                wasCancelled = true;
-                getMethodlock.lock();
-                getMethodCanReturn.signal();
-                getMethodlock.unlock();
-                canProceed.signal();       // if not even started, task will not run
-            }
-            lock.unlock();
-            if (do_return) return true;
-        }
-        if (!isWaitingForStart()){ // already running, or already finished.
-            if (isDone()) { // already finished
-                lock.unlock();
-                return false;
-            }
-            if (mayInterruptIfRunning) {  // interrupt only if explicitly allowed by user
-                wasCancelled = true;
-
-                getMethodlock.lock();
-                getMethodCanReturn.signal();
-                getMethodlock.unlock();
-
-                canProceed.signal();
-                lock.unlock();
-
-                //todo-sv: check with ogi. moved this up here so handler get canceld in case of force
-                cancelAllHandlers();
-
-                return true;
-            }
-        }
-
-        wasCancelled = true; // to make sure subsequent calls to isDone() will return true
-        getMethodlock.lock();
-        getMethodCanReturn.signal();
-        getMethodlock.unlock();
-
-        lock.unlock();
-*/
-        return false; // cause we did not explicitly manage to cancel it with this invocation
+        this.wasCancelled = true;
     }
-
-
 
     public boolean isRunning() {
-        return (wasStarted && !isDone() && !isCancelled());
+        return (wasStarted && !done && !wasCancelled);
     }
 
-    private boolean wasStarted = false;
-
-    private void start(){
-        logger.debug("start() invoked");
-
-        final ActorRef cbtRunner = getContext().getSystem().actorOf(CBTRunner.props(context, request, definition));
-
-        cbtRunner.tell(State.START, getSelf());
-    }
-    /**
-     * Returns {@code true} if this task was cancelled before it completed
-     * normally.
-     *
-     * @return {@code true} if this task was cancelled before it completed
-     */
-    //@Override
-    public boolean isCancelled() {
-        //TODO modify this method
-        return this.wasCancelled;
+    private void internalState(ActorRef actorRef) {
+        CollectiveBasedTaskDTO collectiveBasedTaskDTO =
+                new CollectiveBasedTaskDTO(request, result, wasCancelled, wasInterrupted, wasExecutionException,
+                        isRunning(), state, finalStateQoS, inputCollective);
+        actorRef.tell(collectiveBasedTaskDTO, getSelf());
     }
 
-    /**
-     * Returns {@code true} if this task completed.
-     * <p>
-     * Completion may be due to normal termination, an exception, or
-     * cancellation -- in all of these cases, this method will return
-     * {@code true}.
-     *
-     * @return {@code true} if this task completed
-     */
-    //@Override
-    public boolean isDone() {
-        //TODO modify this method
-       return this.state == State.FINAL || this.wasCancelled;
-    }
-
-
-    /**
-     * Waits if necessary for the computation to complete, and then
-     * retrieves its result.
-     *
-     * @return the computed result
-     * @throws CancellationException if the computation was cancelled
-     * @throws ExecutionException    if the computation threw an
-     *                               exception
-     * @throws InterruptedException  if the current thread was interrupted
-     *                               while waiting
-     */
-    //@Override
-    public TaskResult get() throws InterruptedException, ExecutionException, CancellationException {
-        //TODO remove this method
-        /*
+    private void continuousOrchestrationHandlerInit() {
         try {
-            return get(-1, null);
-        } catch (TimeoutException ex) {
-            //should never happen since it uses await()
-            throw new ExecutionException(ex);
-        } */
-        return null;
+            if (this.continuousOrchestrationHandlers == null)
+                this.continuousOrchestrationHandlers = new LinkedList<>(definition.getContinuousOrchestrationHandlers());
+            this.continuousOrchestrationHandler = this.continuousOrchestrationHandlers.pop();
+            setState(State.CONTINUOUS_ORCHESTRATION);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
+        }
     }
 
-    /**
-     * Waits if necessary for at most the given time for the computation
-     * to complete, and then retrieves its result, if available.
-     *
-     * @param timeout the maximum time to wait
-     * @param unit    the time unit of the timeout argument
-     * @return the computed result
-     * @throws CancellationException if the computation was cancelled
-     * @throws ExecutionException    if the computation threw an
-     *                               exception
-     * @throws InterruptedException  if the current thread was interrupted
-     *                               while waiting
-     * @throws TimeoutException      if the wait timed out
-     */
-    //@Override
-    public TaskResult get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    private void continuousOrchestration() {
 
-        //TODO remove this method
-
-        /*
-        getMethodlock.lock();
-        if (isCancelled()) {
-            getMethodlock.unlock();
-            throw new CancellationException("Future.get() called on already cancelled CBT");
-        }
-        if (isDone()) {
-            getMethodlock.unlock();
-            return result;
+        try {
+            getContext().getSystem().actorOf(continuousOrchestrationHandler)
+                    .tell(State.CONTINUOUS_ORCHESTRATION, getSelf());
+        } catch (Exception e) {
+            setState(State.ORCH_FAIL);
         }
 
-        // it might be waiting to start or started
-        if(timeout == -1) {
-            getMethodCanReturn.await();
-        } else {
-            if (!getMethodCanReturn.await(timeout, unit)) {
-                //cancel running handlers if timed out
-                this.cancel(true);
-                //check if we have allready obtained result thats "good enough"
-                if (definition.getExecutionHandler() != null) {
-                    result = definition.getExecutionHandler()
-                            .getResultIfQoRGoodEnough();
-                    if (result != null) {
-                        getMethodlock.unlock();
-                        return result;
-                    }
-                }
-                //otherwise throw timeout exception
-                throw new TimeoutException("CBT timed out!");
-            }
+    }
+
+    private void provisionHandlerInit() {
+
+        try {
+            if (this.provisionHandlers == null)
+                this.provisionHandlers = new LinkedList<>(definition.getProvisioningHandlers());
+            this.provisionHandler = this.provisionHandlers.pop();
+            setState(State.PROVISIONING);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
+        }
+    }
+
+
+    private void provision() {
+
+        try {
+            getContext().getSystem().actorOf(this.provisionHandler)
+                    .tell(definition.getCollectiveForProvisioning(), getSelf());
+        } catch (Exception e) {
+            setState(this.definition.getProvisioningAdaptationPolicy().adapt(getSelf()));
+        }
+    }
+
+    private void compositionHandlerInit(ApplicationBasedCollective abc) {
+        try {
+            if (this.compositionHandlers == null)
+                this.compositionHandlers = new LinkedList<>(definition.getCompositionHandlers());
+            this.provisioningABC = abc;
+            this.compositionHandler = this.compositionHandlers.pop();
+            setState(State.COMPOSITION);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
+        }
+    }
+
+    private void composition() {
+
+        try {
+            getContext().getSystem().actorOf(this.compositionHandler).tell(this.provisioningABC, getSelf());
+        } catch (Exception e) {
+            setState(this.definition.getCompositionAdaptationPolicy().adapt(getSelf()));
         }
 
-        getMethodlock.unlock();
+    }
 
-        if (isCancelled()) {
-            throw new CancellationException("Future.get() called on already cancelled CBT");
+    private void negotiationHandlerInit(NegotiationHandlerDTO negotiationHandlerDTO) {
+        try {
+            if (this.negotiationHandlers == null)
+                this.negotiationHandlers = new LinkedList<>(definition.getNegotiationHandlers());
+            this.negotiables = negotiationHandlerDTO.getCollectivesWithPlan();
+            this.negotiationHandler = this.negotiationHandlers.pop();
+            setState(State.NEGOTIATION);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
+        }
+    }
+
+    private void negotiation() {
+        try {
+            getContext().getSystem().actorOf(this.negotiationHandler).tell(this.negotiables, getSelf());
+        } catch (Exception e) {
+            setState(this.definition.getNegotiationAdaptationPolicy().adapt(getSelf()));
         }
 
-        if (finishedWithSuccess()){
-            return result;
-        }else{
-            //TODO: Throw ExecutionException
-            return null;
+    }
+
+    private void executionHandlerInit(ExecutionHandlerDTO executionHandlerDTO) {
+        try {
+            if (this.executionHandlers == null)
+                this.executionHandlers = new LinkedList<>(definition.getExecutionHandlers());
+            this.agreed = executionHandlerDTO.getCollectiveWithPlan();
+            this.executionHandler = executionHandlers.pop();
+            setState(State.EXECUTION);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
         }
-        */
-        return null;
+    }
+
+    private void execution() {
+
+        try {
+            getContext().getSystem().actorOf(this.executionHandler).tell(this.agreed, getSelf());
+        } catch (Exception e) {
+            setState(this.definition.getExecutionAdaptationPolicy().adapt(getSelf()));
+        }
+
+    }
+
+    private void qualityAssuranceHandlerInit(QualityAssuranceHandlerDTO qualityAssuranceHandlerDTO) {
+        try {
+            if (this.qualityAssuranceHandlers == null)
+                this.qualityAssuranceHandlers = new LinkedList<>(definition.getQualityAssuranceHandlers());
+            this.result = qualityAssuranceHandlerDTO.getTaskResult();
+            this.qualityAssuranceHandlerDTO = qualityAssuranceHandlerDTO;
+            this.qualityAssuranceHandler = this.qualityAssuranceHandlers.pop();
+            setState(State.QUALITY_ASSURANCE);
+        } catch (IllegalStateException | NoSuchElementException e) {
+            setState(State.FAIL);
+        }
+    }
+
+    private void qualityAssurance() {
+        try {
+            getContext().getSystem().actorOf(this.qualityAssuranceHandler).tell(this.result, getSelf());
+        } catch (Exception e) {
+            setState(this.definition.getQualityAssuranceAdaptionPolicy().adapt(getSelf()));
+        }
     }
 
 
-    /**
-     *
-     * @return returns the Collective that was used as the input for the CBT
-     */
-    public Collective getCollectiveInput() {
-        return inputCollective;
-    }
-
-    /**
-     *
-     * @return  returns the ‘provisioned’ collective
-     */
-    public ApplicationBasedCollective getCollectiveProvisioned(){
-        //TODO: We can either make the handler APIs more specific, to make sure they return ABCs,
-        //      or we can make sure that upon exposing the collectives created at runtime they
-        //      get correctly cast to ABCs.
-        return (ApplicationBasedCollective) provisioned;
-    }
-    public ApplicationBasedCollective getCollectiveAgreed(){
-        if (agreed == null) return null;
-        return (ApplicationBasedCollective) agreed.getCollective();
-    }
-
-    public List<ApplicationBasedCollective> getNegotiables(){
-        if (negotiables== null) return null;
-        return negotiables.stream().map(cwp -> (ApplicationBasedCollective) cwp.getCollective()).collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    private void isComparingWithIntermediateState(State compareWith) throws IllegalArgumentException{
+    private void isComparingWithIntermediateState(State compareWith) throws IllegalArgumentException {
 
         if (compareWith == State.WAITING_FOR_PROVISIONING ||
                 compareWith == State.WAITING_FOR_COMPOSITION ||
@@ -461,130 +267,171 @@ public class CollectiveBasedTask extends AbstractActor {
                 compareWith == State.NEG_FAIL ||
                 compareWith == State.EXEC_FAIL ||
                 compareWith == State.ORCH_FAIL
-                )
-        {
+        ) {
             throw new IllegalArgumentException("Cannot use intermediate states in comparison");
         }
     }
 
-    private int getStateSequenceNumber(State theState){
-        switch (theState){
-            case INITIAL:
-                return 0;
-            case PROVISIONING:
-                return 2;
-            case COMPOSITION:
-                return 4;
-            case NEGOTIATION:
-                return 6;
-            case EXECUTION:
-                return 8;
-            case CONTINUOUS_ORCHESTRATION:
-                return 1;
-            case FINAL:
-                return 100;
-            default:
-                return -1;
-        }
-    }
-
-    /**
-     * Returns true if the CBT has finished executing the `compareWith' state;
-     * this also includes waiting on the subsequent state.
-     * Throws exception if the comparison is illogical.
-     * Add logic to make sure this is consistent with start/end states,
-     * and also continuous orchestration.
-     * Throw exceptions for impossible comparisons,
-     * e.g., if cbt is of CollaborationType.OC, that means  continuous_orchestration will be used.
-     * In this case, comparison cbt.isAfter(CBTState.NEGOTIATION) makes no sense and should throw exception.
-     *
-     * @param compareWith state to compare to
-     * @throws IllegalArgumentException
-     * @return
-     */
-    public boolean isAfter(State compareWith) throws IllegalArgumentException {
-
-        isComparingWithIntermediateState(compareWith); // throws exception if illegal argument
-        State cbtState = this.state; // read once, so no need for locking
-        if (cbtState == compareWith) return false;
-
-        int stateIndex = getStateSequenceNumber(cbtState);
-        int compareWithIndex = getStateSequenceNumber(compareWith);
-
-        if (compareWithIndex == 1) {
-            if (stateIndex < 1) return false;
-            if (stateIndex >= 8) return true;
-            throw new IllegalArgumentException("Cannot compare CONTINUOUS ORCHESTRATION with purely on-demand states");
-        }
-
-        return stateIndex > compareWithIndex;
-
-    }
-
-
-    public boolean isBefore(State compareWith) throws IllegalArgumentException {
-
-        isComparingWithIntermediateState(compareWith); // throws exception if illegal argument
-        State cbtState = this.state; // read once, so no need for locking
-        if (cbtState == compareWith) return false;
-
-        int stateIndex = getStateSequenceNumber(cbtState);
-        int compareWithIndex = getStateSequenceNumber(compareWith);
-
-        if (compareWithIndex == 1) {
-            if (stateIndex < 1) return true;
-            if (stateIndex >= 8) return false;
-            throw new IllegalArgumentException("Cannot compare CONTINUOUS ORCHESTRATION with purely on-demand states");
-        }
-
-        return stateIndex < compareWithIndex;
-
-    }
-
-    public boolean isIn(State compareWith) throws IllegalArgumentException {
+    private boolean isIn(State compareWith) throws IllegalArgumentException {
         isComparingWithIntermediateState(compareWith); // throws exception if illegal argument
         return this.state == compareWith;
     }
 
+    private boolean isWaitingForExecution() {
+        return isWaitingFor(State.WAITING_FOR_EXECUTION);
+    }
 
-    public void incentivize(String incentiveType, Object incentiveSpecificParams){
+    private boolean isWaitingForComposition() {
+        return isWaitingFor(State.WAITING_FOR_COMPOSITION);
+    }
+
+    private boolean isWaitingForNegotiation() {
+        return isWaitingFor(State.WAITING_FOR_NEGOTIATION);
+    }
+
+    private boolean isWaitingForProvisioning() {
+        return isWaitingFor(State.WAITING_FOR_PROVISIONING);
+    }
+
+    private boolean isWaitingForContinuousOrchestration() {
+        return isWaitingFor(State.WAITING_FOR_CONTINUOUS_ORCHESTRATION);
+    }
+
+    private boolean isWaitingFor(State thisState) {
+        return this.getCurrentState() == thisState;
+    }
+
+    private State getCurrentState() {
+        return this.state;
+    }
+
+    private void incentivize(IncentivizeDTO incentivizeDTO) {
         ArrayList<Collective> collectivesToIncentivize = new ArrayList<>();
-        if (    isIn(State.PROVISIONING) ||
+        if (isIn(State.PROVISIONING) ||
                 isIn(State.CONTINUOUS_ORCHESTRATION) ||
                 isWaitingForContinuousOrchestration() || isWaitingForProvisioning()) {
             if (null != inputCollective) collectivesToIncentivize.add(inputCollective);
-        }else if (isIn(State.COMPOSITION) || isWaitingForComposition()) {
-            collectivesToIncentivize.add(provisioned);
-        }else if (isIn(State.NEGOTIATION) || isWaitingForNegotiation()) {
-            if ( !laborMode.contains(LaborMode.OPEN_CALL) ){
-                collectivesToIncentivize.add(provisioned);
-            }else{
+        } else if (isIn(State.COMPOSITION) || isWaitingForComposition()) {
+            collectivesToIncentivize.add(provisioningABC);
+        } else if (isIn(State.NEGOTIATION) || isWaitingForNegotiation()) {
+            if (!laborMode.contains(LaborMode.OPEN_CALL)) {
+                collectivesToIncentivize.add(provisioningABC);
+            } else {
                 if (null != negotiables && negotiables.size() > 0)
-                for (CollectiveWithPlan cwp : negotiables){
-                    collectivesToIncentivize.add(cwp.getCollective());
-                }
+                    for (CollectiveWithPlan cwp : negotiables) {
+                        collectivesToIncentivize.add(cwp.getCollective());
+                    }
             }
 
-        }else {
+        } else {
             collectivesToIncentivize.add(agreed.getCollective());
         }
 
-        collectivesToIncentivize.stream().forEach(c -> c.incentivize(incentiveType, incentiveSpecificParams, null));
+        collectivesToIncentivize.stream().forEach(c -> c.incentivize(incentivizeDTO.getIncentiveType(), incentivizeDTO.getIncentiveSpecificParams(), null));
 
+    }
+
+    private boolean isOnDemand() {
+        return laborMode.contains(LaborMode.ON_DEMAND);
+    }
+
+    private boolean isOpenCall() {
+        return laborMode.contains(LaborMode.OPEN_CALL);
+    }
+
+    private void setState(State state) {
+
+        this.state = state;
+        switch (state) {
+            case WAITING_FOR_PROVISIONING:
+                provisionHandlerInit();
+                break;
+            case WAITING_FOR_CONTINUOUS_ORCHESTRATION:
+                continuousOrchestrationHandlerInit();
+                break;
+            case PROVISIONING:
+                provision();
+                break;
+            case WAITING_FOR_COMPOSITION:
+                compositionHandlerInit(this.provisioningABC);
+                break;
+            case COMPOSITION:
+                composition();
+                break;
+            case WAITING_FOR_NEGOTIATION:
+                negotiationHandlerInit(this.negotiationHandlerDTO);
+                break;
+            case NEGOTIATION:
+                negotiation();
+                break;
+            case WAITING_FOR_EXECUTION:
+                executionHandlerInit(this.executionHandlerDTO);
+                break;
+            case EXECUTION:
+                execution();
+                break;
+            case WAITING_FOR_QUALITY_ASSURANCE:
+                qualityAssuranceHandlerInit(this.qualityAssuranceHandlerDTO);
+                break;
+            case QUALITY_ASSURANCE:
+                qualityAssurance();
+                break;
+            case CONTINUOUS_ORCHESTRATION:
+                continuousOrchestration();
+                break;
+            default:
+                cancel();
+        }
+
+        parent.tell(state, getSelf());
     }
 
     @Override
     public Receive createReceive() {
+
         return receiveBuilder()
-                .match(State.class, s -> {
-                    switch (s) {
-                        case START:
-                            start();
-                            break;
-                    }
-                })
+                .match(State.class, this::setState)
+                .match(ApplicationBasedCollective.class,
+                        abc -> {
+                            if (isOpenCall()) {
+                                this.provisioningABC = abc;
+                                setState(State.WAITING_FOR_COMPOSITION);
+                            } else {
+                                this.negotiationHandlerDTO = new NegotiationHandlerDTO(ImmutableList.of(CollectiveWithPlan.of(abc, Plan.empty)));
+                                setState(State.WAITING_FOR_NEGOTIATION);
+                            }
+                            getSender().tell(PoisonPill.getInstance(), getSelf());
+                        })
+                .match(NegotiationHandlerDTO.class,
+                        negotiationHandlerDTO -> {
+                            this.negotiationHandlerDTO = negotiationHandlerDTO;
+                            setState(State.WAITING_FOR_NEGOTIATION);
+                            getSender().tell(PoisonPill.getInstance(), getSelf());
+                        })
+                .match(ExecutionHandlerDTO.class,
+                        executionHandlerDTO -> {
+                                this.executionHandlerDTO = executionHandlerDTO;
+                                setState(State.WAITING_FOR_EXECUTION);
+                                getSender().tell(PoisonPill.getInstance(), getSelf());
+                        })
+                .match(QualityAssuranceHandlerDTO.class,
+                        qualityAssuranceHandlerDTO -> {
+                                this.qualityAssuranceHandlerDTO = qualityAssuranceHandlerDTO;
+                                setState(State.WAITING_FOR_QUALITY_ASSURANCE);
+                                parent.tell(this.result, getSelf());
+                        })
+                .match(ResultDTO.class,
+                        resultDTO -> {
+                            this.finalStateQoS = resultDTO.getQor();
+                            this.state = State.FINAL;
+                            this.done = true;
+                            parent.tell(resultDTO, getSelf());
+                            getSender().tell(PoisonPill.getInstance(), getSelf());
+                        })
+                .match(IncentivizeDTO.class, this::incentivize)
                 .build();
     }
+
 }
 
 
