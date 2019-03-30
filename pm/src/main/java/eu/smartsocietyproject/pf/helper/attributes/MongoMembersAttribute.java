@@ -29,7 +29,7 @@ public class MongoMembersAttribute extends EntityCore implements MembersAttribut
     
     private final ImmutableList<Member> members;
 
-    protected MongoMembersAttribute(JsonNode node) throws PeerManagerException {
+    private MongoMembersAttribute(JsonNode node) throws PeerManagerException {
         super(node);
         this.members = readMembers();
     }
@@ -40,10 +40,10 @@ public class MongoMembersAttribute extends EntityCore implements MembersAttribut
         }
 
         List<Member> members = new ArrayList<>();
-        for (JsonNode node : ((ArrayNode) root)) {
+        for (JsonNode node : (root)) {
             EntityHandler handler = EntityHandler.create(node);
             PeerIntermediary peer = PeerIntermediary.create(EntityHandler.create(node));
-            members.add(Member.of(peer.getPeerId(), peer.getRole()));
+            members.add(Member.of(peer.getPeerId(), peer.getRole(), peer.getAddress()));
         }
 
         return ImmutableList.copyOf(members);
@@ -66,7 +66,7 @@ public class MongoMembersAttribute extends EntityCore implements MembersAttribut
 
         private ArrayNode node;
 
-        public Builder() {
+        Builder() {
             node = JsonNodeFactory.instance.arrayNode();
         }
 

@@ -12,4 +12,5 @@ package eu.smartsocietyproject.peermanager;
 public interface MemberIntermediary {
     String getPeerId();
     String getRole();
+    String getAddress();
 }

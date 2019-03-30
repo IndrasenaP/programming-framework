@@ -1,0 +1,6 @@
+dependencies {
+    compile ('org.web3j:core:4.2.0')
+    compile project(':programming-framework-model')
+    compile project(':programming-framework-pm')
+    testCompile libraries.testShared
+}

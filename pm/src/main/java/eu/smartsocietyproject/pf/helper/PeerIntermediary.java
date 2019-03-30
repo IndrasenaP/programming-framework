@@ -27,16 +27,19 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     
     private static final String idFieldName = "id";
     private static final String roleFieldName = "role";
+    private static final String addressFieldName = "address";
     private static final String deliveryAddress = "deliveryAddress";
     private final BasicAttribute<String> id;
     private final BasicAttribute<String> role;
+    private final BasicAttribute<String> address;
     //private EntityHandler entity;
     
     //todo-sv: constructor throwing exceptions or not?
-    protected PeerIntermediary(EntityHandler handler) throws PeerManagerException {
+    private PeerIntermediary(EntityHandler handler) throws PeerManagerException {
         super(handler.root);
         this.id = this.getAttribute(idFieldName, AttributeType.STRING);
         this.role = this.getAttribute(roleFieldName, AttributeType.STRING);
+        this.address = this.getAttribute(addressFieldName, AttributeType.STRING);
     }
     
     @Override
@@ -56,7 +59,8 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
         ObjectNode memberNode
                     = mapper.createObjectNode()
                     .put(idFieldName, member.getPeerId())
-                    .put(roleFieldName, member.getRole());
+                    .put(roleFieldName, member.getRole())
+                    .put(addressFieldName, member.getAddress());
         return create(EntityHandler.create(memberNode));
     }
 
@@ -64,17 +68,23 @@ public class PeerIntermediary extends EntityHandler implements MemberIntermediar
     public String getRole() {
         return this.role.getValue();
     }
-    
-    public static Builder builder(String id, String role) {
-        return new Builder(id, role);
+
+    @Override
+    public String getAddress() {
+        return this.address.getValue();
+    }
+
+    public static Builder builder(String id, String role, String address) {
+        return new Builder(id, role, address);
     }
     
     public static final class Builder extends EntityHandler.Builder {       
         
-        public Builder(String id, String role) {
+        Builder(String id, String role, String address) {
             super();
             super.addAttribute(idFieldName, AttributeType.from(id));
             super.addAttribute(roleFieldName, AttributeType.from(role));
+            super.addAttribute(addressFieldName, AttributeType.from(address));
         }
         
         public Builder addDeliveryAddress(Attribute address) {

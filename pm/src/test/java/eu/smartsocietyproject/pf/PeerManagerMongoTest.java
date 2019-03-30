@@ -167,9 +167,9 @@ public class PeerManagerMongoTest {
                 .makeMembersVisible()
                 .withMembers(
                     ImmutableList.of(
-                        Member.of(this.expectedMemberTim, ""),
-                        Member.of(this.expectedMemberTom, ""),
-                        Member.of(this.expectedMemberTum, "")));
+                        Member.of(this.expectedMemberTim, "", ""),
+                        Member.of(this.expectedMemberTom, "", ""),
+                        Member.of(this.expectedMemberTum, "", "")));
     }
 
 
@@ -183,7 +183,7 @@ public class PeerManagerMongoTest {
     }
 
     private PeerIntermediary getPeer(String userName, int age, String comment) throws PeerManagerException {
-        return PeerIntermediary.builder(userName, "defaultRole")
+        return PeerIntermediary.builder(userName, "defaultRole", "0x0")
                 .addAttribute(this.expPeerAge, AttributeType.from(age))
                 .addAttribute(this.expPeerComment, AttributeType.from(comment))
                 .build();
