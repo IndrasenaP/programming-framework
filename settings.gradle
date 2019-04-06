@@ -13,5 +13,4 @@ include 'services'
 findProject(':services')?.name = 'programming-framework-services'
 include 'payment'
 findProject(':payment')?.name = 'programming-framework-payment'
-include 'payment'
 

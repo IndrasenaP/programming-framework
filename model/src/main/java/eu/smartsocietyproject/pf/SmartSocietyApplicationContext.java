@@ -2,6 +2,7 @@ package eu.smartsocietyproject.pf;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import eu.smartsocietyproject.payment.PaymentService;
 import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
@@ -17,15 +18,17 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     private final CollectiveKindRegistry kindRegistry;
     private final PeerManager peerManager;
     private final SmartComService smartCom;
+    private final PaymentService paymentService;
     private final ConcurrentHashMap<String, CBTBuilder> buildersByType = new ConcurrentHashMap<>();
 
     public SmartSocietyApplicationContext(CollectiveKindRegistry kindRegistry, 
-            PeerManager.Factory pmFactory, SmartComService.Factory smartCom) {
+            PeerManager.Factory pmFactory, SmartComService.Factory smartCom, PaymentService paymentService) {
         Preconditions.checkNotNull(kindRegistry);
         Preconditions.checkNotNull(pmFactory);
         this.kindRegistry = kindRegistry;
         this.peerManager = pmFactory.create(this);
         this.smartCom = smartCom.create(peerManager);
+        this.paymentService = paymentService;
     }
 
     /** Retrieve the registry of Collective kinds with attribute schema description
@@ -82,6 +85,11 @@ public class SmartSocietyApplicationContext extends ApplicationContext {
     
     public SmartComService getSmartCom() {
         return smartCom;
+    }
+
+    @Override
+    public PaymentService getPaymentService() {
+        return paymentService;
     }
 
     @Override

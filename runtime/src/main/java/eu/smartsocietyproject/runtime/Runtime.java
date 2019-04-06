@@ -102,7 +102,8 @@ public class Runtime extends AbstractActor {
             new SmartSocietyApplicationContext(
                 registry,
                 components.getPeerManagerFactory(),
-                components.getSmartComServiceFactory());
+                components.getSmartComServiceFactory(),
+                components.getPaymentService());
         return new Runtime(context, application).init(config);
     }
 

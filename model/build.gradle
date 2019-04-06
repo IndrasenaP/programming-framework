@@ -3,5 +3,6 @@ dependencies {
     testCompile libraries.testShared
     compile 'at.ac.tuwien.dsg:smartcom-impl:1.0-SNAPSHOT'
     compile 'org.squirrelframework:squirrel-foundation:0.3.8'
+    compile group: 'org.web3j', name: 'core', version: '4.2.0'
     compile group: 'com.typesafe.akka', name: 'akka-actor_2.12', version: '2.5.21'
 }

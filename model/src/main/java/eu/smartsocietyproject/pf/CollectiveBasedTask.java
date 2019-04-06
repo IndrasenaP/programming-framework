@@ -80,7 +80,7 @@ public class CollectiveBasedTask extends AbstractActor {
         this.definition = definition;
         this.uuid = UUID.randomUUID();
         this.state = State.INITIAL;
-
+        this.laborMode = definition.getLaborMode();
         if (definition.getCollectiveForProvisioning().isPresent())
             this.inputCollective = definition.getCollectiveForProvisioning().get();
     }
@@ -137,7 +137,7 @@ public class CollectiveBasedTask extends AbstractActor {
     private void continuousOrchestration() {
 
         try {
-            getContext().getSystem().actorOf(continuousOrchestrationHandler)
+            getContext().actorOf(continuousOrchestrationHandler)
                     .tell(State.CONTINUOUS_ORCHESTRATION, getSelf());
         } catch (Exception e) {
             setState(State.ORCH_FAIL);
@@ -161,8 +161,9 @@ public class CollectiveBasedTask extends AbstractActor {
     private void provision() {
 
         try {
-            getContext().getSystem().actorOf(this.provisionHandler)
-                    .tell(definition.getCollectiveForProvisioning(), getSelf());
+            Collective collective = definition.getCollectiveForProvisioning().orElseThrow(Exception::new);
+            getContext().actorOf(this.provisionHandler)
+                    .tell(collective, getSelf());
         } catch (Exception e) {
             setState(this.definition.getProvisioningAdaptationPolicy().adapt(getSelf()));
         }
@@ -183,7 +184,7 @@ public class CollectiveBasedTask extends AbstractActor {
     private void composition() {
 
         try {
-            getContext().getSystem().actorOf(this.compositionHandler).tell(this.provisioningABC, getSelf());
+            getContext().actorOf(this.compositionHandler).tell(this.provisioningABC, getSelf());
         } catch (Exception e) {
             setState(this.definition.getCompositionAdaptationPolicy().adapt(getSelf()));
         }
@@ -204,7 +205,7 @@ public class CollectiveBasedTask extends AbstractActor {
 
     private void negotiation() {
         try {
-            getContext().getSystem().actorOf(this.negotiationHandler).tell(this.negotiables, getSelf());
+            getContext().actorOf(this.negotiationHandler).tell(new NegotiationHandlerDTO(this.negotiables), getSelf());
         } catch (Exception e) {
             setState(this.definition.getNegotiationAdaptationPolicy().adapt(getSelf()));
         }
@@ -226,7 +227,7 @@ public class CollectiveBasedTask extends AbstractActor {
     private void execution() {
 
         try {
-            getContext().getSystem().actorOf(this.executionHandler).tell(this.agreed, getSelf());
+            getContext().actorOf(this.executionHandler).tell(this.agreed, getSelf());
         } catch (Exception e) {
             setState(this.definition.getExecutionAdaptationPolicy().adapt(getSelf()));
         }
@@ -248,7 +249,7 @@ public class CollectiveBasedTask extends AbstractActor {
 
     private void qualityAssurance() {
         try {
-            getContext().getSystem().actorOf(this.qualityAssuranceHandler).tell(this.result, getSelf());
+            getContext().actorOf(this.qualityAssuranceHandler).tell(this.result, getSelf());
         } catch (Exception e) {
             setState(this.definition.getQualityAssuranceAdaptionPolicy().adapt(getSelf()));
         }

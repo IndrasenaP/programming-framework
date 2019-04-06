@@ -8,6 +8,7 @@ package eu.smartsocietyproject.pf;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.client.MongoCollection;
+import eu.smartsocietyproject.payment.PaymentService;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.peermanager.PeerManagerException;
 import eu.smartsocietyproject.pf.helper.PeerIntermediary;
@@ -106,6 +107,11 @@ public class PeerManagerMongoTest {
         public SmartComService getSmartCom() {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
+
+            @Override
+            public PaymentService getPaymentService() {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
         };
 
     MongoRunner runner;

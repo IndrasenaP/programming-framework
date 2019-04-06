@@ -2,7 +2,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract CollectiveBasedTaskContractFactory {
 
-    address[] private collectiveBasedTasks;
+    mapping(address => bool) private collectiveBasedTasks;
     address private owner;
     uint private minimum;
 
@@ -24,13 +24,13 @@ contract CollectiveBasedTaskContractFactory {
 
         CollectiveBasedTaskContract cbt = (new CollectiveBasedTaskContract).value(msg.value)(owner);
         address cbtAddress = address(cbt);
-        collectiveBasedTasks.push(cbtAddress);
+        collectiveBasedTasks[cbtAddress] = true;
         emit CollectiveBasedTask(cbtAddress, msg.sender, msg.value);
         return cbtAddress;
     }
 
-    function getCollectiveBasedTasks() public view returns(address[] memory _addresses){
-        _addresses = collectiveBasedTasks;
+    function getCollectiveBasedTasks(address _address) public view returns(bool){
+        return collectiveBasedTasks[_address];
     }
 
 }

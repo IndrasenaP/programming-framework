@@ -1,5 +1,8 @@
 package service;
 
+import eu.smartsocietyproject.payment.PaymentService;
+import eu.smartsocietyproject.payment.smartcontracts.ICollectiveBasedTaskContract;
+import eu.smartsocietyproject.payment.smartcontracts.ICollectiveBasedTaskContractFactory;
 import eu.smartsocietyproject.pf.Member;
 import eu.smartsocietyproject.pf.ResidentCollective;
 import org.web3j.crypto.Credentials;
@@ -13,17 +16,18 @@ import smartcontracts.CollectiveBasedTaskContractFactory;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class PaymentService {
+public class PaymentServiceImpl implements PaymentService {
 
     private Web3j web3j;
     private ContractGasProvider gasProvider;
     private Credentials credentials;
     private CompletableFuture<CollectiveBasedTaskContractFactory> cbtFactory;
 
-    public PaymentService(String ethereumNode, ContractGasProvider gasProvider, Credentials credentials,
-                          BigInteger minimumPayment){
+    public PaymentServiceImpl(String ethereumNode, ContractGasProvider gasProvider, Credentials credentials,
+                              BigInteger minimumPayment){
 
         this.gasProvider = gasProvider;
         this.credentials = credentials;
@@ -32,11 +36,20 @@ public class PaymentService {
                 CollectiveBasedTaskContractFactory.deploy(web3j, credentials, gasProvider, minimumPayment).sendAsync();
     }
 
-    public CollectiveBasedTaskContract getDeployedContract(String address){
-        return CollectiveBasedTaskContract.load(address, web3j, credentials, gasProvider);
+    @Override
+    public CollectiveBasedTaskContract getDeployedContract(String address, ContractGasProvider gasProvider){
+        try {
+            boolean exists = cbtFactory.get().getCollectiveBasedTasks(address).send();
+            if(exists)
+                CollectiveBasedTaskContract.load(address, web3j, credentials, gasProvider);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    public CompletableFuture<TransactionReceipt> payCollective(ResidentCollective residentCollective, BigInteger price, CollectiveBasedTaskContract collectiveBasedTaskContract){
+    @Override
+    public CompletableFuture<TransactionReceipt> payCollective(ResidentCollective residentCollective, BigInteger price, ICollectiveBasedTaskContract collectiveBasedTaskContract){
 
         List<String> addresses = residentCollective.getMembers().stream()
                 .map(Member::getAddress).collect(Collectors.toList());

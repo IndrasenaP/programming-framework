@@ -1,6 +1,7 @@
 package eu.smartsocietyproject.runtime;
 
 
+import eu.smartsocietyproject.payment.PaymentService;
 import eu.smartsocietyproject.peermanager.PeerManager;
 import eu.smartsocietyproject.smartcom.SmartComService;
 
@@ -10,19 +11,24 @@ import eu.smartsocietyproject.smartcom.SmartComService;
 public class SmartSocietyComponents {
     private final PeerManager.Factory pmFactory;
     private final SmartComService.Factory scsFactory;
+    private final PaymentService paymentService;
 
     public SmartSocietyComponents(PeerManager.Factory pmFactory,
-            SmartComService.Factory scsFactory) {
+            SmartComService.Factory scsFactory, PaymentService paymentService) {
         this.pmFactory = pmFactory;
         this.scsFactory = scsFactory;
+        this.paymentService = paymentService;
     }
 
-    public PeerManager.Factory getPeerManagerFactory() {
+    PeerManager.Factory getPeerManagerFactory() {
         return pmFactory;
     }
 
-    public SmartComService.Factory getSmartComServiceFactory() {
+    SmartComService.Factory getSmartComServiceFactory() {
         return scsFactory;
     }
 
+    PaymentService getPaymentService() {
+        return paymentService;
+    }
 }

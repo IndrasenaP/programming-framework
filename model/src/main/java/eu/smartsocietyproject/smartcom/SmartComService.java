@@ -23,6 +23,6 @@ public interface SmartComService {
     //todo-sv: define interface
 //    void send(Message m);
     public interface Factory {
-        public SmartComService create(PeerManager... pm);
+        public SmartComService create(PeerManager pm);
     }
 }

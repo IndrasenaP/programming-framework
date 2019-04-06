@@ -3,6 +3,7 @@ dependencies {
     compile project(':programming-framework-pm')
     compile project(':programming-framework-runtime')
     compile project(':programming-framework-smartcom')
+    compile project(':programming-framework-payment')
     compile libraries.compileShared
     testCompile libraries.testShared
 }

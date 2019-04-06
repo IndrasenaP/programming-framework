@@ -81,12 +81,18 @@ public class TaskFlowDefinition {
             List<Props> continuousOrchestrationHandlers,
             Collective collectiveForProvisioning) {
         this.laborMode = ImmutableSet.copyOf(laborMode);
-        this.provisioningHandlers = ImmutableList.copyOf(provisioningHandlers);
-        this.compositionHandlers = ImmutableList.copyOf(compositionHandlers);
-        this.negotiationHandlers = ImmutableList.copyOf(negotiationHandlers);
-        this.executionHandlers = ImmutableList.copyOf(executionHandlers);
-        this.qualityAssuranceHandlers = ImmutableList.copyOf(qualityAssuranceHandlers);
-        this.continuousOrchestrationHandlers = ImmutableList.copyOf(continuousOrchestrationHandlers);
+        this.provisioningHandlers = provisioningHandlers != null ?
+                ImmutableList.copyOf(provisioningHandlers) : ImmutableList.of();
+        this.compositionHandlers = compositionHandlers != null ?
+                ImmutableList.copyOf(compositionHandlers) : ImmutableList.of();
+        this.negotiationHandlers = negotiationHandlers != null ?
+                ImmutableList.copyOf(negotiationHandlers) : ImmutableList.of();
+        this.executionHandlers = executionHandlers != null ?
+                ImmutableList.copyOf(executionHandlers) : ImmutableList.of();
+        this.qualityAssuranceHandlers = qualityAssuranceHandlers != null ?
+                ImmutableList.copyOf(qualityAssuranceHandlers) : ImmutableList.of();
+        this.continuousOrchestrationHandlers = continuousOrchestrationHandlers != null ?
+                ImmutableList.copyOf(continuousOrchestrationHandlers) : ImmutableList.of();
         this.collectiveForProvisioning = collectiveForProvisioning;
         this.provisioningAdaptationPolicy = AdaptationPolicies.abort();
         this.compositionAdaptationPolicy = AdaptationPolicies.abort();
@@ -97,12 +103,12 @@ public class TaskFlowDefinition {
 
     private TaskFlowDefinition() {
         laborMode = ImmutableSet.copyOf(EnumSet.noneOf(LaborMode.class));
-        provisioningHandlers = null;
-        compositionHandlers = null;
-        negotiationHandlers = null;
-        continuousOrchestrationHandlers = null;
-        executionHandlers = null;
-        qualityAssuranceHandlers = null;
+        provisioningHandlers = ImmutableList.of();
+        compositionHandlers = ImmutableList.of();
+        negotiationHandlers = ImmutableList.of();
+        continuousOrchestrationHandlers = ImmutableList.of();
+        executionHandlers = ImmutableList.of();
+        qualityAssuranceHandlers = ImmutableList.of();
         collectiveForProvisioning = null;
         this.provisioningAdaptationPolicy = AdaptationPolicies.abort();
         this.compositionAdaptationPolicy = AdaptationPolicies.abort();

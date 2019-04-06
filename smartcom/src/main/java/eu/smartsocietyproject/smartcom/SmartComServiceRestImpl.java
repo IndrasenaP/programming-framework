@@ -56,7 +56,7 @@ public class SmartComServiceRestImpl implements SmartComService {
 
 	public static class Factory implements SmartComService.Factory {
 		@Override
-		public SmartComService create(PeerManager... pm) {
+		public SmartComService create(PeerManager pm) {
 			RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
 			RestOperations restOperations = restTemplateBuilder.setReadTimeout(Duration.ofSeconds(10))
 					.setConnectTimeout(Duration.ofSeconds(10)).build();

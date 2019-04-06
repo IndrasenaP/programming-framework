@@ -1,10 +1,12 @@
 package eu.smartsocietyproject.pf;
 
+import eu.smartsocietyproject.payment.PaymentService;
 import eu.smartsocietyproject.peermanager.PeerManager;
 
 import java.util.UUID;
 
 import eu.smartsocietyproject.smartcom.SmartComService;
+
 
 /* Facade that allows the developer of a smartsociety application to interact to with the framework. In general we
  * expect that only a single Context is instantiated. This interface is mainly for allowing testing, but the only provided
@@ -23,6 +25,12 @@ public abstract class ApplicationContext {
     public abstract PeerManager getPeerManager();
     
     public abstract SmartComService getSmartCom();
+
+    /**
+     * Return the payment serive
+     * @return an instance implementing the {@link PaymentService} interface
+     */
+    public abstract PaymentService getPaymentService();
 
     /** Return the registry of Collective kinds with attribute schema description
      * @return the registry of Collective kinds of type {@link CollectiveKindRegistry}
