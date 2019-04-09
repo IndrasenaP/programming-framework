@@ -1,6 +1,5 @@
 package eu.smartsocietyproject.smartcom;
 
-import at.ac.tuwien.dsg.smartcom.Communication;
 import at.ac.tuwien.dsg.smartcom.adapter.OutputAdapter;
 import at.ac.tuwien.dsg.smartcom.model.Identifier;
 import at.ac.tuwien.dsg.smartcom.rest.model.NotificationDTO;

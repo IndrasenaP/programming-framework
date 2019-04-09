@@ -21,7 +21,7 @@ public class AbortPolicy implements ExecutionAdaptationPolicy,
 
     @Override
     public State adapt(ActorRef actorRef) {
-        return State.FINAL;
+        return State.FAIL;
     }
     
 }
