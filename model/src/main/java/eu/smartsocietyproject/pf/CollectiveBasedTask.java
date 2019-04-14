@@ -3,7 +3,6 @@ package eu.smartsocietyproject.pf;
 import akka.actor.AbstractActor;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -283,10 +282,6 @@ public class CollectiveBasedTask extends AbstractActor {
     return this.state == compareWith;
   }
 
-  private boolean isWaitingForExecution() {
-    return isWaitingFor(State.WAITING_FOR_EXECUTION);
-  }
-
   private boolean isWaitingForComposition() {
     return isWaitingFor(State.WAITING_FOR_COMPOSITION);
   }
@@ -335,10 +330,6 @@ public class CollectiveBasedTask extends AbstractActor {
 
     collectivesToIncentivize.stream().forEach(c -> c.incentivize(incentivizeDTO.getIncentiveType(), incentivizeDTO.getIncentiveSpecificParams(), null));
 
-  }
-
-  private boolean isOnDemand() {
-    return laborMode.contains(LaborMode.ON_DEMAND);
   }
 
   private boolean isOpenCall() {
